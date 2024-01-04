@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - "**"
-      - "!develop"
-      - "!release/**"
       - "!main"
   workflow_dispatch:
 

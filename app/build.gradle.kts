@@ -4,6 +4,10 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
     id("maven-publish")
+    id("securestorage.jvm-toolchains")
+    id("sonarqube-module-config")
+    id("jacoco")
+    id("jacoco-module-config")
 }
 
 apply(from = "${rootProject.extra["configDir"]}/detekt/config.gradle")
@@ -103,16 +107,16 @@ dependencies {
 
 publishing {
     publications {
-        create<MavenPublication>("mobile-android-authentication") {
+        create<MavenPublication>("mobile-android-securestorage") {
             groupId = "uk.gov.android"
-            artifactId = "authentication"
+            artifactId = "securestorage"
             version = rootProject.extra["packageVersion"] as String
 
             artifact("$buildDir/outputs/aar/${project.name}-release.aar")
         }
     }
     repositories {
-        maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-authentication") {
+        maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-securestorage") {
             credentials {
                 username = System.getenv("USERNAME")
                 password = System.getenv("TOKEN")

@@ -14,9 +14,9 @@ detekt {
     ignoreFailures = false
     parallel = true
     source = files(
-        "src/main/java",
-        "src/test/java",
-        "src/androidTest/java"
+            "src/main/java",
+            "src/test/java",
+            "src/androidTest/java"
     )
     toolVersion = dep_detekt
 }
