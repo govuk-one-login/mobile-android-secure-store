@@ -13,8 +13,8 @@ val rootSonarProperties by rootProject.extra(
     mapOf(
         "sonar.host.url" to System.getProperty("uk.gov.ui.sonar.host.url"),
         "sonar.login" to System.getProperty("uk.gov.ui.sonar.login"),
-        "sonar.projectKey" to "mobile-android-securestorage",
-        "sonar.projectName" to "mobile-android-securestorage",
+        "sonar.projectKey" to "mobile-android-secure-storage",
+        "sonar.projectName" to "mobile-android-secure-storage",
         "sonar.projectVersion" to packageVersion,
         "sonar.organization" to "govuk-one-login",
         "sonar.sourceEncoding" to "UTF-8",
