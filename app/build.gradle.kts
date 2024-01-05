@@ -1,20 +1,27 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.android.kotlin)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
+    id("maven-publish")
+    id("securestore.jvm-toolchains")
+    id("sonarqube-module-config")
+    id("jacoco")
+    id("jacoco-module-config")
 }
 
+apply(from = "${rootProject.extra["configDir"]}/detekt/config.gradle")
+apply(from = "${rootProject.extra["configDir"]}/ktlint/config.gradle")
+
 android {
-    namespace = "uk.gov.android.securestorage"
-    compileSdk = 34
+    namespace = "${rootProject.extra["baseNamespace"]}.pages"
+    compileSdk = (rootProject.extra["compileAndroidVersion"] as Int)
 
     defaultConfig {
-        applicationId = "uk.gov.android.securestorage"
-        minSdk = 29
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = (rootProject.extra["minAndroidVersion"] as Int)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -26,6 +33,53 @@ android {
             )
         }
     }
+
+    lint {
+        abortOnError = true
+        absolutePaths = true
+        baseline = File("${rootProject.extra["configDir"]}/android/baseline.xml")
+        checkAllWarnings = true
+        checkDependencies = false
+        checkGeneratedSources = false
+        checkReleaseBuilds = true
+        disable.addAll(
+            setOf(
+                "ConvertToWebp",
+                "UnusedIds",
+                "VectorPath"
+            )
+        )
+        explainIssues = true
+        htmlReport = true
+        ignoreTestSources = true
+        ignoreWarnings = false
+        lintConfig = File("${rootProject.extra["configDir"]}/android/lint.xml")
+        noLines = false
+        quiet = false
+        showAll = true
+        textReport = true
+        warningsAsErrors = true
+        xmlReport = true
+    }
+
+    testOptions {
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
+        animationsDisabled = true
+        unitTests.all {
+            it.testLogging {
+                events = setOf(
+                    org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED,
+                    org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED,
+                    org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
+                )
+            }
+        }
+        unitTests {
+            isReturnDefaultValues = true
+            isIncludeAndroidResources = true
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -36,11 +90,37 @@ android {
 }
 
 dependencies {
+    listOf(
+        libs.androidx.test.ext.junit,
+        libs.espresso.core
+    ).forEach(::androidTestImplementation)
 
-    implementation("androidx.core:core-ktx:1.12.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    listOf(
+        libs.androidx.core.core.ktx,
+        libs.appcompat
+    ).forEach(::implementation)
+
+    listOf(
+        libs.junit
+    ).forEach(::testImplementation)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mobile-android-securestore") {
+            groupId = "uk.gov.android"
+            artifactId = "securestore"
+            version = rootProject.extra["packageVersion"] as String
+
+            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+        }
+    }
+    repositories {
+        maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-securestore") {
+            credentials {
+                username = System.getenv("USERNAME")
+                password = System.getenv("TOKEN")
+            }
+        }
+    }
 }
