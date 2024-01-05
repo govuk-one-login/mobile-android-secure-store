@@ -1,10 +1,10 @@
-package uk.gov.securestorage.filetree.fetcher
+package uk.gov.securestore.filetree.fetcher
 
 import org.gradle.api.Project
 import org.gradle.api.file.FileTree
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import uk.gov.securestorage.ext.ProjectExt.debugLog
+import uk.gov.securestore.ext.ProjectExt.debugLog
 
 /**
  * [FileTreeFetcher] implementation designed to obtain the output files from compiling kotlin files

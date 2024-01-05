@@ -1,9 +1,9 @@
-package uk.gov.securestorage.jacoco.config
+package uk.gov.securestore.jacoco.config
 
 import org.gradle.api.Project
 import org.gradle.api.file.FileTree
 import org.gradle.testing.jacoco.tasks.JacocoReport
-import uk.gov.securestorage.filetree.fetcher.FileTreeFetcher
+import uk.gov.securestore.filetree.fetcher.FileTreeFetcher
 
 /**
  * A [JacocoCustomConfig] implementation specifically for aggregating other configurations.

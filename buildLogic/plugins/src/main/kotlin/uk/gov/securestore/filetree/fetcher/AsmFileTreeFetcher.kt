@@ -1,10 +1,10 @@
-package uk.gov.securestorage.filetree.fetcher
+package uk.gov.securestore.filetree.fetcher
 
 import com.android.build.gradle.tasks.TransformClassesWithAsmTask
 import org.gradle.api.Project
 import org.gradle.api.file.FileTree
 import org.gradle.api.provider.Provider
-import uk.gov.securestorage.ext.ProjectExt.debugLog
+import uk.gov.securestore.ext.ProjectExt.debugLog
 
 /**
  * [FileTreeFetcher] implementation designed to obtain the output files from the

@@ -1,13 +1,13 @@
-package uk.gov.securestorage.jacoco.config
+package uk.gov.securestore.jacoco.config
 
 import org.gradle.api.Project
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.testing.jacoco.tasks.JacocoReport
-import uk.gov.securestorage.SourceSetFolder
-import uk.gov.securestorage.ext.JacocoReportExt.setupReportDirectories
-import uk.gov.securestorage.ext.ProjectExt.debugLog
-import uk.gov.securestorage.filetree.fetcher.FileTreeFetcher
+import uk.gov.securestore.SourceSetFolder
+import uk.gov.securestore.ext.JacocoReportExt.setupReportDirectories
+import uk.gov.securestore.ext.ProjectExt.debugLog
+import uk.gov.securestore.filetree.fetcher.FileTreeFetcher
 
 /**
  * Base implementation for defining the necessary properties for creating a custom Jacoco Gradle

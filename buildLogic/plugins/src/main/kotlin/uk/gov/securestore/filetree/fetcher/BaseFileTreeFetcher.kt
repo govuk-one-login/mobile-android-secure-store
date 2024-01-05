@@ -1,4 +1,4 @@
-package uk.gov.securestorage.filetree.fetcher
+package uk.gov.securestore.filetree.fetcher
 
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -6,7 +6,7 @@ import org.gradle.api.file.FileTree
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.util.PatternSet
 import org.gradle.configurationcache.extensions.capitalized
-import uk.gov.securestorage.ext.ProjectExt.debugLog
+import uk.gov.securestore.ext.ProjectExt.debugLog
 
 /**
  * Partial implementation for obtaining a [FileTree].

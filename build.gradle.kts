@@ -4,7 +4,7 @@ buildscript {
     val compileAndroidVersion by rootProject.extra { 34 }
     val androidBuildToolsVersion by rootProject.extra { "34.0.0" }
     val configDir by rootProject.extra { "$rootDir/config" }
-    val baseNamespace by rootProject.extra { "uk.gov.android.securestorage" }
+    val baseNamespace by rootProject.extra { "uk.gov.android.securestore" }
 
     val localProperties = java.util.Properties()
     if (rootProject.file("local.properties").exists()) {

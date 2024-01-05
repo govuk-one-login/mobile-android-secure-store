@@ -1,9 +1,9 @@
 import com.android.build.gradle.LibraryExtension
-import uk.gov.securestorage.ext.LibraryExtensionExt.decorateDslLibraryExtensionWithJacoco
-import uk.gov.securestorage.ext.LibraryExtensionExt.decorateLibraryExtensionWithJacoco
-import uk.gov.securestorage.ext.ProjectExt.debugLog
-import uk.gov.securestorage.ext.TestExt.decorateTestTasksWithJacoco
-import uk.gov.securestorage.ext.generateDebugJacocoTasks
+import uk.gov.securestore.ext.LibraryExtensionExt.decorateDslLibraryExtensionWithJacoco
+import uk.gov.securestore.ext.LibraryExtensionExt.decorateLibraryExtensionWithJacoco
+import uk.gov.securestore.ext.ProjectExt.debugLog
+import uk.gov.securestore.ext.TestExt.decorateTestTasksWithJacoco
+import uk.gov.securestore.ext.generateDebugJacocoTasks
 import com.android.build.api.dsl.LibraryExtension as DslLibraryExtension
 
 plugins {

@@ -1,13 +1,13 @@
-package uk.gov.securestorage.jacoco.tasks
+package uk.gov.securestore.jacoco.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.testing.jacoco.tasks.JacocoReport
-import uk.gov.securestorage.Filters
-import uk.gov.securestorage.filetree.fetcher.FileTreeFetcher
-import uk.gov.securestorage.jacoco.config.JacocoCombinedTestConfig
-import uk.gov.securestorage.jacoco.config.JacocoCustomConfig
+import uk.gov.securestore.Filters
+import uk.gov.securestore.filetree.fetcher.FileTreeFetcher
+import uk.gov.securestore.jacoco.config.JacocoCombinedTestConfig
+import uk.gov.securestore.jacoco.config.JacocoCustomConfig
 
 /**
  * A [JacocoTaskGenerator] implementation for combining the provided [JacocoTaskGenerator]

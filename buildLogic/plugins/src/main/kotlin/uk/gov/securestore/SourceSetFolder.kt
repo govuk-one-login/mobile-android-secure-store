@@ -1,9 +1,9 @@
-package uk.gov.securestorage
+package uk.gov.securestore
 
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import java.io.File
-import uk.gov.securestorage.ext.ProjectExt.debugLog
+import uk.gov.securestore.ext.ProjectExt.debugLog
 
 /**
  * Handles the logic for obtaining source set folders.

@@ -1,16 +1,16 @@
-package uk.gov.securestorage.ext
+package uk.gov.securestore.ext
 
 import com.android.build.gradle.api.LibraryVariant
 import org.gradle.api.Project
 import org.gradle.configurationcache.extensions.capitalized
-import uk.gov.securestorage.filetree.fetcher.AsmFileTreeFetcher
-import uk.gov.securestorage.filetree.fetcher.FileTreesFetcher
-import uk.gov.securestorage.filetree.fetcher.JavaCompileFileTreeFetcher
-import uk.gov.securestorage.filetree.fetcher.KotlinCompileFileTreeFetcher
-import uk.gov.securestorage.jacoco.tasks.JacocoCombinedTestTaskGenerator
-import uk.gov.securestorage.jacoco.tasks.JacocoConnectedTestTaskGenerator
-import uk.gov.securestorage.jacoco.tasks.JacocoTaskGenerator
-import uk.gov.securestorage.jacoco.tasks.JacocoUnitTestTaskGenerator
+import uk.gov.securestore.filetree.fetcher.AsmFileTreeFetcher
+import uk.gov.securestore.filetree.fetcher.FileTreesFetcher
+import uk.gov.securestore.filetree.fetcher.JavaCompileFileTreeFetcher
+import uk.gov.securestore.filetree.fetcher.KotlinCompileFileTreeFetcher
+import uk.gov.securestore.jacoco.tasks.JacocoCombinedTestTaskGenerator
+import uk.gov.securestore.jacoco.tasks.JacocoConnectedTestTaskGenerator
+import uk.gov.securestore.jacoco.tasks.JacocoTaskGenerator
+import uk.gov.securestore.jacoco.tasks.JacocoUnitTestTaskGenerator
 
 fun LibraryVariant.generateDebugJacocoTasks(
     project: Project

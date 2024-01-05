@@ -1,4 +1,4 @@
-package uk.gov.android.securestorage
+package uk.gov.android.securestore
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

@@ -1,4 +1,4 @@
-package uk.gov.securestorage.ext
+package uk.gov.securestore.ext
 
 import org.gradle.api.tasks.testing.Test
 import org.gradle.testing.jacoco.plugins.JacocoTaskExtension

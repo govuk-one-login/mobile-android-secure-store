@@ -1,11 +1,11 @@
-package uk.gov.securestorage.jacoco.tasks
+package uk.gov.securestore.jacoco.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.testing.jacoco.tasks.JacocoReport
-import uk.gov.securestorage.Filters
-import uk.gov.securestorage.jacoco.config.JacocoCustomConfig
+import uk.gov.securestore.Filters
+import uk.gov.securestore.jacoco.config.JacocoCustomConfig
 
 /**
  * Partial implementation of [JacocoTaskGenerator] that primarily acts as a property bag for

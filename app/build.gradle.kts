@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
     id("maven-publish")
-    id("securestorage.jvm-toolchains")
+    id("securestore.jvm-toolchains")
     id("sonarqube-module-config")
     id("jacoco")
     id("jacoco-module-config")
@@ -107,16 +107,16 @@ dependencies {
 
 publishing {
     publications {
-        create<MavenPublication>("mobile-android-securestorage") {
+        create<MavenPublication>("mobile-android-securestore") {
             groupId = "uk.gov.android"
-            artifactId = "securestorage"
+            artifactId = "securestore"
             version = rootProject.extra["packageVersion"] as String
 
             artifact("$buildDir/outputs/aar/${project.name}-release.aar")
         }
     }
     repositories {
-        maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-securestorage") {
+        maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-securestore") {
             credentials {
                 username = System.getenv("USERNAME")
                 password = System.getenv("TOKEN")

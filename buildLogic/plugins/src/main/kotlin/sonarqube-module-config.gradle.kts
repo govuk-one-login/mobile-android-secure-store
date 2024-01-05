@@ -1,6 +1,6 @@
 import org.sonarqube.gradle.SonarExtension
-import uk.gov.securestorage.Filters
-import uk.gov.securestorage.SourceSetFolder
+import uk.gov.securestore.Filters
+import uk.gov.securestore.SourceSetFolder
 
 plugins {
     id("org.sonarqube")

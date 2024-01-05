@@ -1,4 +1,4 @@
-package uk.gov.securestorage
+package uk.gov.securestore
 
 import java.io.FilenameFilter
 

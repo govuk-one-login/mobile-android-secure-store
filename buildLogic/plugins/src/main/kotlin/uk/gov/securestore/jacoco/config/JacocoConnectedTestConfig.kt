@@ -1,13 +1,14 @@
-package uk.gov.securestorage.jacoco.config
+package uk.gov.securestore.jacoco.config
 
-import com.android.build.gradle.tasks.factory.AndroidUnitTest
+import com.android.build.gradle.internal.tasks.DeviceProviderInstrumentTestTask
 import org.gradle.api.Project
 import org.gradle.api.file.FileTree
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.kotlin.dsl.named
-import uk.gov.securestorage.filetree.fetcher.FileTreeFetcher
+import uk.gov.securestore.filetree.fetcher.FileTreeFetcher
 
 /**
- * A [JacocoCustomConfig] implementation specifically for unit tests.
+ * A [JacocoCustomConfig] implementation specifically for instrumentation tests.
  *
  * Obtains the required Gradle task via the provided [capitalisedVariantName], passed back through
  * the [getExecutionData] function.
@@ -19,7 +20,7 @@ import uk.gov.securestorage.filetree.fetcher.FileTreeFetcher
  * @param capitalisedVariantName The TitleCase representation of the Android build variant of the
  * Gradle module. Finds the relevant test task name by using this parameter.
  */
-class JacocoUnitTestConfig(
+class JacocoConnectedTestConfig(
     private val project: Project,
     private val classDirectoryFetcher: FileTreeFetcher,
     private val capitalisedVariantName: String,
@@ -29,19 +30,22 @@ class JacocoUnitTestConfig(
 ) {
 
     override fun getExecutionData(): FileTree {
-        val unitTestTask = project.tasks.named(
-            "test${capitalisedVariantName}UnitTest",
-            AndroidUnitTest::class,
+        val connectedTestTask: TaskProvider<DeviceProviderInstrumentTestTask> = project.tasks.named(
+            "connected${capitalisedVariantName}AndroidTest",
+            DeviceProviderInstrumentTestTask::class,
         )
-        val unitTestExecutionDataFile = unitTestTask.flatMap { utTask ->
+        val connectedTestExecutionDirectory = connectedTestTask.flatMap { connectedTask ->
             project.provider {
-                utTask.jacocoCoverageOutputFile.get().asFile
-                    .parentFile
+                connectedTask
+                    .coverageDirectory
+                    .asFile
+                    .get()
                     .absolutePath
             }
         }
-        return project.fileTree(unitTestExecutionDataFile) {
-            setIncludes(listOf("${unitTestTask.name}.exec"))
+
+        return project.fileTree(connectedTestExecutionDirectory) {
+            setIncludes(listOf("**/*.ec"))
         }
     }
 }

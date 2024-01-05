@@ -1,10 +1,10 @@
-package uk.gov.securestorage.jacoco.tasks
+package uk.gov.securestore.jacoco.tasks
 
 import org.gradle.api.Project
 import org.gradle.configurationcache.extensions.capitalized
-import uk.gov.securestorage.filetree.fetcher.FileTreeFetcher
-import uk.gov.securestorage.jacoco.config.JacocoConnectedTestConfig
-import uk.gov.securestorage.jacoco.config.JacocoCustomConfig
+import uk.gov.securestore.filetree.fetcher.FileTreeFetcher
+import uk.gov.securestore.jacoco.config.JacocoConnectedTestConfig
+import uk.gov.securestore.jacoco.config.JacocoCustomConfig
 
 /**
  * A [JacocoTaskGenerator] implementation specifically for instrumentation tests.

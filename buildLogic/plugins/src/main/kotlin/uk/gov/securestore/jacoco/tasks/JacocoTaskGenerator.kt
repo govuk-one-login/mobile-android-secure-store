@@ -1,8 +1,8 @@
-package uk.gov.securestorage.jacoco.tasks
+package uk.gov.securestore.jacoco.tasks
 
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.testing.jacoco.tasks.JacocoReport
-import uk.gov.securestorage.jacoco.config.JacocoCustomConfig
+import uk.gov.securestore.jacoco.config.JacocoCustomConfig
 
 /**
  * Abstraction that acts as the entry point for generating a customised [JacocoReport] Gradle task.

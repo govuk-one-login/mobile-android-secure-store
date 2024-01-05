@@ -1,4 +1,4 @@
-package uk.gov.securestorage.filetree.fetcher
+package uk.gov.securestore.filetree.fetcher
 
 import org.gradle.api.file.FileTree
 import org.gradle.api.provider.Provider

@@ -1,4 +1,4 @@
-package uk.gov.securestorage.ext
+package uk.gov.securestore.ext
 
 import com.android.build.gradle.LibraryExtension
 import com.android.build.api.dsl.LibraryExtension as DslLibraryExtension
