@@ -1,11 +1,13 @@
 [versions]
 core-ktx = "1.12.0"
+test-core = "1.5.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 appcompat = "1.6.1"
 androidGradlePlugin = "8.2.0"
 kotlin = "1.9.22"
+mockito = "5.8.0"
 
 [libraries]
 androidx-core-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -13,6 +15,10 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+test-core = { group = "androidx.test", name = "core", version.ref = "test-core" }
+test-runner = { group = "androidx.test", name = "runner", version.ref = "test-core" }
+test-rules = { group = "androidx.test", name = "rules", version.ref = "test-core" }
 
 [plugins]
 detekt = { id = "io.gitlab.arturbosch.detekt", version = "1.23.4" }

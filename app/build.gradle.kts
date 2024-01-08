@@ -101,7 +101,9 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
-        libs.junit
+        libs.junit,
+        libs.test.core,
+        libs.mockito
     ).forEach(::testImplementation)
 }
 
