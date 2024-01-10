@@ -63,8 +63,6 @@ android {
     }
 
     testOptions {
-        execution = "ANDROIDX_TEST_ORCHESTRATOR"
-        animationsDisabled = true
         unitTests.all {
             it.testLogging {
                 events = setOf(
@@ -92,7 +90,8 @@ android {
 dependencies {
     listOf(
         libs.androidx.test.ext.junit,
-        libs.espresso.core
+        libs.test.runner,
+        libs.test.rules
     ).forEach(::androidTestImplementation)
 
     listOf(
@@ -101,7 +100,9 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
-        libs.junit
+        libs.junit,
+        libs.test.core,
+        libs.mockito
     ).forEach(::testImplementation)
 }
 
