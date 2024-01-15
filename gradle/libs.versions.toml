@@ -7,7 +7,7 @@ espresso-core = "3.5.1"
 appcompat = "1.6.1"
 androidGradlePlugin = "8.2.0"
 kotlin = "1.9.22"
-mockito = "5.8.0"
+mockito = "5.9.0"
 
 [libraries]
 androidx-core-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
