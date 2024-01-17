@@ -8,39 +8,48 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
-import org.mockito.ArgumentMatchers.eq
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import uk.gov.android.securestore.crypto.CryptoManager
 
 class SharedPrefsStoreTest {
 
     private val mockContext: Context = mock()
     private val mockSharedPreferences: SharedPreferences = mock()
     private val mockEditor: SharedPreferences.Editor = mock()
+    private val mockCryptoManager: CryptoManager = mock()
 
     private val storeName = "testStore"
     private val key = "testKey"
     private val value = "testValue"
+    private val encryptedValue = "testEncrypted"
 
     private lateinit var sharedPrefsStore: SharedPrefsStore
 
     @Before
     fun setUp() {
-        `when`(mockContext.getSharedPreferences(eq(storeName), eq(Context.MODE_PRIVATE)))
+        whenever(mockContext.getSharedPreferences(eq(storeName), eq(Context.MODE_PRIVATE)))
             .thenReturn(mockSharedPreferences)
+        whenever(mockSharedPreferences.edit()).thenReturn(mockEditor)
 
-        `when`(mockSharedPreferences.edit()).thenReturn(mockEditor)
-
-        sharedPrefsStore = SharedPrefsStore(mockContext, storeName)
+        sharedPrefsStore = SharedPrefsStore(
+            mockContext,
+            storeName,
+            false,
+            mockCryptoManager
+        )
     }
 
     @Test
     fun testUpsert() {
+        whenever(mockCryptoManager.encryptText(key, value)).thenReturn(encryptedValue)
+
         sharedPrefsStore.upsert(key, value)
 
-        verify(mockEditor).putString(key, value)
+        verify(mockEditor).putString(key, encryptedValue)
         verify(mockEditor).apply()
     }
 
@@ -54,7 +63,8 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieve() {
-        `when`(mockSharedPreferences.getString(eq(key), any())).thenReturn(value)
+        whenever(mockSharedPreferences.getString(key, null)).thenReturn(encryptedValue)
+        whenever(mockCryptoManager.decryptText(key, encryptedValue)).thenReturn(value)
 
         val result = sharedPrefsStore.retrieve(key)
 
@@ -63,7 +73,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveNonExistentKey() {
-        `when`(mockSharedPreferences.getString(eq(key), any())).thenReturn(null)
+        whenever(mockSharedPreferences.getString(eq(key), any())).thenReturn(null)
 
         val result = sharedPrefsStore.retrieve(key)
 
@@ -72,7 +82,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testExists() {
-        `when`(mockSharedPreferences.contains(key)).thenReturn(true)
+        whenever(mockSharedPreferences.contains(key)).thenReturn(true)
 
         val result = sharedPrefsStore.exists(key)
 
@@ -81,7 +91,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testDoesNotExist() {
-        `when`(mockSharedPreferences.contains(key)).thenReturn(false)
+        whenever(mockSharedPreferences.contains(key)).thenReturn(false)
 
         val result = sharedPrefsStore.exists(key)
 
