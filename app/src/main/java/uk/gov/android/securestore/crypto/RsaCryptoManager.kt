@@ -10,12 +10,8 @@ import javax.crypto.Cipher
 
 /**
  * Implementation of [CryptoManager] using RSA encryption algorithm to create Public/Private key pair.
- *
- * @param userAuthRequired Set if keys require user authentication. Applies to all keys created by a given instance of [RsaCryptoManager]
  */
-internal class RsaCryptoManager(
-    private val userAuthRequired: Boolean
-) : CryptoManager {
+internal class RsaCryptoManager : CryptoManager {
     private val keyStore: KeyStore = KeyStore.getInstance(TYPE).apply {
         load(null)
     }
@@ -63,7 +59,6 @@ internal class RsaCryptoManager(
                     .setKeySize(KEY_SIZE)
                     .setBlockModes(BLOCK_MODE)
                     .setEncryptionPaddings(PADDING)
-                    .setUserAuthenticationRequired(userAuthRequired)
                     .setRandomizedEncryptionRequired(true)
                     .build()
             )

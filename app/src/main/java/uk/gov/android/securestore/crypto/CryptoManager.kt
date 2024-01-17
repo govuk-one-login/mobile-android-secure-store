@@ -11,6 +11,8 @@ interface CryptoManager {
      * @param text Plain text to encrypt
      *
      * @return Encrypted data as a [String]
+     *
+     * @throws [java.security.GeneralSecurityException] If encryption fails
      */
     fun encryptText(alias: String, text: String): String
 
@@ -21,13 +23,17 @@ interface CryptoManager {
      * @param text Encrypted [String] to decrypt
      *
      * @return The decrypted text as a [String]
+     *
+     * @throws [java.security.GeneralSecurityException] If decryption fails
      */
     fun decryptText(alias: String, text: String): String
 
     /**
-     * Remove an encryption key from the KeyStore
+     * Remove an encryption key entry from the Keystore
      *
-     * @param alias Name of key to remove
+     * @param alias Name of key entry to remove
+     *
+     * @throws [java.security.KeyStoreException] If Keystore is not initialized or entry not removed
      */
     fun deleteKey(alias: String)
 }

@@ -1,29 +1,43 @@
 package uk.gov.android.securestore
 
 import android.content.Context
+import java.security.GeneralSecurityException
+import java.security.KeyStoreException
 import uk.gov.android.securestore.crypto.CryptoManager
 import uk.gov.android.securestore.crypto.RsaCryptoManager
 
+@Suppress("SwallowedException")
 class SharedPrefsStore(
     context: Context,
-    storeName: String,
-    authRequired: Boolean = false,
-    private val cryptoManager: CryptoManager = RsaCryptoManager(authRequired)
+    configuration: SecureStorageConfiguration,
+    private val cryptoManager: CryptoManager = RsaCryptoManager()
 ) : SecureStore {
-    private val sharedPrefs = context.getSharedPreferences(storeName, Context.MODE_PRIVATE)
+    private val sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
 
     override fun upsert(key: String, value: String): String {
-        return cryptoManager.encryptText(key, value).also { writeToPrefs(key, it) }
+        try {
+            return cryptoManager.encryptText(key, value).also { writeToPrefs(key, it) }
+        } catch (e: GeneralSecurityException) {
+            throw SecureStorageError(e.message)
+        }
     }
 
     override fun delete(key: String) {
         writeToPrefs(key, null)
-        cryptoManager.deleteKey(key)
+        try {
+            cryptoManager.deleteKey(key)
+        } catch (e: KeyStoreException) {
+            throw SecureStorageError(e.message)
+        }
     }
 
     override fun retrieve(key: String): String? {
-        return sharedPrefs.getString(key, null)?.let {
-            cryptoManager.decryptText(key, it)
+        try {
+            return sharedPrefs.getString(key, null)?.let {
+                cryptoManager.decryptText(key, it)
+            }
+        } catch (e: GeneralSecurityException) {
+            throw SecureStorageError(e.message)
         }
     }
 

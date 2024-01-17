@@ -14,9 +14,12 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SharedPrefsStoreInstrumentationTest {
 
-    private val storeName = "testStore"
     private val key = "testKey"
     private val value = "testValue"
+    private val config = SecureStorageConfiguration(
+        "testStore",
+        AccessControlLevel.OPEN
+    )
 
     private lateinit var sharedPrefsStore: SharedPrefsStore
 
@@ -24,7 +27,7 @@ class SharedPrefsStoreInstrumentationTest {
     fun setUp() {
         sharedPrefsStore = SharedPrefsStore(
             ApplicationProvider.getApplicationContext(),
-            storeName
+            config
         )
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
