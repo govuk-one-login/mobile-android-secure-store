@@ -37,7 +37,7 @@ class SharedPrefsStoreTest {
 
     @Before
     fun setUp() {
-        whenever(mockContext.getSharedPreferences(eq(config.id), eq(Context.MODE_PRIVATE)))
+        whenever(mockContext.getSharedPreferences(eq("testStore"), eq(Context.MODE_PRIVATE)))
             .thenReturn(mockSharedPreferences)
         whenever(mockSharedPreferences.edit()).thenReturn(mockEditor)
 

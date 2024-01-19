@@ -6,19 +6,18 @@ import java.security.KeyStoreException
 import uk.gov.android.securestore.crypto.CryptoManager
 import uk.gov.android.securestore.crypto.RsaCryptoManager
 
-@Suppress("SwallowedException")
 class SharedPrefsStore(
     context: Context,
     configuration: SecureStorageConfiguration,
     private val cryptoManager: CryptoManager = RsaCryptoManager()
 ) : SecureStore {
-    private val sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
+    private val sharedPrefs = configuration.getSharedPrefs(context)
 
     override fun upsert(key: String, value: String): String {
         try {
             return cryptoManager.encryptText(key, value).also { writeToPrefs(key, it) }
         } catch (e: GeneralSecurityException) {
-            throw SecureStorageError(e.message)
+            throw SecureStorageError(e)
         }
     }
 
@@ -27,7 +26,7 @@ class SharedPrefsStore(
         try {
             cryptoManager.deleteKey(key)
         } catch (e: KeyStoreException) {
-            throw SecureStorageError(e.message)
+            throw SecureStorageError(e)
         }
     }
 
@@ -37,7 +36,7 @@ class SharedPrefsStore(
                 cryptoManager.decryptText(key, it)
             }
         } catch (e: GeneralSecurityException) {
-            throw SecureStorageError(e.message)
+            throw SecureStorageError(e)
         }
     }
 
