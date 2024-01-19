@@ -1,3 +1,7 @@
 package uk.gov.android.securestore
 
-class SecureStorageError : Error()
+import java.lang.Exception
+
+class SecureStorageError(
+    exception: Exception
+) : Error(exception)

@@ -2,6 +2,7 @@ package uk.gov.android.securestore
 
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import java.security.KeyStore
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -11,11 +12,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SharedPrefsStoreTest {
+class SharedPrefsStoreInstrumentationTest {
 
-    private val storeName = "testStore"
     private val key = "testKey"
     private val value = "testValue"
+    private val config = SecureStorageConfiguration(
+        "testStore",
+        AccessControlLevel.OPEN
+    )
 
     private lateinit var sharedPrefsStore: SharedPrefsStore
 
@@ -23,8 +27,11 @@ class SharedPrefsStoreTest {
     fun setUp() {
         sharedPrefsStore = SharedPrefsStore(
             ApplicationProvider.getApplicationContext(),
-            storeName
+            config
         )
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null)
+        keyStore.deleteEntry(key)
     }
 
     @Test
