@@ -19,6 +19,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.crypto.CryptoManager
 
 @Suppress("UNCHECKED_CAST")
@@ -27,6 +28,7 @@ class SharedPrefsStoreTest {
     private val mockSharedPreferences: SharedPreferences = mock()
     private val mockEditor: SharedPreferences.Editor = mock()
     private val mockCryptoManager: CryptoManager = mock()
+    private val mockAuthenticator: Authenticator = mock()
 
     private val config = SecureStorageConfiguration(
         "testStore",
@@ -47,6 +49,7 @@ class SharedPrefsStoreTest {
         sharedPrefsStore = SharedPrefsStore(
             mockContext,
             config,
+            mockAuthenticator,
             mockCryptoManager
         )
     }
@@ -77,8 +80,13 @@ class SharedPrefsStoreTest {
         whenever(mockSharedPreferences.getString(key, null)).thenReturn(encryptedValue)
 
         runBlocking {
-            whenever(mockCryptoManager.decryptText(eq(encryptedValue), any(), any())).thenAnswer {
-                println("here")
+            whenever(
+                mockCryptoManager.decryptText(
+                    eq(encryptedValue),
+                    any(),
+                    eq(null)
+                )
+            ).thenAnswer {
                 (it.arguments[1] as (text: String?) -> Unit).invoke(value)
             }
             val result = sharedPrefsStore.retrieve(key)
@@ -132,7 +140,7 @@ class SharedPrefsStoreTest {
     @Test
     fun testRetrieveThrowsError() {
         whenever(mockSharedPreferences.getString(key, null)).thenReturn(encryptedValue)
-        given(mockCryptoManager.decryptText(any(), any(), any())).willAnswer {
+        given(mockCryptoManager.decryptText(eq(encryptedValue), any(), eq(null))).willAnswer {
             throw GeneralSecurityException()
         }
 

@@ -5,17 +5,20 @@ import androidx.fragment.app.FragmentActivity
 import java.security.GeneralSecurityException
 import java.security.KeyStoreException
 import kotlin.coroutines.suspendCoroutine
+import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
+import uk.gov.android.securestore.authentication.UserAuthenticator
 import uk.gov.android.securestore.crypto.CryptoManager
 import uk.gov.android.securestore.crypto.RsaCryptoManager
 
 class SharedPrefsStore(
     context: FragmentActivity,
     configuration: SecureStorageConfiguration,
+    private val authenticator: Authenticator = UserAuthenticator(context),
     private val cryptoManager: CryptoManager = RsaCryptoManager(
-        context,
         configuration.id,
-        configuration.accessControlLevel
+        configuration.accessControlLevel,
+        authenticator
     )
 ) : SecureStore {
     private val sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
@@ -53,7 +56,6 @@ class SharedPrefsStore(
                         { text -> continuation.resumeWith(Result.success(text)) },
                         authPromptConfig
                     )
-                    println("here3")
                 } ?: continuation.resumeWith(Result.success(null))
             } catch (e: GeneralSecurityException) {
                 throw SecureStorageError(e)

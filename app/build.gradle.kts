@@ -118,7 +118,7 @@ publishing {
             artifactId = "securestore"
             version = rootProject.extra["packageVersion"] as String
 
-            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+            artifact("$buildDir/outputs/aar/app-release.aar")
         }
     }
     repositories {

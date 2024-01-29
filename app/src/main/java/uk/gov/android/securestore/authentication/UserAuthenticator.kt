@@ -6,7 +6,7 @@ import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.AccessControlLevel
 
-class UserAuthenticator(
+internal class UserAuthenticator(
     private val context: FragmentActivity
 ) : Authenticator {
     override fun authenticate(
@@ -22,27 +22,7 @@ class UserAuthenticator(
 
         val biometricPrompt = BiometricPrompt(
             context,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(
-                    errorCode: Int,
-                    errString: CharSequence
-                ) {
-                    super.onAuthenticationError(errorCode, errString)
-                    handler.onError(errorCode, errString)
-                }
-
-                override fun onAuthenticationSucceeded(
-                    result: BiometricPrompt.AuthenticationResult
-                ) {
-                    super.onAuthenticationSucceeded(result)
-                    handler.onSuccess()
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    handler.onFailure()
-                }
-            }
+            handler
         )
 
         biometricPrompt.authenticate(

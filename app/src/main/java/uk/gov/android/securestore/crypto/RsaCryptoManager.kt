@@ -5,7 +5,6 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import androidx.annotation.RequiresApi
-import androidx.fragment.app.FragmentActivity
 import java.security.GeneralSecurityException
 import java.security.KeyPairGenerator
 import java.security.KeyStore
@@ -15,16 +14,14 @@ import uk.gov.android.securestore.AccessControlLevel
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
-import uk.gov.android.securestore.authentication.UserAuthenticator
 
 /**
  * Implementation of [CryptoManager] using RSA encryption algorithm to create Public/Private key pair.
  */
 internal class RsaCryptoManager(
-    private val context: FragmentActivity,
     private val alias: String,
     private val accessControlLevel: AccessControlLevel,
-    private val authenticator: Authenticator = UserAuthenticator(context)
+    private val authenticator: Authenticator
 ) : CryptoManager {
     private val keyStore: KeyStore = KeyStore.getInstance(TYPE).apply {
         load(null)
@@ -135,7 +132,7 @@ internal class RsaCryptoManager(
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_ECB
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
         private const val KEY_SIZE = 4096
-        private const val KEY_TIMEOUT = 1000
+        private const val KEY_TIMEOUT = 1
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
     }
 }
