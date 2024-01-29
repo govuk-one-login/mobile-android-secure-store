@@ -1,5 +1,7 @@
 package uk.gov.android.securestore
 
+import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
+
 /**
  * Create an instance of [SecureStore] to save, query and delete data. Data stored as a key value pair, with the value being a [String]
  */
@@ -12,7 +14,7 @@ interface SecureStore {
      *
      * @throws [SecureStorageError] if unable to save
      */
-    fun upsert(key: String, value: String): String
+    suspend fun upsert(key: String, value: String): String
 
     /**
      * Delete a given value based on a key
@@ -27,11 +29,15 @@ interface SecureStore {
      * Access the data for a given key
      *
      * @param [key] The unique key to identify data to retrieve
+     * @param authPromptConfig Configuration for the Biometric prompt, can be null if [uk.gov.android.securestore.SecureStore] is set to OPEN. Default as null
      * @return The data held against the given key, null if no data held
      *
      * @throws [SecureStorageError] if unable to retrieve
      */
-    fun retrieve(key: String): String?
+    suspend fun retrieve(
+        key: String,
+        authPromptConfig: AuthenticatorPromptConfiguration? = null
+    ): String?
 
     /**
      * Check if a certain key exists in the store

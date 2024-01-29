@@ -2,8 +2,10 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.fragment.app.FragmentActivity
 import java.security.GeneralSecurityException
 import java.security.KeyStoreException
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -19,8 +21,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.crypto.CryptoManager
 
+@Suppress("UNCHECKED_CAST")
 class SharedPrefsStoreTest {
-    private val mockContext: Context = mock()
+    private val mockContext: FragmentActivity = mock()
     private val mockSharedPreferences: SharedPreferences = mock()
     private val mockEditor: SharedPreferences.Editor = mock()
     private val mockCryptoManager: CryptoManager = mock()
@@ -50,12 +53,15 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testUpsert() {
-        whenever(mockCryptoManager.encryptText(key, value)).thenReturn(encryptedValue)
+        whenever(mockCryptoManager.encryptText(value)).thenReturn(encryptedValue)
 
-        sharedPrefsStore.upsert(key, value)
+        runBlocking {
+            sharedPrefsStore.upsert(key, value)
 
-        verify(mockEditor).putString(key, encryptedValue)
-        verify(mockEditor).apply()
+            verify(mockCryptoManager).encryptText(value)
+            verify(mockEditor).putString(key, encryptedValue)
+            verify(mockEditor).apply()
+        }
     }
 
     @Test
@@ -69,20 +75,25 @@ class SharedPrefsStoreTest {
     @Test
     fun testRetrieve() {
         whenever(mockSharedPreferences.getString(key, null)).thenReturn(encryptedValue)
-        whenever(mockCryptoManager.decryptText(key, encryptedValue)).thenReturn(value)
 
-        val result = sharedPrefsStore.retrieve(key)
-
-        assertEquals(value, result)
+        runBlocking {
+            whenever(mockCryptoManager.decryptText(eq(encryptedValue), any(), any())).thenAnswer {
+                println("here")
+                (it.arguments[1] as (text: String?) -> Unit).invoke(value)
+            }
+            val result = sharedPrefsStore.retrieve(key)
+            assertEquals(value, result)
+        }
     }
 
     @Test
     fun testRetrieveNonExistentKey() {
         whenever(mockSharedPreferences.getString(eq(key), any())).thenReturn(null)
+        runBlocking {
+            val result = sharedPrefsStore.retrieve(key)
 
-        val result = sharedPrefsStore.retrieve(key)
-
-        assertNull(result)
+            assertNull(result)
+        }
     }
 
     @Test
@@ -107,30 +118,34 @@ class SharedPrefsStoreTest {
     fun testUpsertThrowsError() {
         given(
             mockCryptoManager.encryptText(
-                key,
                 value
             )
         ).willAnswer { throw GeneralSecurityException() }
 
-        assertThrows(SecureStorageError::class.java) { sharedPrefsStore.upsert(key, value) }
+        assertThrows(SecureStorageError::class.java) {
+            runBlocking {
+                sharedPrefsStore.upsert(key, value)
+            }
+        }
     }
 
     @Test
     fun testRetrieveThrowsError() {
         whenever(mockSharedPreferences.getString(key, null)).thenReturn(encryptedValue)
-        given(
-            mockCryptoManager.decryptText(
-                key,
-                encryptedValue
-            )
-        ).willAnswer { throw GeneralSecurityException() }
+        given(mockCryptoManager.decryptText(any(), any(), any())).willAnswer {
+            throw GeneralSecurityException()
+        }
 
-        assertThrows(SecureStorageError::class.java) { sharedPrefsStore.retrieve(key) }
+        assertThrows(SecureStorageError::class.java) {
+            runBlocking {
+                sharedPrefsStore.retrieve(key)
+            }
+        }
     }
 
     @Test
     fun testDeleteThrowsError() {
-        given(mockCryptoManager.deleteKey(key)).willAnswer { throw KeyStoreException() }
+        given(mockCryptoManager.deleteKey()).willAnswer { throw KeyStoreException() }
 
         assertThrows(SecureStorageError::class.java) { sharedPrefsStore.delete(key) }
     }
