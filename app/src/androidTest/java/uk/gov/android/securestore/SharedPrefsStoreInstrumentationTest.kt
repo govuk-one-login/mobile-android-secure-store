@@ -13,7 +13,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
-import uk.gov.android.securestore.crypto.RsaCryptoManager
 
 @RunWith(AndroidJUnit4::class)
 class SharedPrefsStoreInstrumentationTest {
@@ -34,13 +33,8 @@ class SharedPrefsStoreInstrumentationTest {
     fun setUp() {
         rule.scenario.onActivity {
             sharedPrefsStore = SharedPrefsStore(
-                it,
-                config,
-                RsaCryptoManager(
-                    it,
-                    config.id,
-                    config.accessControlLevel
-                )
+                context = it,
+                configuration = config
             )
         }
 
