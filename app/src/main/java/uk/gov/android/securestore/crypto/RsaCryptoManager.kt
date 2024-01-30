@@ -119,7 +119,7 @@ internal class RsaCryptoManager(
     @RequiresApi(Build.VERSION_CODES.R)
     private fun getAuthType(accessLevel: AccessControlLevel): Int =
         when (accessLevel) {
-            AccessControlLevel.OPEN -> -1
+            AccessControlLevel.OPEN -> AUTH_TYPE_OPEN
             AccessControlLevel.PASSCODE -> KeyProperties.AUTH_DEVICE_CREDENTIAL
             AccessControlLevel.PASSCODE_AND_ANY_BIOMETRICS,
             AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS ->
@@ -133,6 +133,7 @@ internal class RsaCryptoManager(
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
         private const val KEY_SIZE = 4096
         private const val KEY_TIMEOUT = 1
+        private const val AUTH_TYPE_OPEN = -1
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
     }
 }
