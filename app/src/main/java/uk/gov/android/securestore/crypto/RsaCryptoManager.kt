@@ -48,8 +48,11 @@ internal class RsaCryptoManager(
         val cipher = Cipher.getInstance(TRANSFORMATION)
 
         if (accessControlLevel == AccessControlLevel.OPEN) {
-            cipher.init(Cipher.DECRYPT_MODE, getKeyEntry(alias).privateKey)
-            callback(cipher.doFinal(encryptedBytes).decodeToString())
+            initCipherAndDecrypt(
+                cipher,
+                encryptedBytes,
+                callback
+            )
         } else {
             if (authPromptConfig != null) {
                 authenticator.authenticate(
@@ -57,9 +60,11 @@ internal class RsaCryptoManager(
                     authPromptConfig,
                     AuthenticatorCallbackHandler(
                         onSuccess = {
-                            cipher.init(Cipher.DECRYPT_MODE, getKeyEntry(alias).privateKey)
-                            val decryptedBytes = cipher.doFinal(encryptedBytes)
-                            callback(decryptedBytes?.decodeToString())
+                            initCipherAndDecrypt(
+                                cipher,
+                                encryptedBytes,
+                                callback
+                            )
                         }
                     )
                 )
@@ -67,6 +72,15 @@ internal class RsaCryptoManager(
                 throw GeneralSecurityException("No authentication prompt configuration set")
             }
         }
+    }
+
+    private fun initCipherAndDecrypt(
+        cipher: Cipher,
+        encryptedBytes: ByteArray,
+        callback: (result: String?) -> Unit
+    ) {
+        cipher.init(Cipher.DECRYPT_MODE, getKeyEntry(alias).privateKey)
+        callback(cipher.doFinal(encryptedBytes).decodeToString())
     }
 
     override fun deleteKey() {
