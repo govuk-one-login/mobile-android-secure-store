@@ -1,19 +1,21 @@
 package uk.gov.android.securestore
 
-import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.security.KeyStore
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
 @RunWith(AndroidJUnit4::class)
 class SharedPrefsStoreInstrumentationTest {
-
     private val key = "testKey"
     private val value = "testValue"
     private val config = SecureStorageConfiguration(
@@ -23,12 +25,19 @@ class SharedPrefsStoreInstrumentationTest {
 
     private lateinit var sharedPrefsStore: SharedPrefsStore
 
+    @JvmField
+    @Rule
+    val rule: ActivityScenarioRule<TestActivity> = ActivityScenarioRule(TestActivity::class.java)
+
     @Before
     fun setUp() {
-        sharedPrefsStore = SharedPrefsStore(
-            ApplicationProvider.getApplicationContext(),
-            config
-        )
+        rule.scenario.onActivity {
+            sharedPrefsStore = SharedPrefsStore(
+                context = it,
+                configuration = config
+            )
+        }
+
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
         keyStore.deleteEntry(key)
@@ -36,29 +45,40 @@ class SharedPrefsStoreInstrumentationTest {
 
     @Test
     fun testUpsertAndRetrieve() {
-        sharedPrefsStore.upsert(key, value)
-
-        val result = sharedPrefsStore.retrieve(key)
-        assertEquals(value, result)
+        runBlocking {
+            sharedPrefsStore.upsert(key, value)
+            val result = sharedPrefsStore.retrieve(
+                key,
+                AuthenticatorPromptConfiguration(
+                    "test",
+                    "test",
+                    "test"
+                )
+            )
+            assertEquals(value, result)
+        }
     }
 
     @Test
     fun testDeleteAndRetrieveNonExistentKey() {
-        sharedPrefsStore.upsert(key, value)
+        runBlocking {
+            sharedPrefsStore.upsert(key, value)
 
-        sharedPrefsStore.delete(key)
-
-        val result = sharedPrefsStore.retrieve(key)
-        assertNull(result)
+            sharedPrefsStore.delete(key)
+            val result = sharedPrefsStore.retrieve(key)
+            assertNull(result)
+        }
     }
 
     @Test
     fun testExists() {
-        sharedPrefsStore.upsert(key, value)
+        runBlocking {
+            sharedPrefsStore.upsert(key, value)
 
-        val result = sharedPrefsStore.exists(key)
+            val result = sharedPrefsStore.exists(key)
 
-        assertTrue(result)
+            assertTrue(result)
+        }
     }
 
     @Test

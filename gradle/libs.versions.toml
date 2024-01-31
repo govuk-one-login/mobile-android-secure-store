@@ -6,8 +6,9 @@ androidx-test-ext-junit = "1.1.5"
 appcompat = "1.6.1"
 androidGradlePlugin = "8.2.0"
 kotlin = "1.9.22"
-mockito = "5.9.0"
+mockito = "5.10.0"
 mockito-kotlin = "5.2.1"
+biometric = "1.1.0"
 
 
 [libraries]
@@ -16,10 +17,12 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-android = { group = "org.mockito", name = "mockito-android", version.ref = "mockito" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito-kotlin" }
 test-core = { group = "androidx.test", name = "core", version.ref = "test-core" }
 test-runner = { group = "androidx.test", name = "runner", version.ref = "test-core" }
 test-rules = { group = "androidx.test", name = "rules", version.ref = "test-core" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 
 [plugins]
 detekt = { id = "io.gitlab.arturbosch.detekt", version = "1.23.4" }

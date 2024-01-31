@@ -1,5 +1,7 @@
 package uk.gov.android.securestore.crypto
 
+import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
+
 /**
  * Class to handle encryption and decryption of [String] data
  */
@@ -7,33 +9,35 @@ interface CryptoManager {
     /**
      * Encrypt a [String]
      *
-     * @param alias [String] value for the name of the encryption key. Uses existing one or create a new one
      * @param text Plain text to encrypt
      *
      * @return Encrypted data as a [String]
      *
      * @throws [java.security.GeneralSecurityException] If encryption fails
      */
-    fun encryptText(alias: String, text: String): String
+    fun encryptText(
+        text: String
+    ): String
 
     /**
      * Decrypt a [String]
      *
-     * @param alias [String] value for the name of the decryption key. Must be same as key used to encrypt the data
      * @param text Encrypted [String] to decrypt
-     *
-     * @return The decrypted text as a [String]
+     * @param callback Method to use decrypted text (the result)
+     * @param authPromptConfig Configuration for the Biometric prompt, can be null if [uk.gov.android.securestore.SecureStore] is set to OPEN. Default as null
      *
      * @throws [java.security.GeneralSecurityException] If decryption fails
      */
-    fun decryptText(alias: String, text: String): String
+    fun decryptText(
+        text: String,
+        callback: (result: String?) -> Unit,
+        authPromptConfig: AuthenticatorPromptConfiguration? = null
+    )
 
     /**
      * Remove an encryption key entry from the Keystore
      *
-     * @param alias Name of key entry to remove
-     *
      * @throws [java.security.KeyStoreException] If Keystore is not initialized or entry not removed
      */
-    fun deleteKey(alias: String)
+    fun deleteKey()
 }

@@ -91,12 +91,16 @@ dependencies {
     listOf(
         libs.androidx.test.ext.junit,
         libs.test.runner,
-        libs.test.rules
+        libs.test.rules,
+        libs.mockito,
+        libs.mockito.kotlin,
+        libs.mockito.android
     ).forEach(::androidTestImplementation)
 
     listOf(
         libs.androidx.core.core.ktx,
-        libs.appcompat
+        libs.appcompat,
+        libs.androidx.biometric
     ).forEach(::implementation)
 
     listOf(
@@ -114,7 +118,7 @@ publishing {
             artifactId = "securestore"
             version = rootProject.extra["packageVersion"] as String
 
-            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+            artifact("$buildDir/outputs/aar/app-release.aar")
         }
     }
     repositories {
