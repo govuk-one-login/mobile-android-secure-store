@@ -113,7 +113,7 @@ dependencies {
 
 publishing {
     publications {
-        create<MavenPublication>("mobile-android-securestore") {
+        create<MavenPublication>("mobile-android-secure-store") {
             groupId = "uk.gov.android"
             artifactId = "securestore"
             version = rootProject.extra["packageVersion"] as String
@@ -122,7 +122,7 @@ publishing {
         }
     }
     repositories {
-        maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-securestore") {
+        maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-secure-store") {
             credentials {
                 username = System.getenv("USERNAME")
                 password = System.getenv("TOKEN")
