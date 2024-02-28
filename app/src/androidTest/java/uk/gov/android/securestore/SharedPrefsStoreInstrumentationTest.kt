@@ -70,7 +70,8 @@ class SharedPrefsStoreInstrumentationTest {
                 sharedPrefsStore.upsert(key, value, it)
 
                 sharedPrefsStore.delete(key, it)
-                val result = sharedPrefsStore.retrieve(key,
+                val result = sharedPrefsStore.retrieve(
+                    key,
                     AuthenticatorPromptConfiguration(
                         "test",
                         "test",

@@ -155,7 +155,8 @@ class SharedPrefsStoreTest {
     @Test
     fun testDeleteThrowsError() {
         given(mockCryptoManager.deleteKey()).willAnswer { throw KeyStoreException() }
-
-        assertThrows(SecureStorageError::class.java) { sharedPrefsStore.delete(key, activityFragment) }
+        assertThrows(SecureStorageError::class.java) {
+            sharedPrefsStore.delete(key, activityFragment)
+        }
     }
 }
