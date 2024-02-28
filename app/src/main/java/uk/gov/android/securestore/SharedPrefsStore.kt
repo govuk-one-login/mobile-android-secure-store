@@ -12,9 +12,9 @@ import uk.gov.android.securestore.crypto.CryptoManager
 import uk.gov.android.securestore.crypto.RsaCryptoManager
 
 class SharedPrefsStore(
-    context: FragmentActivity,
+    context: Context,
     configuration: SecureStorageConfiguration,
-    private val authenticator: Authenticator = UserAuthenticator(context),
+    private val authenticator: Authenticator = UserAuthenticator(),
     private val cryptoManager: CryptoManager = RsaCryptoManager(
         configuration.id,
         configuration.accessControlLevel,
@@ -23,22 +23,26 @@ class SharedPrefsStore(
 ) : SecureStore {
     private val sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
 
-    override suspend fun upsert(key: String, value: String): String {
+    override suspend fun upsert(key: String, value: String, context: FragmentActivity): String {
+        authenticator.init(context)
         return suspendCoroutine { continuation ->
             try {
                 val result = cryptoManager.encryptText(value)
                     .also { writeToPrefs(key, it) }
                 continuation.resumeWith(Result.success(result))
+                authenticator.close(context)
             } catch (e: GeneralSecurityException) {
                 throw SecureStorageError(e)
             }
         }
     }
 
-    override fun delete(key: String) {
+    override fun delete(key: String, context: FragmentActivity) {
         writeToPrefs(key, null)
+        authenticator.init(context)
         try {
             cryptoManager.deleteKey()
+            authenticator.close(context)
         } catch (e: KeyStoreException) {
             throw SecureStorageError(e)
         }
@@ -46,8 +50,10 @@ class SharedPrefsStore(
 
     override suspend fun retrieve(
         key: String,
-        authPromptConfig: AuthenticatorPromptConfiguration?
+        authPromptConfig: AuthenticatorPromptConfiguration?,
+        context: FragmentActivity
     ): String? {
+        authenticator.init(context)
         return suspendCoroutine { continuation ->
             try {
                 sharedPrefs.getString(key, null)?.let { encryptedText ->
@@ -57,6 +63,7 @@ class SharedPrefsStore(
                         authPromptConfig
                     )
                 } ?: continuation.resumeWith(Result.success(null))
+                authenticator.close(context)
             } catch (e: GeneralSecurityException) {
                 throw SecureStorageError(e)
             }

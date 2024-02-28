@@ -1,5 +1,7 @@
 package uk.gov.android.securestore.authentication
 
+import android.content.Context
+import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.AccessControlLevel
 
 /**
@@ -13,9 +15,14 @@ interface Authenticator {
      * @param configuration Configuration for the UI elements of the OS Biometric Prompt
      * @param handler An [AuthenticatorCallbackHandler] to handle success, failure and error states from authentication
      */
+
+    fun init(context: FragmentActivity)
+
     fun authenticate(
         accessControlLevel: AccessControlLevel,
         configuration: AuthenticatorPromptConfiguration,
         handler: AuthenticatorCallbackHandler
     )
+
+    fun close(context: Context)
 }

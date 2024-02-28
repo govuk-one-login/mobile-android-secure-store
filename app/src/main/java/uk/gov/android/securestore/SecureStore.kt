@@ -1,5 +1,6 @@
 package uk.gov.android.securestore
 
+import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
 /**
@@ -14,7 +15,7 @@ interface SecureStore {
      *
      * @throws [SecureStorageError] if unable to save
      */
-    suspend fun upsert(key: String, value: String): String
+    suspend fun upsert(key: String, value: String, context: FragmentActivity): String
 
     /**
      * Delete a given value based on a key
@@ -23,7 +24,7 @@ interface SecureStore {
      *
      * @throws [SecureStorageError] if unable to delete
      */
-    fun delete(key: String)
+    fun delete(key: String, context: FragmentActivity)
 
     /**
      * Access the data for a given key
@@ -36,7 +37,8 @@ interface SecureStore {
      */
     suspend fun retrieve(
         key: String,
-        authPromptConfig: AuthenticatorPromptConfiguration? = null
+        authPromptConfig: AuthenticatorPromptConfiguration? = null,
+        context: FragmentActivity
     ): String?
 
     /**

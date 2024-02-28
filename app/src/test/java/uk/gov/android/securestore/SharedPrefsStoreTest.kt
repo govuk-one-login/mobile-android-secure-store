@@ -29,6 +29,7 @@ class SharedPrefsStoreTest {
     private val mockEditor: SharedPreferences.Editor = mock()
     private val mockCryptoManager: CryptoManager = mock()
     private val mockAuthenticator: Authenticator = mock()
+    private val activityFragment: FragmentActivity = mock()
 
     private val config = SecureStorageConfiguration(
         "testStore",
@@ -59,7 +60,7 @@ class SharedPrefsStoreTest {
         whenever(mockCryptoManager.encryptText(value)).thenReturn(encryptedValue)
 
         runBlocking {
-            sharedPrefsStore.upsert(key, value)
+            sharedPrefsStore.upsert(key, value, activityFragment)
 
             verify(mockCryptoManager).encryptText(value)
             verify(mockEditor).putString(key, encryptedValue)
@@ -69,7 +70,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testDelete() {
-        sharedPrefsStore.delete(key)
+        sharedPrefsStore.delete(key, activityFragment)
 
         verify(mockEditor).putString(key, null)
         verify(mockEditor).apply()
@@ -89,7 +90,7 @@ class SharedPrefsStoreTest {
             ).thenAnswer {
                 (it.arguments[1] as (text: String?) -> Unit).invoke(value)
             }
-            val result = sharedPrefsStore.retrieve(key)
+            val result = sharedPrefsStore.retrieve(key, null, activityFragment)
             assertEquals(value, result)
         }
     }
@@ -98,7 +99,7 @@ class SharedPrefsStoreTest {
     fun testRetrieveNonExistentKey() {
         whenever(mockSharedPreferences.getString(eq(key), any())).thenReturn(null)
         runBlocking {
-            val result = sharedPrefsStore.retrieve(key)
+            val result = sharedPrefsStore.retrieve(key, null, activityFragment)
 
             assertNull(result)
         }
@@ -132,7 +133,7 @@ class SharedPrefsStoreTest {
 
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
-                sharedPrefsStore.upsert(key, value)
+                sharedPrefsStore.upsert(key, value, activityFragment)
             }
         }
     }
@@ -146,7 +147,7 @@ class SharedPrefsStoreTest {
 
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
-                sharedPrefsStore.retrieve(key)
+                sharedPrefsStore.retrieve(key, null, activityFragment)
             }
         }
     }
@@ -155,6 +156,6 @@ class SharedPrefsStoreTest {
     fun testDeleteThrowsError() {
         given(mockCryptoManager.deleteKey()).willAnswer { throw KeyStoreException() }
 
-        assertThrows(SecureStorageError::class.java) { sharedPrefsStore.delete(key) }
+        assertThrows(SecureStorageError::class.java) { sharedPrefsStore.delete(key, activityFragment) }
     }
 }
