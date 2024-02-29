@@ -1,6 +1,5 @@
 package uk.gov.android.securestore.authentication
 
-import android.content.Context
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
@@ -8,7 +7,7 @@ import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.AccessControlLevel
 
 internal class UserAuthenticator : Authenticator {
-    private lateinit var fragmentContext: FragmentActivity
+    private var fragmentContext: FragmentActivity? = null
     override fun init(context: FragmentActivity) {
         fragmentContext = context
     }
@@ -24,12 +23,14 @@ internal class UserAuthenticator : Authenticator {
             .setDescription(configuration.description)
             .setAllowedAuthenticators(getRequireAuthenticators(accessControlLevel))
 
-        val biometricPrompt = BiometricPrompt(
-            fragmentContext,
-            handler
-        )
+        val biometricPrompt = fragmentContext?.let {
+            BiometricPrompt(
+                it,
+                handler
+            )
+        }
 
-        biometricPrompt.authenticate(
+        biometricPrompt?.authenticate(
             promptInfoBuilder.build()
         )
     }
@@ -43,7 +44,7 @@ internal class UserAuthenticator : Authenticator {
                 BIOMETRIC_STRONG or DEVICE_CREDENTIAL
         }
 
-    override fun close(context: Context) {
-        fragmentContext.finish()
+    override fun close() {
+        fragmentContext = null
     }
 }

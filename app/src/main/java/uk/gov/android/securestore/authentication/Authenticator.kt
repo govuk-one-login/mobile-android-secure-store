@@ -24,5 +24,5 @@ interface Authenticator {
         handler: AuthenticatorCallbackHandler
     )
 
-    fun close(context: Context)
+    fun close()
 }

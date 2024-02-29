@@ -30,9 +30,10 @@ class SharedPrefsStore(
                 val result = cryptoManager.encryptText(value)
                     .also { writeToPrefs(key, it) }
                 continuation.resumeWith(Result.success(result))
-                authenticator.close(context)
             } catch (e: GeneralSecurityException) {
                 throw SecureStorageError(e)
+            } finally {
+                authenticator.close()
             }
         }
     }
@@ -42,9 +43,10 @@ class SharedPrefsStore(
         authenticator.init(context)
         try {
             cryptoManager.deleteKey()
-            authenticator.close(context)
         } catch (e: KeyStoreException) {
             throw SecureStorageError(e)
+        } finally {
+            authenticator.close()
         }
     }
 
@@ -63,9 +65,10 @@ class SharedPrefsStore(
                         authPromptConfig
                     )
                 } ?: continuation.resumeWith(Result.success(null))
-                authenticator.close(context)
             } catch (e: GeneralSecurityException) {
                 throw SecureStorageError(e)
+            } finally {
+                authenticator.close()
             }
         }
     }
