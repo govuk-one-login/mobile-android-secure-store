@@ -1,6 +1,5 @@
 package uk.gov.android.securestore.authentication
 
-import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.AccessControlLevel
 
