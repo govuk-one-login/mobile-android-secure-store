@@ -24,9 +24,9 @@ class SharedPrefsStore(
     private val sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
 
     override suspend fun upsert(key: String, value: String, context: FragmentActivity): String {
-        authenticator.init(context)
         return suspendCoroutine { continuation ->
             try {
+                authenticator.init(context)
                 val result = cryptoManager.encryptText(value)
                     .also { writeToPrefs(key, it) }
                 continuation.resumeWith(Result.success(result))
@@ -40,8 +40,8 @@ class SharedPrefsStore(
 
     override fun delete(key: String, context: FragmentActivity) {
         writeToPrefs(key, null)
-        authenticator.init(context)
         try {
+            authenticator.init(context)
             cryptoManager.deleteKey()
         } catch (e: KeyStoreException) {
             throw SecureStorageError(e)
@@ -55,9 +55,9 @@ class SharedPrefsStore(
         authPromptConfig: AuthenticatorPromptConfiguration?,
         context: FragmentActivity
     ): String? {
-        authenticator.init(context)
         return suspendCoroutine { continuation ->
             try {
+                authenticator.init(context)
                 sharedPrefs.getString(key, null)?.let { encryptedText ->
                     cryptoManager.decryptText(
                         encryptedText,
