@@ -1,11 +1,17 @@
 package uk.gov.android.securestore.authentication
 
+import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.AccessControlLevel
 
 /**
  * Class to handle making OS Authentication. Calling a Biometric Prompt
  */
 interface Authenticator {
+    /**
+     * Initializing the FragmentContext to be used before initializing the SharedPrefsStore methods.
+     */
+    fun init(context: FragmentActivity)
+
     /**
      * Start an OS authentication prompt
      *
@@ -18,4 +24,10 @@ interface Authenticator {
         configuration: AuthenticatorPromptConfiguration,
         handler: AuthenticatorCallbackHandler
     )
+
+    /**
+     * Closing the FragmentContext - to be used after initializing the SharedPrefsStore methods have
+     * been completed.
+     */
+    fun close()
 }
