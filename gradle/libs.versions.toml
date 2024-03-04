@@ -6,7 +6,7 @@ androidx-test-ext-junit = "1.1.5"
 appcompat = "1.6.1"
 androidGradlePlugin = "8.2.0"
 kotlin = "1.9.22"
-mockito = "5.10.0"
+mockito = "5.11.0"
 mockito-kotlin = "5.2.1"
 biometric = "1.1.0"
 
