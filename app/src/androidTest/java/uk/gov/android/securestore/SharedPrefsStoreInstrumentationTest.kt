@@ -12,7 +12,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
+import org.mockito.kotlin.mock
+import uk.gov.android.securestore.authentication.Authenticator
 
 @RunWith(AndroidJUnit4::class)
 class SharedPrefsStoreInstrumentationTest {
@@ -22,6 +23,7 @@ class SharedPrefsStoreInstrumentationTest {
         "testStore",
         AccessControlLevel.OPEN
     )
+    private val mockAuthenticator: Authenticator = mock()
 
     private lateinit var sharedPrefsStore: SharedPrefsStore
 
@@ -34,25 +36,23 @@ class SharedPrefsStoreInstrumentationTest {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
         keyStore.deleteEntry(key)
+
+        rule.scenario.onActivity {
+            sharedPrefsStore = SharedPrefsStore(
+                context = it,
+                configuration = config,
+                authenticator = mockAuthenticator
+            )
+        }
     }
 
     @Test
     fun testUpsertAndRetrieve() {
         rule.scenario.onActivity {
-            sharedPrefsStore = SharedPrefsStore(
-                context = it,
-                configuration = config
-            )
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
                 val result = sharedPrefsStore.retrieve(
-                    key,
-                    AuthenticatorPromptConfiguration(
-                        "test",
-                        "test",
-                        "test"
-                    ),
-                    it
+                    key
                 )
                 assertEquals(value, result)
             }
@@ -62,22 +62,12 @@ class SharedPrefsStoreInstrumentationTest {
     @Test
     fun testDeleteAndRetrieveNonExistentKey() {
         rule.scenario.onActivity {
-            sharedPrefsStore = SharedPrefsStore(
-                context = it,
-                configuration = config
-            )
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
 
                 sharedPrefsStore.delete(key, it)
                 val result = sharedPrefsStore.retrieve(
-                    key,
-                    AuthenticatorPromptConfiguration(
-                        "test",
-                        "test",
-                        "test"
-                    ),
-                    it
+                    key
                 )
                 assertNull(result)
             }
@@ -87,10 +77,6 @@ class SharedPrefsStoreInstrumentationTest {
     @Test
     fun testExists() {
         rule.scenario.onActivity {
-            sharedPrefsStore = SharedPrefsStore(
-                context = it,
-                configuration = config
-            )
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
 
@@ -104,10 +90,6 @@ class SharedPrefsStoreInstrumentationTest {
     @Test
     fun testDoesNotExist() {
         rule.scenario.onActivity {
-            sharedPrefsStore = SharedPrefsStore(
-                context = it,
-                configuration = config
-            )
             val result = sharedPrefsStore.exists("nonExistentKey")
 
             assertFalse(result)

@@ -29,18 +29,30 @@ interface SecureStore {
     fun delete(key: String, context: FragmentActivity)
 
     /**
-     * Access the data for a given key
+     * Access the data for a given key when authentication is not required; access control level is set to OPEN
      *
      * @param [key] The unique key to identify data to retrieve
-     * @param authPromptConfig Configuration for the Biometric prompt, can be null if [uk.gov.android.securestore.SecureStore] is set to OPEN. Default as null
-     * @param [context] The [FragmentActivity] where the method is called
      * @return The data held against the given key, null if no data held
      *
      * @throws [SecureStorageError] if unable to retrieve
      */
     suspend fun retrieve(
+        key: String
+    ): String?
+
+    /**
+     * Access the data for a given key when authentication is required; access control level is not OPEN
+     *
+     * @param [key] The unique key to identify data to retrieve
+     * @param authPromptConfig Configuration for the Biometric prompt
+     * @param [context] The [FragmentActivity] where the method is called, used for auth prompt
+     * @return The data held against the given key, null if no data held
+     *
+     * @throws [SecureStorageError] if unable to retrieve
+     */
+    suspend fun retrieveWithAuthentication(
         key: String,
-        authPromptConfig: AuthenticatorPromptConfiguration? = null,
+        authPromptConfig: AuthenticatorPromptConfiguration,
         context: FragmentActivity
     ): String?
 
