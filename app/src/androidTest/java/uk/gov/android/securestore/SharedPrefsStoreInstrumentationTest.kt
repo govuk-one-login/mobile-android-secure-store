@@ -7,7 +7,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -60,7 +59,7 @@ class SharedPrefsStoreInstrumentationTest {
     }
 
     @Test
-    fun testUpsertAndRetrieveWithAuthThrows() {
+    fun testUpsertAndRetrieveWithAuth() {
         initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
         whenever(
             mockAuthenticator.authenticate(
@@ -75,15 +74,17 @@ class SharedPrefsStoreInstrumentationTest {
         rule.scenario.onActivity {
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
-                assertThrows(SecureStorageError::class.java) {
-                    runBlocking {
-                        sharedPrefsStore.retrieveWithAuthentication(
-                            key,
-                            AuthenticatorPromptConfiguration("title"),
-                            it
-                        )
-                    }
+//                assertThrows(SecureStorageError::class.java) {
+                runBlocking {
+                    val result = sharedPrefsStore.retrieveWithAuthentication(
+                        key,
+                        AuthenticatorPromptConfiguration("title"),
+                        it
+                    )
+
+                    assertEquals(value, result)
                 }
+//                }
 
                 verify(mockAuthenticator, times(2)).init(it)
                 verify(mockAuthenticator, times(2)).close()
