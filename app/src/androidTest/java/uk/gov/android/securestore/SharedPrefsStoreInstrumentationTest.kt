@@ -7,25 +7,32 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.authentication.Authenticator
+import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
+import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
 @RunWith(AndroidJUnit4::class)
 class SharedPrefsStoreInstrumentationTest {
     private val key = "testKey"
     private val value = "testValue"
-    private val config = SecureStorageConfiguration(
-        "testStore",
-        AccessControlLevel.OPEN
-    )
+    private val storeId = "id"
+
     private val mockAuthenticator: Authenticator = mock()
 
-    private lateinit var sharedPrefsStore: SharedPrefsStore
+    private val sharedPrefsStore = SharedPrefsStore(
+        authenticator = mockAuthenticator
+    )
 
     @JvmField
     @Rule
@@ -36,18 +43,11 @@ class SharedPrefsStoreInstrumentationTest {
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
         keyStore.load(null)
         keyStore.deleteEntry(key)
-
-        rule.scenario.onActivity {
-            sharedPrefsStore = SharedPrefsStore(
-                context = it,
-                configuration = config,
-                authenticator = mockAuthenticator
-            )
-        }
     }
 
     @Test
     fun testUpsertAndRetrieve() {
+        initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
@@ -60,7 +60,40 @@ class SharedPrefsStoreInstrumentationTest {
     }
 
     @Test
+    fun testUpsertAndRetrieveWithAuthThrows() {
+        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
+        whenever(
+            mockAuthenticator.authenticate(
+                any(),
+                any(),
+                any()
+            )
+        ).thenAnswer {
+            (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
+        }
+
+        rule.scenario.onActivity {
+            runBlocking {
+                sharedPrefsStore.upsert(key, value, it)
+                assertThrows(SecureStorageError::class.java) {
+                    runBlocking {
+                        sharedPrefsStore.retrieveWithAuthentication(
+                            key,
+                            AuthenticatorPromptConfiguration("title"),
+                            it
+                        )
+                    }
+                }
+
+                verify(mockAuthenticator, times(2)).init(it)
+                verify(mockAuthenticator, times(2)).close()
+            }
+        }
+    }
+
+    @Test
     fun testDeleteAndRetrieveNonExistentKey() {
+        initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
@@ -76,6 +109,7 @@ class SharedPrefsStoreInstrumentationTest {
 
     @Test
     fun testExists() {
+        initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
@@ -89,10 +123,23 @@ class SharedPrefsStoreInstrumentationTest {
 
     @Test
     fun testDoesNotExist() {
+        initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             val result = sharedPrefsStore.exists("nonExistentKey")
 
             assertFalse(result)
+        }
+    }
+
+    private fun initSecureStore(acl: AccessControlLevel) {
+        rule.scenario.onActivity {
+            sharedPrefsStore.init(
+                context = it,
+                configuration = SecureStorageConfiguration(
+                    storeId,
+                    acl
+                )
+            )
         }
     }
 }

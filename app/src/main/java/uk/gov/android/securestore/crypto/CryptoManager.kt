@@ -1,9 +1,16 @@
 package uk.gov.android.securestore.crypto
 
+import uk.gov.android.securestore.AccessControlLevel
+
 /**
  * Class to handle encryption and decryption of [String] data
  */
 interface CryptoManager {
+    /**
+     *Init the [AccessControlLevel] and alias, this must be done before using the CryptoManager
+     */
+    fun init(alias: String, acl: AccessControlLevel)
+
     /**
      * Encrypt a [String]
      *

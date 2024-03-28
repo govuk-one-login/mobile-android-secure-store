@@ -14,12 +14,16 @@ import uk.gov.android.securestore.AccessControlLevel
 /**
  * Implementation of [CryptoManager] using RSA encryption algorithm to create Public/Private key pair.
  */
-internal class RsaCryptoManager(
-    private val alias: String,
-    private val accessControlLevel: AccessControlLevel
-) : CryptoManager {
+internal class RsaCryptoManager : CryptoManager {
+    private lateinit var alias: String
+    private lateinit var accessControlLevel: AccessControlLevel
     private val keyStore: KeyStore = KeyStore.getInstance(TYPE).apply {
         load(null)
+    }
+
+    override fun init(alias: String, acl: AccessControlLevel) {
+        accessControlLevel = acl
+        this.alias = alias
     }
 
     override fun encryptText(

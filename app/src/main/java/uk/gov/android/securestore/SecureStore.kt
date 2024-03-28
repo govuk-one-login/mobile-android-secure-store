@@ -1,5 +1,6 @@
 package uk.gov.android.securestore
 
+import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
@@ -7,6 +8,17 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
  * Create an instance of [SecureStore] to save, query and delete data. Data stored as a key value pair, with the value being a [String]
  */
 interface SecureStore {
+    /**
+     *This must be called before using an instance of secure store, it sets the [AccessControlLevel] for the [SecureStore]
+     *
+     * @param context Just a basic context to allow initialisation of storage
+     * @param configuration [SecureStorageConfiguration] to allow setting of [AccessControlLevel] and store ID
+     */
+    fun init(
+        context: Context,
+        configuration: SecureStorageConfiguration
+    )
+
     /**
      * Save a value, if the key exists it is overwritten, if it doesn't exist it's added
      *

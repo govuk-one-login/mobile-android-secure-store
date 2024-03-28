@@ -37,8 +37,14 @@ class SharedPrefsStoreTest {
     private val key = "testKey"
     private val value = "testValue"
     private val encryptedValue = "testEncrypted"
+    private val authConfig = AuthenticatorPromptConfiguration(
+        "title"
+    )
 
-    private lateinit var sharedPrefsStore: SharedPrefsStore
+    private val sharedPrefsStore: SecureStore = SharedPrefsStore(
+        mockAuthenticator,
+        mockCryptoManager
+    )
 
     @Before
     fun setUp() {
@@ -49,7 +55,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testUpsert() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         whenever(mockCryptoManager.encryptText(value)).thenReturn(encryptedValue)
 
         runBlocking {
@@ -63,7 +69,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testDelete() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         sharedPrefsStore.delete(key, activityFragment)
 
         verify(mockEditor).putString(key, null)
@@ -72,7 +78,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieve() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(key, null)).thenReturn(encryptedValue)
 
         runBlocking {
@@ -91,10 +97,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveWithAuthentication() {
-        setupSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
-        val authConfig = AuthenticatorPromptConfiguration(
-            "title"
-        )
+        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
         whenever(mockSharedPreferences.getString(key, null)).thenReturn(encryptedValue)
 
         runBlocking {
@@ -130,7 +133,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveNonExistentKey() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(eq(key), any())).thenReturn(null)
         runBlocking {
             val result = sharedPrefsStore.retrieve(key)
@@ -141,7 +144,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testExists() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.contains(key)).thenReturn(true)
 
         val result = sharedPrefsStore.exists(key)
@@ -151,7 +154,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testDoesNotExist() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.contains(key)).thenReturn(false)
 
         val result = sharedPrefsStore.exists(key)
@@ -161,7 +164,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testUpsertThrowsError() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         given(
             mockCryptoManager.encryptText(
                 value
@@ -177,7 +180,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveThrowsErrorFromCrypto() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(key, null)).thenReturn(encryptedValue)
         given(mockCryptoManager.decryptText(eq(encryptedValue), any())).willAnswer {
             throw GeneralSecurityException()
@@ -192,7 +195,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveThrowsErrorFromWrongACL() {
-        setupSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
+        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
 
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
@@ -203,7 +206,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveWithAuthenticationThrowsErrorFromWrongACL() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         val authConfig = AuthenticatorPromptConfiguration(
             "title"
         )
@@ -221,24 +224,67 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testDeleteThrowsError() {
-        setupSecureStore(AccessControlLevel.OPEN)
+        initSecureStore(AccessControlLevel.OPEN)
         given(mockCryptoManager.deleteKey()).willAnswer { throw KeyStoreException() }
         assertThrows(SecureStorageError::class.java) {
             sharedPrefsStore.delete(key, activityFragment)
         }
     }
 
-    private fun setupSecureStore(acl: AccessControlLevel) {
+    @Test
+    fun testUpsertThrowsIfNotInit() {
+        assertThrows(SecureStorageError::class.java) {
+            runBlocking {
+                sharedPrefsStore.upsert(key, value, activityFragment)
+            }
+        }
+    }
+
+    @Test
+    fun testRetrieveWithAuthThrowsIfNotInit() {
+        assertThrows(SecureStorageError::class.java) {
+            runBlocking {
+                sharedPrefsStore.retrieveWithAuthentication(key, authConfig, activityFragment)
+            }
+        }
+    }
+
+    @Test
+    fun testRetrieveThrowsIfNotInit() {
+        assertThrows(SecureStorageError::class.java) {
+            runBlocking {
+                sharedPrefsStore.retrieve(key)
+            }
+        }
+    }
+
+    @Test
+    fun testExistsThrowsIfNotInit() {
+        assertThrows(SecureStorageError::class.java) {
+            runBlocking {
+                sharedPrefsStore.exists(key)
+            }
+        }
+    }
+
+    @Test
+    fun testDeleteThrowsIfNotInit() {
+        assertThrows(SecureStorageError::class.java) {
+            runBlocking {
+                sharedPrefsStore.delete(key, activityFragment)
+            }
+        }
+    }
+
+    private fun initSecureStore(acl: AccessControlLevel) {
         val config = SecureStorageConfiguration(
             storeId,
             acl
         )
 
-        sharedPrefsStore = SharedPrefsStore(
+        sharedPrefsStore.init(
             mockContext,
-            config,
-            mockAuthenticator,
-            mockCryptoManager
+            config
         )
     }
 }
