@@ -7,8 +7,10 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,6 +61,7 @@ class SharedPrefsStoreInstrumentationTest {
     }
 
     @Test
+    @Ignore("Currently don't know if we can simulate biometrics on emulator")
     fun testUpsertAndRetrieveWithAuth() {
         initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
         whenever(
@@ -74,17 +77,17 @@ class SharedPrefsStoreInstrumentationTest {
         rule.scenario.onActivity {
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
-//                assertThrows(SecureStorageError::class.java) {
-                runBlocking {
-                    val result = sharedPrefsStore.retrieveWithAuthentication(
-                        key,
-                        AuthenticatorPromptConfiguration("title"),
-                        it
-                    )
+                assertThrows(SecureStorageError::class.java) {
+                    runBlocking {
+                        val result = sharedPrefsStore.retrieveWithAuthentication(
+                            key,
+                            AuthenticatorPromptConfiguration("title"),
+                            it
+                        )
 
-                    assertEquals(value, result)
+                        assertEquals(value, result)
+                    }
                 }
-//                }
 
                 verify(mockAuthenticator, times(2)).init(it)
                 verify(mockAuthenticator, times(2)).close()
