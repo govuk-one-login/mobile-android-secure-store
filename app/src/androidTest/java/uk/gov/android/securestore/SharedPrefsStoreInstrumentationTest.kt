@@ -12,18 +12,26 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import uk.gov.android.securestore.authentication.Authenticator
+import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
 @RunWith(AndroidJUnit4::class)
 class SharedPrefsStoreInstrumentationTest {
     private val key = "testKey"
     private val value = "testValue"
-    private val config = SecureStorageConfiguration(
-        "testStore",
-        AccessControlLevel.OPEN
-    )
+    private val storeId = "id"
 
-    private lateinit var sharedPrefsStore: SharedPrefsStore
+    private val mockAuthenticator: Authenticator = mock()
+
+    private val sharedPrefsStore = SharedPrefsStore(
+        authenticator = mockAuthenticator
+    )
 
     @JvmField
     @Rule
@@ -38,21 +46,12 @@ class SharedPrefsStoreInstrumentationTest {
 
     @Test
     fun testUpsertAndRetrieve() {
+        initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
-            sharedPrefsStore = SharedPrefsStore(
-                context = it,
-                configuration = config
-            )
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
                 val result = sharedPrefsStore.retrieve(
-                    key,
-                    AuthenticatorPromptConfiguration(
-                        "test",
-                        "test",
-                        "test"
-                    ),
-                    it
+                    key
                 )
                 assertEquals(value, result)
             }
@@ -60,24 +59,49 @@ class SharedPrefsStoreInstrumentationTest {
     }
 
     @Test
-    fun testDeleteAndRetrieveNonExistentKey() {
-        rule.scenario.onActivity {
-            sharedPrefsStore = SharedPrefsStore(
-                context = it,
-                configuration = config
+    fun testUpsertAndRetrieveWithAuth() {
+        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
+        whenever(
+            mockAuthenticator.authenticate(
+                any(),
+                any(),
+                any()
             )
+        ).thenAnswer {
+            (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
+        }
+
+        rule.scenario.onActivity {
+            runBlocking {
+                sharedPrefsStore.upsert(key, value, it)
+//                assertThrows(SecureStorageError::class.java) {
+                runBlocking {
+                    val result = sharedPrefsStore.retrieveWithAuthentication(
+                        key,
+                        AuthenticatorPromptConfiguration("title"),
+                        it
+                    )
+
+                    assertEquals(value, result)
+                }
+//                }
+
+                verify(mockAuthenticator, times(2)).init(it)
+                verify(mockAuthenticator, times(2)).close()
+            }
+        }
+    }
+
+    @Test
+    fun testDeleteAndRetrieveNonExistentKey() {
+        initSecureStore(AccessControlLevel.OPEN)
+        rule.scenario.onActivity {
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
 
                 sharedPrefsStore.delete(key, it)
                 val result = sharedPrefsStore.retrieve(
-                    key,
-                    AuthenticatorPromptConfiguration(
-                        "test",
-                        "test",
-                        "test"
-                    ),
-                    it
+                    key
                 )
                 assertNull(result)
             }
@@ -86,11 +110,8 @@ class SharedPrefsStoreInstrumentationTest {
 
     @Test
     fun testExists() {
+        initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
-            sharedPrefsStore = SharedPrefsStore(
-                context = it,
-                configuration = config
-            )
             runBlocking {
                 sharedPrefsStore.upsert(key, value, it)
 
@@ -103,14 +124,23 @@ class SharedPrefsStoreInstrumentationTest {
 
     @Test
     fun testDoesNotExist() {
+        initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
-            sharedPrefsStore = SharedPrefsStore(
-                context = it,
-                configuration = config
-            )
             val result = sharedPrefsStore.exists("nonExistentKey")
 
             assertFalse(result)
+        }
+    }
+
+    private fun initSecureStore(acl: AccessControlLevel) {
+        rule.scenario.onActivity {
+            sharedPrefsStore.init(
+                context = it,
+                configuration = SecureStorageConfiguration(
+                    storeId,
+                    acl
+                )
+            )
         }
     }
 }

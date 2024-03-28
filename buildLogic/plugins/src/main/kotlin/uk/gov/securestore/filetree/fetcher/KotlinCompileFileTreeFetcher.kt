@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import uk.gov.securestore.ext.ProjectExt.debugLog
 
 /**
- * [FileTreeFetcher] implementation designed to obtain the output files from compiling kotlin files
+ * [FileTreeFetcher] implementation designed to obtain the output files from compiling Kotlin files
  * into java files.
  *
  * @param project The Gradle [Project] to base the [getBaseFileTree] output from.

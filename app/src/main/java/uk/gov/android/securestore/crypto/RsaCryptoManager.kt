@@ -5,26 +5,25 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import androidx.annotation.RequiresApi
-import java.security.GeneralSecurityException
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.KeyStore.PrivateKeyEntry
 import javax.crypto.Cipher
 import uk.gov.android.securestore.AccessControlLevel
-import uk.gov.android.securestore.authentication.Authenticator
-import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
-import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
 /**
  * Implementation of [CryptoManager] using RSA encryption algorithm to create Public/Private key pair.
  */
-internal class RsaCryptoManager(
-    private val alias: String,
-    private val accessControlLevel: AccessControlLevel,
-    private val authenticator: Authenticator
-) : CryptoManager {
+internal class RsaCryptoManager : CryptoManager {
+    private lateinit var alias: String
+    private lateinit var accessControlLevel: AccessControlLevel
     private val keyStore: KeyStore = KeyStore.getInstance(TYPE).apply {
         load(null)
+    }
+
+    override fun init(alias: String, acl: AccessControlLevel) {
+        accessControlLevel = acl
+        this.alias = alias
     }
 
     override fun encryptText(
@@ -40,38 +39,17 @@ internal class RsaCryptoManager(
 
     override fun decryptText(
         text: String,
-        callback: (result: String?) -> Unit,
-        authPromptConfig: AuthenticatorPromptConfiguration?
+        callback: (result: String?) -> Unit
     ) {
         val encryptedBytes = Base64.decode(text, Base64.NO_WRAP)
 
         val cipher = Cipher.getInstance(TRANSFORMATION)
 
-        if (accessControlLevel == AccessControlLevel.OPEN) {
-            initCipherAndDecrypt(
-                cipher,
-                encryptedBytes,
-                callback
-            )
-        } else {
-            if (authPromptConfig != null) {
-                authenticator.authenticate(
-                    accessControlLevel,
-                    authPromptConfig,
-                    AuthenticatorCallbackHandler(
-                        onSuccess = {
-                            initCipherAndDecrypt(
-                                cipher,
-                                encryptedBytes,
-                                callback
-                            )
-                        }
-                    )
-                )
-            } else {
-                throw GeneralSecurityException("No authentication prompt configuration set")
-            }
-        }
+        initCipherAndDecrypt(
+            cipher,
+            encryptedBytes,
+            callback
+        )
     }
 
     private fun initCipherAndDecrypt(

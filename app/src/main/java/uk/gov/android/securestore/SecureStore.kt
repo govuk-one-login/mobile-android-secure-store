@@ -1,5 +1,6 @@
 package uk.gov.android.securestore
 
+import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
@@ -7,6 +8,17 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
  * Create an instance of [SecureStore] to save, query and delete data. Data stored as a key value pair, with the value being a [String]
  */
 interface SecureStore {
+    /**
+     *This must be called before using an instance of secure store, it sets the [AccessControlLevel] for the [SecureStore]
+     *
+     * @param context Just a basic context to allow initialisation of storage
+     * @param configuration [SecureStorageConfiguration] to allow setting of [AccessControlLevel] and store ID
+     */
+    fun init(
+        context: Context,
+        configuration: SecureStorageConfiguration
+    )
+
     /**
      * Save a value, if the key exists it is overwritten, if it doesn't exist it's added
      *
@@ -29,18 +41,30 @@ interface SecureStore {
     fun delete(key: String, context: FragmentActivity)
 
     /**
-     * Access the data for a given key
+     * Access the data for a given key when authentication is not required; access control level is set to OPEN
      *
      * @param [key] The unique key to identify data to retrieve
-     * @param authPromptConfig Configuration for the Biometric prompt, can be null if [uk.gov.android.securestore.SecureStore] is set to OPEN. Default as null
-     * @param [context] The [FragmentActivity] where the method is called
      * @return The data held against the given key, null if no data held
      *
      * @throws [SecureStorageError] if unable to retrieve
      */
     suspend fun retrieve(
+        key: String
+    ): String?
+
+    /**
+     * Access the data for a given key when authentication is required; access control level is not OPEN
+     *
+     * @param [key] The unique key to identify data to retrieve
+     * @param authPromptConfig Configuration for the Biometric prompt
+     * @param [context] The [FragmentActivity] where the method is called, used for auth prompt
+     * @return The data held against the given key, null if no data held
+     *
+     * @throws [SecureStorageError] if unable to retrieve
+     */
+    suspend fun retrieveWithAuthentication(
         key: String,
-        authPromptConfig: AuthenticatorPromptConfiguration? = null,
+        authPromptConfig: AuthenticatorPromptConfiguration,
         context: FragmentActivity
     ): String?
 
