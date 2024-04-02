@@ -1,6 +1,6 @@
-Android
+(?i)Android
 APIs
-ASM
+(?i)ASM
 Composable
 Coroutine
 Coroutines
@@ -11,7 +11,7 @@ Dp
 GNU
 GPG
 GOV
-Gradle
+(?i)Gradle
 JDK
 JIRA
 JRE
@@ -53,3 +53,4 @@ vararg
 veriff
 keystore
 Keystore
+i.e.
