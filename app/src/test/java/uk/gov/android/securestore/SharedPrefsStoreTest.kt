@@ -23,6 +23,7 @@ import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 import uk.gov.android.securestore.crypto.CryptoManager
+import uk.gov.android.securestore.error.SecureStorageError
 
 @Suppress("UNCHECKED_CAST")
 class SharedPrefsStoreTest {

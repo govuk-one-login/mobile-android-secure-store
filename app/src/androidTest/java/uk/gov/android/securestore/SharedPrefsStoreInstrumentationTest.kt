@@ -22,6 +22,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
+import uk.gov.android.securestore.error.SecureStorageError
 
 @RunWith(AndroidJUnit4::class)
 class SharedPrefsStoreInstrumentationTest {
