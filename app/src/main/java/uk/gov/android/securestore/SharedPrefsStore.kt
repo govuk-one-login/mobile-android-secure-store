@@ -2,6 +2,7 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import java.lang.NullPointerException
 import java.security.GeneralSecurityException
@@ -13,13 +14,14 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
 import uk.gov.android.securestore.authentication.UserAuthenticator
 import uk.gov.android.securestore.crypto.CryptoManager
 import uk.gov.android.securestore.crypto.RsaCryptoManager
+import uk.gov.android.securestore.error.SecureStorageError
+import uk.gov.android.securestore.error.SecureStoreErrorType
 
 @Suppress("TooGenericExceptionCaught")
 class SharedPrefsStore(
     private val authenticator: Authenticator = UserAuthenticator(),
     private val cryptoManager: CryptoManager = RsaCryptoManager()
 ) : SecureStore {
-
     private var configuration: SecureStorageConfiguration? = null
     private var sharedPrefs: SharedPreferences? = null
 
@@ -103,6 +105,32 @@ class SharedPrefsStore(
                         AuthenticatorCallbackHandler(
                             onSuccess = {
                                 cryptoDecryptText(key, continuation)
+                            },
+                            onError = { errorCode, errorString ->
+                                val errorType = if (
+                                    errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
+                                    errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON
+                                ) {
+                                    SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
+                                } else {
+                                    SecureStoreErrorType.GENERAL
+                                }
+
+                                continuation.resumeWith(
+                                    Result.failure(
+                                        SecureStorageError(
+                                            Exception(errorString.toString()),
+                                            errorType
+                                        )
+                                    )
+                                )
+                            },
+                            onFailure = {
+                                continuation.resumeWith(
+                                    Result.failure(
+                                        SecureStorageError(Exception("Bio Prompt failed"))
+                                    )
+                                )
                             }
                         )
                     )
@@ -148,6 +176,8 @@ class SharedPrefsStore(
             } catch (e: NullPointerException) {
                 throw SecureStorageError(e)
             }
-        } ?: throw SecureStorageError(Exception("You must call init first!"))
+        } ?: continuation.resumeWith(
+            Result.failure(SecureStorageError(Exception("You must call init first!")))
+        )
     }
 }
