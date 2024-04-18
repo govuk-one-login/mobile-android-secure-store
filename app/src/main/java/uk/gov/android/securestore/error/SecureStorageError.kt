@@ -7,5 +7,6 @@ class SecureStorageError(
 
 enum class SecureStoreErrorType {
     GENERAL,
-    USER_CANCELED_BIO_PROMPT
+    USER_CANCELED_BIO_PROMPT,
+    FAILED_BIO_PROMPT
 }

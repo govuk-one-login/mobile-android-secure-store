@@ -6,7 +6,6 @@ import java.security.KeyStore
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -23,6 +22,7 @@ import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 import uk.gov.android.securestore.error.SecureStorageError
+import uk.gov.android.securestore.error.SecureStoreErrorType
 
 @RunWith(AndroidJUnit4::class)
 class SharedPrefsStoreInstrumentationTest {
@@ -56,7 +56,7 @@ class SharedPrefsStoreInstrumentationTest {
                 val result = sharedPrefsStore.retrieve(
                     key
                 )
-                assertEquals(value, result)
+                assertEquals(RetrievalEvent.Success(value), result)
             }
         }
     }
@@ -107,7 +107,10 @@ class SharedPrefsStoreInstrumentationTest {
                 val result = sharedPrefsStore.retrieve(
                     key
                 )
-                assertNull(result)
+                assertEquals(
+                    RetrievalEvent.Failed(SecureStoreErrorType.GENERAL),
+                    result
+                )
             }
         }
     }
