@@ -1,60 +1,56 @@
+package uk.gov.securestore
+
 import org.sonarqube.gradle.SonarExtension
-import uk.gov.securestore.Filters
-import uk.gov.securestore.SourceSetFolder
+import java.io.File
 
 plugins {
     id("org.sonarqube")
 }
 
 fun generateCommaSeparatedFiles(
-    iterator: Iterable<String>,
+    iterator: Iterable<String>
 ) = fileTree(project.projectDir) {
     this.setIncludes(iterator)
 }.files.joinToString(
     separator = ",",
-    transform = File::getAbsolutePath,
+    transform = File::getAbsolutePath
 )
 
-private val _owaspDependencyCheckBase by project.extra(
-    "${project.buildDir}/reports/dependency-check-report",
-)
 val androidLintReportFiles by project.extra(
-    generateCommaSeparatedFiles(listOf("**/reports/lint-results-*.xml")),
+    generateCommaSeparatedFiles(listOf("**/reports/lint-results-*.xml"))
 )
 val detektReportFiles by project.extra(
-    generateCommaSeparatedFiles(listOf("**/reports/detekt/*.xml")),
+    generateCommaSeparatedFiles(
+        listOf(
+            "**/reports/detekt/*.xml"
+        )
+    )
 )
 val jacocoXmlReportFiles by project.extra(
     generateCommaSeparatedFiles(
         listOf(
             "**/reports/coverage/**/*.xml", // android instrumentation test reports
-            "**/reports/jacoco/**/*.xml", // unit test reports
-        ),
-    ),
+            "**/reports/jacoco/**/*.xml" // unit test reports
+        )
+    )
 )
 val junitReportFiles by project.extra(
     generateCommaSeparatedFiles(
         listOf(
-            "**/outputs/androidTest-results/connected/flavors/*/", // instrumentation
-            "**/test-results", // unit tests
-        ),
-    ),
+            "**/outputs/androidTest-results/managedDevice/*", // instrumentation
+            "**/test-results" // unit tests
+        )
+    )
 )
 val ktLintReportFiles by project.extra(
-    generateCommaSeparatedFiles(listOf("**/reports/ktlint/**/*.xml")),
-)
-val owaspDependencyCheckHtml by project.extra(
-    "$_owaspDependencyCheckBase.html",
-)
-val owaspDependencyCheckJson by project.extra(
-    "$_owaspDependencyCheckBase.json",
+    generateCommaSeparatedFiles(listOf("**/reports/ktlint/**/*.xml"))
 )
 val sonarExclusions by project.extra(
     listOf(
         Filters.androidInstrumentationTests,
         Filters.sonar,
-        Filters.testSourceSets,
-    ).flatten().joinToString(separator = ","),
+        Filters.testSourceSets
+    ).flatten().joinToString(separator = ",")
 )
 
 val moduleSourceFolder = SourceSetFolder(project)
@@ -62,7 +58,7 @@ var sourceFolders by project.extra("")
 var testFolders by project.extra("")
 
 var projectSonarProperties by project.extra(
-    mapOf<String, Any>(),
+    mapOf<String, Any>()
 )
 
 configure<SonarExtension> {
@@ -79,14 +75,13 @@ configure<SonarExtension> {
         "sonar.coverage.jacoco.xmlReportPaths" to jacocoXmlReportFiles,
         "sonar.kotlin.detekt.reportPaths" to detektReportFiles,
         "sonar.kotlin.ktlint.reportPaths" to ktLintReportFiles,
-        "sonar.junit.reportPaths" to junitReportFiles,
-        "sonar.dependencyCheck.htmlReportPath" to owaspDependencyCheckHtml,
-        "sonar.dependencyCheck.jsonReportPath" to owaspDependencyCheckJson,
+        "sonar.junit.reportPaths" to junitReportFiles
     )
 
     properties {
         projectSonarProperties.forEach { (key: String, value: Any) ->
             property(key, value)
+            project.logger.debug("SONAR $key $value")
         }
     }
 }

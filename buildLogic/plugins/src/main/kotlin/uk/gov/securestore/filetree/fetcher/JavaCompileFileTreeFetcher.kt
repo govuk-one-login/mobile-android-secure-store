@@ -4,7 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileTree
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.compile.JavaCompile
-import uk.gov.securestore.ext.ProjectExt.debugLog
+import uk.gov.securestore.extensions.ProjectExtensions.debugLog
 
 /**
  * [FileTreeFetcher] implementation designed to obtain the output files from compiling intermediary
@@ -19,31 +19,31 @@ import uk.gov.securestore.ext.ProjectExt.debugLog
 class JavaCompileFileTreeFetcher(
     project: Project,
     variant: String,
-    capitalisedVariantFlavorName: String,
+    capitalisedVariantFlavorName: String
 ) : BaseFileTreeFetcher(
     project,
     variant,
-    capitalisedVariantFlavorName,
+    capitalisedVariantFlavorName
 ) {
 
     override fun getBaseFileTree(): Provider<FileTree> {
         return project.provider {
             getJavaCompileFileTree(
-                "compile${capitalisedVariantName}JavaWithJavac",
+                "compile${capitalisedVariantName}JavaWithJavac"
             ) ?: getJavaCompileFileTree(
-                "compile${capitalisedVariantFlavorName}JavaWithJavac",
+                "compile${capitalisedVariantFlavorName}JavaWithJavac"
             ) ?: project.fileTree(
-                "${project.buildDir}/intermediates/javac/$variant/classes",
+                "${project.buildDir}/intermediates/javac/$variant/classes"
             )
         }.also {
             project.debugLog(
-                "JavaCompileFileTreeFetcher: ${it.get().files}",
+                "JavaCompileFileTreeFetcher: ${it.get().files}"
             )
         }
     }
 
     private fun getJavaCompileFileTree(
-        name: String,
+        name: String
     ): FileTree? = performOnFoundTask<JavaCompile, FileTree>(name) {
         it.destinationDirectory.asFileTree
     }

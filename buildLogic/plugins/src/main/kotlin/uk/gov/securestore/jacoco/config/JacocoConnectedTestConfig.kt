@@ -24,28 +24,33 @@ class JacocoConnectedTestConfig(
     private val project: Project,
     private val classDirectoryFetcher: FileTreeFetcher,
     private val capitalisedVariantName: String,
+    name: String,
+    testTaskName: String = "connected${capitalisedVariantName}AndroidTest"
 ) : JacocoCustomConfig(
     project,
     classDirectoryFetcher,
+    name,
+    testTaskName
 ) {
 
     override fun getExecutionData(): FileTree {
         val connectedTestTask: TaskProvider<DeviceProviderInstrumentTestTask> = project.tasks.named(
-            "connected${capitalisedVariantName}AndroidTest",
-            DeviceProviderInstrumentTestTask::class,
+            testTaskName!!,
+            DeviceProviderInstrumentTestTask::class
         )
         val connectedTestExecutionDirectory = connectedTestTask.flatMap { connectedTask ->
-            project.provider {
-                connectedTask
-                    .coverageDirectory
-                    .asFile
-                    .get()
-                    .absolutePath
-            }
+            connectedTask
+                .coverageDirectory
+                .asFile
         }
 
         return project.fileTree(connectedTestExecutionDirectory) {
-            setIncludes(listOf("**/*.ec"))
+            setIncludes(
+                listOf(
+                    "**/*.ec",
+                    "*.ec"
+                )
+            )
         }
     }
 }

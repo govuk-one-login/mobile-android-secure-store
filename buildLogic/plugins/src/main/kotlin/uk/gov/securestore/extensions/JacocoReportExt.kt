@@ -1,4 +1,4 @@
-package uk.gov.securestore.ext
+package uk.gov.securestore.extensions
 
 import org.gradle.api.Project
 import org.gradle.testing.jacoco.tasks.JacocoReport
@@ -16,7 +16,7 @@ object JacocoReportExt {
      */
     fun JacocoReport.setupReportDirectories(
         project: Project,
-        reportsOutputDir: String,
+        reportsOutputDir: String
     ) {
         this.reports {
             this.csv.apply {

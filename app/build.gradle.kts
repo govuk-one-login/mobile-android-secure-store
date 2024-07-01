@@ -1,27 +1,17 @@
+import uk.gov.securestore.config.ApkConfig
+
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.android.kotlin)
-    alias(libs.plugins.detekt)
-    alias(libs.plugins.ktlint)
-    id("maven-publish")
-    id("securestore.jvm-toolchains")
-    id("sonarqube-module-config")
-    id("jacoco")
-    id("jacoco-module-config")
+    `maven-publish`
+    id("uk.gov.securestore.android-lib-config")
 }
 
-apply(from = "${rootProject.extra["configDir"]}/detekt/config.gradle")
-apply(from = "${rootProject.extra["configDir"]}/ktlint/config.gradle")
-
 android {
-    namespace = "${rootProject.extra["baseNamespace"]}.pages"
-    compileSdk = (rootProject.extra["compileAndroidVersion"] as Int)
-
     defaultConfig {
-        minSdk = (rootProject.extra["minAndroidVersion"] as Int)
-
+        namespace = ApkConfig.APPLICATION_ID + ".impl"
+        compileSdk = ApkConfig.COMPILE_SDK_VERSION
+        minSdk = ApkConfig.MINIMUM_SDK_VERSION
+        targetSdk = ApkConfig.TARGET_SDK_VERSION
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -29,15 +19,17 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
 
     lint {
+        val configDir = "${rootProject.projectDir}/config"
+
         abortOnError = true
         absolutePaths = true
-        baseline = File("${rootProject.extra["configDir"]}/android/baseline.xml")
+        baseline = File("$configDir/android/baseline.xml")
         checkAllWarnings = true
         checkDependencies = false
         checkGeneratedSources = false
@@ -46,14 +38,14 @@ android {
             setOf(
                 "ConvertToWebp",
                 "UnusedIds",
-                "VectorPath"
-            )
+                "VectorPath",
+            ),
         )
         explainIssues = true
         htmlReport = true
         ignoreTestSources = true
         ignoreWarnings = false
-        lintConfig = File("${rootProject.extra["configDir"]}/android/lint.xml")
+        lintConfig = File("$configDir/android/lint.xml")
         noLines = false
         quiet = false
         showAll = true
@@ -63,13 +55,15 @@ android {
     }
 
     testOptions {
+        animationsDisabled = true
         unitTests.all {
             it.testLogging {
-                events = setOf(
-                    org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED,
-                    org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED,
-                    org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
-                )
+                events =
+                    setOf(
+                        org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED,
+                        org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED,
+                        org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED,
+                    )
             }
         }
         unitTests {
@@ -90,24 +84,25 @@ android {
 dependencies {
     listOf(
         libs.androidx.test.ext.junit,
-        libs.test.runner,
-        libs.test.rules,
+        libs.androidx.test.runner,
+        libs.androidx.test.rules,
+        libs.espresso.core,
         libs.mockito,
         libs.mockito.kotlin,
-        libs.mockito.android
+        libs.mockito.android,
     ).forEach(::androidTestImplementation)
 
     listOf(
-        libs.androidx.core.core.ktx,
+        libs.core.ktx,
+        libs.androidx.biometric,
         libs.appcompat,
-        libs.androidx.biometric
     ).forEach(::implementation)
 
     listOf(
+        libs.androidx.test,
         libs.junit,
-        libs.test.core,
         libs.mockito,
-        libs.mockito.kotlin
+        libs.mockito.kotlin,
     ).forEach(::testImplementation)
 }
 
@@ -118,14 +113,29 @@ publishing {
             artifactId = "securestore"
             version = rootProject.extra["packageVersion"] as String
 
-            artifact("$buildDir/outputs/aar/app-release.aar")
+            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+
+            // generate pom nodes for dependencies
+            pom.withXml {
+                val dependenciesNode = asNode().appendNode("dependencies")
+                configurations.getByName("implementation") {
+                    allDependencies.forEach { dependency ->
+                        if (dependency.name != "unspecified") {
+                            val dependencyNode = dependenciesNode.appendNode("dependency")
+                            dependencyNode.appendNode("groupId", dependency.group)
+                            dependencyNode.appendNode("artifactId", dependency.name)
+                            dependencyNode.appendNode("version", dependency.version)
+                        }
+                    }
+                }
+            }
         }
-    }
-    repositories {
-        maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-secure-store") {
-            credentials {
-                username = System.getenv("USERNAME")
-                password = System.getenv("TOKEN")
+        repositories {
+            maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-secure-store") {
+                credentials {
+                    username = System.getenv("USERNAME")
+                    password = System.getenv("TOKEN")
+                }
             }
         }
     }
