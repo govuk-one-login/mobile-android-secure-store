@@ -2,8 +2,8 @@ package uk.gov.securestore
 
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
+import uk.gov.securestore.extensions.ProjectExtensions.debugLog
 import java.io.File
-import uk.gov.securestore.ext.ProjectExt.debugLog
 
 /**
  * Handles the logic for obtaining source set folders.
@@ -27,7 +27,7 @@ class SourceSetFolder(private val project: Project) {
                 ?.joinToString(separator = ",") { it.absolutePath }
                 ?: ""
             ).also {
-                project.debugLog("SourceSetFolder: Source folders: $it")
+            project.debugLog("SourceSetFolder: Source folders: $it")
         }
 
     /**
@@ -50,7 +50,7 @@ class SourceSetFolder(private val project: Project) {
                 ?.joinToString(separator = ",") { it.absolutePath }
                 ?: ""
             ).also {
-                project.debugLog("SourceSetFolder: Test folders: $it")
+            project.debugLog("SourceSetFolder: Test folders: $it")
         }
 
     /**

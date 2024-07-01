@@ -24,7 +24,6 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
 
-@RunWith(AndroidJUnit4::class)
 class SharedPrefsStoreInstrumentationTest {
     private val key = "testKey"
     private val value = "testValue"

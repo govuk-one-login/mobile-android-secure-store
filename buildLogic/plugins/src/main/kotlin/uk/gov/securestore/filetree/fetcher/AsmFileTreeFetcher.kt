@@ -4,11 +4,11 @@ import com.android.build.gradle.tasks.TransformClassesWithAsmTask
 import org.gradle.api.Project
 import org.gradle.api.file.FileTree
 import org.gradle.api.provider.Provider
-import uk.gov.securestore.ext.ProjectExt.debugLog
+import uk.gov.securestore.extensions.ProjectExtensions.debugLog
 
 /**
  * [FileTreeFetcher] implementation designed to obtain the output files from the
- * [ASM bytecode framework](https://asm.ow2.io/).
+ * [Assembly (ASM) bytecode framework](https://asm.ow2.io/).
  *
  * Used by android app Gradle modules as part of pro-guard obfuscation.
  *
@@ -21,31 +21,31 @@ import uk.gov.securestore.ext.ProjectExt.debugLog
 class AsmFileTreeFetcher(
     project: Project,
     variant: String,
-    capitalisedVariantFlavorName: String,
+    capitalisedVariantFlavorName: String
 ) : BaseFileTreeFetcher(
     project,
     variant,
-    capitalisedVariantFlavorName,
+    capitalisedVariantFlavorName
 ) {
 
     override fun getBaseFileTree(): Provider<FileTree> {
         return project.provider {
             getAsmClassesFileTree(
-                "transform${capitalisedVariantName}ClassesWithAsm",
+                "transform${capitalisedVariantName}ClassesWithAsm"
             ) ?: getAsmClassesFileTree(
-                "transform${capitalisedVariantFlavorName}ClassesWithAsm",
+                "transform${capitalisedVariantFlavorName}ClassesWithAsm"
             ) ?: project.fileTree(
-                "${project.buildDir}/intermediates/asm_instrumented_project_classes/$variant/",
+                "${project.buildDir}/intermediates/asm_instrumented_project_classes/$variant/"
             )
         }.also {
             project.debugLog(
-                "AsmFileTreeFetcher: ${it.get().files}",
+                "AsmFileTreeFetcher: ${it.get().files}"
             )
         }
     }
 
     private fun getAsmClassesFileTree(
-        name: String,
+        name: String
     ): FileTree? = performOnFoundTask<TransformClassesWithAsmTask, FileTree>(name) {
         it.classesOutputDir.asFileTree
     }

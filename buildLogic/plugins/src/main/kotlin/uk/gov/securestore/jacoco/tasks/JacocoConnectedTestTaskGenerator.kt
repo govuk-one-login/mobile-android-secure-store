@@ -2,6 +2,7 @@ package uk.gov.securestore.jacoco.tasks
 
 import org.gradle.api.Project
 import org.gradle.configurationcache.extensions.capitalized
+import uk.gov.securestore.Filters
 import uk.gov.securestore.filetree.fetcher.FileTreeFetcher
 import uk.gov.securestore.jacoco.config.JacocoConnectedTestConfig
 import uk.gov.securestore.jacoco.config.JacocoCustomConfig
@@ -20,23 +21,24 @@ class JacocoConnectedTestTaskGenerator(
     private val project: Project,
     private val classDirectoriesFetcher: FileTreeFetcher,
     variant: String,
+    name: String = "jacoco${variant.capitalized()}ConnectedTestReport",
+    configuration: JacocoCustomConfig = JacocoConnectedTestConfig(
+        project,
+        classDirectoriesFetcher,
+        variant.capitalized(),
+        name
+    )
 ) : BaseJacocoTaskGenerator(
     project,
     variant,
+    configuration
 ) {
 
     override val androidCoverageTaskName: String =
         "create${capitalisedVariantName}AndroidTestCoverageReport"
-    override val name: String =
-        "jacoco${capitalisedVariantName}ConnectedTestReport"
     override val description =
         "Create coverage report from the '$capitalisedVariantName' instrumentation tests."
     override val reportsBaseDirectory: String get() = "$reportsDirectoryPrefix/connected"
     override val testTaskName: String get() = "connected${capitalisedVariantName}AndroidTest"
-
-    override val configuration: JacocoCustomConfig get() = JacocoConnectedTestConfig(
-        project,
-        classDirectoriesFetcher,
-        variant.capitalized(),
-    )
+    override val excludes: List<String> = Filters.androidInstrumentationTests
 }

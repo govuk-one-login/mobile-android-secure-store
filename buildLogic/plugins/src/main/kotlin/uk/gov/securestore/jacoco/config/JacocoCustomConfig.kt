@@ -5,14 +5,15 @@ import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.testing.jacoco.tasks.JacocoReport
 import uk.gov.securestore.SourceSetFolder
-import uk.gov.securestore.ext.JacocoReportExt.setupReportDirectories
-import uk.gov.securestore.ext.ProjectExt.debugLog
+import uk.gov.securestore.extensions.JacocoReportExt.setupReportDirectories
+import uk.gov.securestore.extensions.ProjectExtensions.debugLog
 import uk.gov.securestore.filetree.fetcher.FileTreeFetcher
 
 /**
  * Base implementation for defining the necessary properties for creating a custom Jacoco Gradle
  * task.
  *
+ * @param name The name of the generated task.
  * @param project The Gradle [Project] that houses the generated Jacoco task.
  * @param classDirectoryFetcher The [FileTreeFetcher] that provides the necessary files for Jacoco
  * to analyse.
@@ -20,6 +21,8 @@ import uk.gov.securestore.filetree.fetcher.FileTreeFetcher
 abstract class JacocoCustomConfig(
     private val project: Project,
     private val classDirectoryFetcher: FileTreeFetcher,
+    private val name: String,
+    val testTaskName: String? = null
 ) {
 
     /**
@@ -37,7 +40,7 @@ abstract class JacocoCustomConfig(
      * Getter value function for obtaining the internally stored Jacoco task. Throws an exception
      * if referenced before calling a variant of [generateCustomJacocoReport].
      */
-    val createdTask: TaskProvider<JacocoReport> get() = _createdTask!!
+    private val createdTask: TaskProvider<JacocoReport> get() = _createdTask!!
 
     /**
      * Create a [JacocoReport] Gradle task. Updates the [created task][createdTask] for future
@@ -46,7 +49,6 @@ abstract class JacocoCustomConfig(
      * @param excludes The list of regular expression patterns used as a File filter.
      * @param dependencies The list of dependencies that the generated Jacoco task requires.
      * @param description The description for the generated task.
-     * @param name The name of the generated task.
      * @param reportOutputDir The absolute path of the directory that shall contain the generated
      * Jacoco reports.
      * @param group The Gradle task group of the generated task. Defaults to `Jacoco`.
@@ -57,11 +59,9 @@ abstract class JacocoCustomConfig(
         excludes: List<String>,
         dependencies: Iterable<*>,
         description: String,
-        name: String,
         reportOutputDir: String,
-        group: String = "Jacoco",
-        testTaskName: String? = null,
-        ): TaskProvider<JacocoReport> {
+        group: String = "Jacoco"
+    ): TaskProvider<JacocoReport> {
         val sourceSetFolder = SourceSetFolder(project)
 
         val classDirectoriesTree = classDirectoryFetcher.getProvider(excludes)
@@ -71,40 +71,36 @@ abstract class JacocoCustomConfig(
         } else {
             project.tasks.register(
                 name,
-                JacocoReport::class.java,
+                JacocoReport::class.java
             ) {
-                this.dependsOn(
-                    dependencies,
-                )
+                this.dependsOn(dependencies)
                 this.description = description
                 this.group = group
 
                 this.additionalSourceDirs.from(
-                    sourceSetFolder.sourceFiles.files.map {
-                        it.absolutePath
-                    },
+                    sourceSetFolder.sourceFiles
                 ).also {
                     project.debugLog(
                         "$name: Configured additional source directories: " +
-                            "${it.files}",
+                            "${it.files}"
                     )
                 }
                 this.classDirectories.from(classDirectoriesTree).also {
                     project.debugLog(
                         "$name: Configured class directories: " +
-                            "${it.files}",
+                            "${it.files}"
                     )
                 }
                 this.executionData.from(this@JacocoCustomConfig.getExecutionData()).also {
                     project.debugLog(
                         "$name: Configured execution data: " +
-                            "${it.files}",
+                            "${it.files}"
                     )
                 }
-                this.sourceDirectories.from(sourceSetFolder.sourceFiles.files).also {
+                this.sourceDirectories.from(sourceSetFolder.sourceFiles).also {
                     project.debugLog(
                         "$name: Configured source directories: " +
-                            "${it.files}",
+                            "${it.files}"
                     )
                 }
 
