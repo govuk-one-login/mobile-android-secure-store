@@ -1,7 +1,7 @@
 name: Release Mobile Android Logging
 on:
   push:
-    branches: [ main ]
+    branches: [ main, simplify-workflows ]
 
 jobs:
   bump_version:
