@@ -3,7 +3,7 @@ package uk.gov.securestore.filetree.fetcher
 import org.gradle.api.Project
 import org.gradle.api.file.FileTree
 import org.gradle.api.provider.Provider
-import uk.gov.securestore.ext.ProjectExt.debugLog
+import uk.gov.securestore.extensions.ProjectExtensions.debugLog
 
 /**
  * Decorator class for containing multiple [FileTreeFetcher] objects.
@@ -14,18 +14,18 @@ import uk.gov.securestore.ext.ProjectExt.debugLog
  * [Provider] containers.
  * @param fetchers The sub-[FileTreeFetcher] objects that combine together via unions.
  */
-data class FileTreesFetcher constructor(
+data class FileTreesFetcher(
     private val project: Project,
-    private val fetchers: Iterable<FileTreeFetcher>,
+    private val fetchers: Iterable<FileTreeFetcher>
 ) : FileTreeFetcher {
 
     constructor(
         project: Project,
-        vararg fetcher: FileTreeFetcher,
+        vararg fetcher: FileTreeFetcher
     ) : this(project, fetcher.toList())
 
     override fun getProvider(
-        excludes: List<String>,
+        excludes: List<String>
     ): Provider<FileTree> =
         fetchers
             .map { it.getProvider(excludes) }
@@ -34,7 +34,7 @@ data class FileTreesFetcher constructor(
             }.also {
                 project.debugLog(
                     "${this::class.java.simpleName}: Generated file tree: " +
-                        it.get().files,
+                        it.get().files
                 )
             }
 }

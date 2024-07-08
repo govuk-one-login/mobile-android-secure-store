@@ -1,10 +1,8 @@
 package uk.gov.securestore.jacoco.tasks
 
 import org.gradle.api.Project
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.configurationcache.extensions.capitalized
 import org.gradle.testing.jacoco.tasks.JacocoReport
-import uk.gov.securestore.Filters
 import uk.gov.securestore.jacoco.config.JacocoCustomConfig
 
 /**
@@ -21,7 +19,8 @@ import uk.gov.securestore.jacoco.config.JacocoCustomConfig
 abstract class BaseJacocoTaskGenerator(
     project: Project,
     protected val variant: String,
-    protected val reportsDirectoryPrefix: String = "${project.buildDir}/reports/jacoco",
+    val configuration: JacocoCustomConfig,
+    protected val reportsDirectoryPrefix: String = "${project.buildDir}/reports/jacoco"
 ) : JacocoTaskGenerator {
 
     /**
@@ -52,15 +51,19 @@ abstract class BaseJacocoTaskGenerator(
     abstract val testTaskName: String
 
     /**
+     * The list of exclusion patterns to ignore when generating the jacoco report.
+     */
+    abstract val excludes: List<String>
+
+    /**
      * Create a [JacocoReport] task, using the [configuration] as the mechanism for doing so.
      */
-    override fun customTask(): TaskProvider<JacocoReport> = configuration
-        .generateCustomJacocoReport(
-            excludes = Filters.androidUnitTests,
+    override fun generate() {
+        configuration.generateCustomJacocoReport(
+            excludes = excludes,
             dependencies = listOf(testTaskName, androidCoverageTaskName),
             description = description,
-            name = name,
-            testTaskName = testTaskName,
-            reportOutputDir = reportsBaseDirectory,
+            reportOutputDir = reportsBaseDirectory
         )
+    }
 }
