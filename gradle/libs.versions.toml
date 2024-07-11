@@ -2,7 +2,7 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-android-gradle = "8.4.2" # https://developer.android.com/studio/releases/gradle-plugin
+android-gradle = "8.5.0" # https://developer.android.com/studio/releases/gradle-plugin
 androidx-test = "1.6.1"
 androidx-junit = "1.1.5"
 appcompat = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/appcompat
