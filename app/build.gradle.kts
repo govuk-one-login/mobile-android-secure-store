@@ -1,17 +1,17 @@
-import uk.gov.securestore.config.ApkConfig
+import uk.gov.pipelines.config.ApkConfig
 
 plugins {
-    `maven-publish`
-    id("uk.gov.securestore.android-lib-config")
+    id("uk.gov.pipelines.android-lib-config")
 }
 
 android {
     defaultConfig {
-        namespace = ApkConfig.APPLICATION_ID + ".impl"
-        compileSdk = ApkConfig.COMPILE_SDK_VERSION
-        minSdk = ApkConfig.MINIMUM_SDK_VERSION
-        targetSdk = ApkConfig.TARGET_SDK_VERSION
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        val apkConfig: ApkConfig by project.rootProject.extra
+        namespace = apkConfig.applicationId + ".impl"
+        compileSdk = apkConfig.sdkVersions.compile
+        minSdk = apkConfig.sdkVersions.minimum
+        targetSdk = apkConfig.sdkVersions.target
+        testInstrumentationRunner = "$namespace.InstrumentationTestRunner"
     }
 
     buildTypes {
@@ -55,6 +55,7 @@ android {
     }
 
     testOptions {
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
         animationsDisabled = true
         unitTests.all {
             it.testLogging {
@@ -106,37 +107,17 @@ dependencies {
     ).forEach(::testImplementation)
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("mobile-android-secure-store") {
-            groupId = "uk.gov.android"
-            artifactId = "securestore"
-            version = rootProject.extra["packageVersion"] as String
+mavenPublishingConfig {
+    mavenConfigBlock {
+        name.set(
+            "secure storage of key-value data"
+        )
+        description.set(
+            """
+                Gradle configured Android library for secure storage of data, optionally protected by the user’s biometrics & passcode
+            """.trimIndent()
+        )
 
-            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
 
-            // generate pom nodes for dependencies
-            pom.withXml {
-                val dependenciesNode = asNode().appendNode("dependencies")
-                configurations.getByName("implementation") {
-                    allDependencies.forEach { dependency ->
-                        if (dependency.name != "unspecified") {
-                            val dependencyNode = dependenciesNode.appendNode("dependency")
-                            dependencyNode.appendNode("groupId", dependency.group)
-                            dependencyNode.appendNode("artifactId", dependency.name)
-                            dependencyNode.appendNode("version", dependency.version)
-                        }
-                    }
-                }
-            }
-        }
-        repositories {
-            maven("https://maven.pkg.github.com/govuk-one-login/mobile-android-secure-store") {
-                credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
-                }
-            }
-        }
     }
 }
