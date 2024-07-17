@@ -21,8 +21,7 @@ jobs:
     env:
       ANDROID_HOME: ${{ github.workspace }}/bin/androidSdk
     name: Verify code base when pull request is published/updated
-    runs-on: ubuntu-latest
-    #    runs-on: ubuntu-20.04-16core # Larger github runner, with KVM acceleration
+    runs-on: ubuntu-24.04
     steps:
       - name: Run pull request workflow
         uses: govuk-one-login/mobile-android-pipelines@0ced974a40b06d5a92513639e9c82f7cb2f811cc
