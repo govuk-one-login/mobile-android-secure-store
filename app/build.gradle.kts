@@ -10,8 +10,6 @@ android {
         namespace = apkConfig.applicationId + ".impl"
         compileSdk = apkConfig.sdkVersions.compile
         minSdk = apkConfig.sdkVersions.minimum
-        targetSdk = apkConfig.sdkVersions.target
-        testInstrumentationRunner = "$namespace.InstrumentationTestRunner"
     }
 
     buildTypes {
