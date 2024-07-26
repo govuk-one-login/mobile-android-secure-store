@@ -103,6 +103,13 @@ dependencies {
         libs.mockito,
         libs.mockito.kotlin,
     ).forEach(::testImplementation)
+
+
+    listOf(
+        libs.androidx.test.orchestrator
+    ).forEach {
+        androidTestUtil(it)
+    }
 }
 
 mavenPublishingConfig {
