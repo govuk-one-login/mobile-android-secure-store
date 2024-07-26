@@ -2,7 +2,7 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-android-gradle = "8.4.2" # https://developer.android.com/studio/releases/gradle-plugin
+android-gradle = "8.5.1" # https://developer.android.com/studio/releases/gradle-plugin
 androidx-test = "1.6.1"
 androidx-junit = "1.2.1"
 appcompat = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/appcompat
@@ -16,6 +16,7 @@ ktlint-gradle = "11.3.1" # https://github.com/JLLeitschuh/ktlint-gradle/releases
 mockito = "5.12.0"
 mockito-kotlin = "5.4.0"
 sonarqube-gradle = "5.1.0.4882" # https://github.com/SonarSource/sonar-scanner-gradle/releases
+androidx-test-orchestrator = "1.4.2"
 
 [libraries]
 
@@ -36,6 +37,7 @@ mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito
 mockito-android = { group = "org.mockito", name = "mockito-android", version.ref = "mockito" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito-kotlin" }
 sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube-gradle" }
+androidx-test-orchestrator = { group = "androidx.test", name = "orchestrator", version.ref = "androidx-test-orchestrator" }
 
 [plugins]
 
