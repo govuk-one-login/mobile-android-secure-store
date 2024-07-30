@@ -25,21 +25,19 @@ interface SecureStore {
      *
      * @param [key] The unique key to save the data against
      * @param [value] The data to save as a [String]
-     * @param [context] The [FragmentActivity] where the method is called
      *
-     * @throws [SecureStorageError] if unable to save
+     * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to save
      */
-    suspend fun upsert(key: String, value: String, context: FragmentActivity): String
+    suspend fun upsert(key: String, value: String): String
 
     /**
      * Delete a given value based on a key
      *
      * @param [key] The unique identifier for the value to delete
-     * @param [context] The [FragmentActivity] where the method is called
      *
-     * @throws [SecureStorageError] if unable to delete
+     * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to delete
      */
-    fun delete(key: String, context: FragmentActivity)
+    fun delete(key: String)
 
     /**
      * Access the data for a given key when authentication is not required; access control level is set to OPEN
@@ -73,7 +71,7 @@ interface SecureStore {
      * @param [key] Key to select
      * @return True or false if the key exists in the store
      *
-     * @throws [SecureStorageError] if unable to check for existence
+     * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to check for existence
      */
     fun exists(key: String): Boolean
 }

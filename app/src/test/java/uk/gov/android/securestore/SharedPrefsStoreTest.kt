@@ -61,7 +61,7 @@ class SharedPrefsStoreTest {
         whenever(mockCryptoManager.encryptText(value)).thenReturn(encryptedValue)
 
         runBlocking {
-            sharedPrefsStore.upsert(key, value, activityFragment)
+            sharedPrefsStore.upsert(key, value)
 
             verify(mockCryptoManager).encryptText(value)
             verify(mockEditor).putString(key, encryptedValue)
@@ -72,7 +72,7 @@ class SharedPrefsStoreTest {
     @Test
     fun testDelete() {
         initSecureStore(AccessControlLevel.OPEN)
-        sharedPrefsStore.delete(key, activityFragment)
+        sharedPrefsStore.delete(key)
 
         verify(mockEditor).putString(key, null)
         verify(mockEditor).apply()
@@ -175,7 +175,7 @@ class SharedPrefsStoreTest {
 
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
-                sharedPrefsStore.upsert(key, value, activityFragment)
+                sharedPrefsStore.upsert(key, value)
             }
         }
     }
@@ -241,7 +241,7 @@ class SharedPrefsStoreTest {
         initSecureStore(AccessControlLevel.OPEN)
         given(mockCryptoManager.deleteKey()).willAnswer { throw KeyStoreException() }
         assertThrows(SecureStorageError::class.java) {
-            sharedPrefsStore.delete(key, activityFragment)
+            sharedPrefsStore.delete(key)
         }
     }
 
@@ -249,7 +249,7 @@ class SharedPrefsStoreTest {
     fun testUpsertThrowsIfNotInit() {
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
-                sharedPrefsStore.upsert(key, value, activityFragment)
+                sharedPrefsStore.upsert(key, value)
             }
         }
     }
@@ -299,7 +299,7 @@ class SharedPrefsStoreTest {
     fun testDeleteThrowsIfNotInit() {
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
-                sharedPrefsStore.delete(key, activityFragment)
+                sharedPrefsStore.delete(key)
             }
         }
     }

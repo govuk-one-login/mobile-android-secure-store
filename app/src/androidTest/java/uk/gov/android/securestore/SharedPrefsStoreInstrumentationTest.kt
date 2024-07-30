@@ -1,7 +1,6 @@
 package uk.gov.android.securestore
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.security.KeyStore
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -12,7 +11,6 @@ import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -51,7 +49,7 @@ class SharedPrefsStoreInstrumentationTest {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
-                sharedPrefsStore.upsert(key, value, it)
+                sharedPrefsStore.upsert(key, value)
                 val result = sharedPrefsStore.retrieve(
                     key
                 )
@@ -76,7 +74,7 @@ class SharedPrefsStoreInstrumentationTest {
 
         rule.scenario.onActivity {
             runBlocking {
-                sharedPrefsStore.upsert(key, value, it)
+                sharedPrefsStore.upsert(key, value)
                 assertThrows(SecureStorageError::class.java) {
                     runBlocking {
                         val result = sharedPrefsStore.retrieveWithAuthentication(
@@ -100,9 +98,9 @@ class SharedPrefsStoreInstrumentationTest {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
-                sharedPrefsStore.upsert(key, value, it)
+                sharedPrefsStore.upsert(key, value)
 
-                sharedPrefsStore.delete(key, it)
+                sharedPrefsStore.delete(key)
                 val result = sharedPrefsStore.retrieve(
                     key
                 )
@@ -119,7 +117,7 @@ class SharedPrefsStoreInstrumentationTest {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
-                sharedPrefsStore.upsert(key, value, it)
+                sharedPrefsStore.upsert(key, value)
 
                 val result = sharedPrefsStore.exists(key)
 
