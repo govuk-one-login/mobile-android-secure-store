@@ -77,7 +77,7 @@ class SharedPrefsStore(
                         cryptoDecryptText(key) {
                             val event = it?.let {
                                 RetrievalEvent.Success(it)
-                            } ?: RetrievalEvent.Failed(SecureStoreErrorType.GENERAL)
+                            } ?: RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND)
 
                             continuation.resume(event)
                         }
@@ -121,7 +121,7 @@ class SharedPrefsStore(
                             cryptoDecryptText(key) {
                                 val event = it?.let {
                                     RetrievalEvent.Success(it)
-                                } ?: RetrievalEvent.Failed(SecureStoreErrorType.GENERAL)
+                                } ?: RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND)
                                 trySend(event)
                             }
                         },
