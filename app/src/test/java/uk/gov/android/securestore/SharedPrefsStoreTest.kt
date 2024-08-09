@@ -176,7 +176,7 @@ class SharedPrefsStoreTest {
         runBlocking {
             val result = sharedPrefsStore.retrieve(key)
 
-            assertEquals(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL), result)
+            assertEquals(RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND), result)
         }
     }
 

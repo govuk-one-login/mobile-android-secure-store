@@ -105,7 +105,7 @@ class SharedPrefsStoreInstrumentationTest {
                     key
                 )
                 assertEquals(
-                    RetrievalEvent.Failed(SecureStoreErrorType.GENERAL),
+                    RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND),
                     result
                 )
             }
