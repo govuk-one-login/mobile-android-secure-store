@@ -134,6 +134,42 @@ class SharedPrefsStoreTest {
     }
 
     @Test
+    fun testRetrieveWithAuthenticationNull() {
+        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
+        whenever(mockSharedPreferences.getString(key, null)).thenReturn(null)
+
+        runBlocking {
+            whenever(
+                mockAuthenticator.authenticate(
+                    eq(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS),
+                    eq(authConfig),
+                    any()
+                )
+            ).thenAnswer {
+                (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
+            }
+            whenever(
+                mockCryptoManager.decryptText(
+                    eq(encryptedValue),
+                    any()
+                )
+            ).thenAnswer {
+                (it.arguments[1] as (text: String?) -> Unit).invoke(null)
+            }
+
+            val result = sharedPrefsStore.retrieveWithAuthentication(
+                key,
+                authConfig,
+                activityFragment
+            ).first()
+
+            assertEquals(RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND), result)
+            verify(mockAuthenticator).init(activityFragment)
+            verify(mockAuthenticator).close()
+        }
+    }
+
+    @Test
     fun testRetrieveNonExistentKey() {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(eq(key), any())).thenReturn(null)
