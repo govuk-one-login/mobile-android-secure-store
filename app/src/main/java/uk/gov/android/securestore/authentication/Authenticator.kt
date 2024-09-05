@@ -22,7 +22,8 @@ interface Authenticator {
     fun authenticate(
         accessControlLevel: AccessControlLevel,
         configuration: AuthenticatorPromptConfiguration,
-        handler: AuthenticatorCallbackHandler
+        handler: AuthenticatorCallbackHandler,
+       // cipher: Cipher
     )
 
     /**

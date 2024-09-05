@@ -10,7 +10,7 @@ sealed class RetrievalEvent {
      * Successful event, holds the retrieved data value as a [String]
      */
     data class Success(
-        val value: String
+        val values: Map<String, String?>
     ) : RetrievalEvent()
 
     /**

@@ -15,7 +15,8 @@ internal class UserAuthenticator : Authenticator {
     override fun authenticate(
         accessControlLevel: AccessControlLevel,
         configuration: AuthenticatorPromptConfiguration,
-        handler: AuthenticatorCallbackHandler
+        handler: AuthenticatorCallbackHandler,
+       // cipher: Cipher
     ) {
         val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
             .setTitle(configuration.title)
@@ -31,7 +32,8 @@ internal class UserAuthenticator : Authenticator {
         }
 
         biometricPrompt?.authenticate(
-            promptInfoBuilder.build()
+            promptInfoBuilder.build(),
+//            BiometricPrompt.CryptoObject(cipher)
         )
     }
 

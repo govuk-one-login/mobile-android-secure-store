@@ -47,7 +47,7 @@ interface SecureStore {
      *
      */
     suspend fun retrieve(
-        key: String
+        vararg key: String
     ): RetrievalEvent
 
     /**
@@ -60,10 +60,10 @@ interface SecureStore {
      *
      */
     suspend fun retrieveWithAuthentication(
-        key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
-        context: FragmentActivity
-    ): Flow<RetrievalEvent>
+        context: FragmentActivity,
+        vararg key: String
+    ): RetrievalEvent
 
     /**
      * Check if a certain key exists in the store

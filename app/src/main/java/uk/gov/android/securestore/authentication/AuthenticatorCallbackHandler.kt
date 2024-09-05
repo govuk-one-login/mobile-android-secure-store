@@ -3,7 +3,7 @@ package uk.gov.android.securestore.authentication
 import androidx.biometric.BiometricPrompt
 
 data class AuthenticatorCallbackHandler(
-    val onSuccess: () -> Unit = {},
+    val onSuccess: (result: BiometricPrompt.AuthenticationResult) -> Unit = {},
     val onError: (
         errorCode: Int,
         errString: CharSequence
@@ -17,7 +17,7 @@ data class AuthenticatorCallbackHandler(
 
     override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
         super.onAuthenticationSucceeded(result)
-        onSuccess()
+        onSuccess(result)
     }
 
     override fun onAuthenticationFailed() {
