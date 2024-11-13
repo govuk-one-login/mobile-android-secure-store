@@ -6,9 +6,9 @@ data class AuthenticatorCallbackHandler(
     val onSuccess: () -> Unit = {},
     val onError: (
         errorCode: Int,
-        errString: CharSequence
+        errString: CharSequence,
     ) -> Unit = { _, _ -> },
-    val onFailure: () -> Unit = {}
+    val onFailure: () -> Unit = {},
 ) : BiometricPrompt.AuthenticationCallback() {
     override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
         super.onAuthenticationError(errorCode, errString)

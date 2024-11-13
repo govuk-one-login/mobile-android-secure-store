@@ -5,11 +5,11 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import androidx.annotation.RequiresApi
+import uk.gov.android.securestore.AccessControlLevel
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.KeyStore.PrivateKeyEntry
 import javax.crypto.Cipher
-import uk.gov.android.securestore.AccessControlLevel
 
 /**
  * Implementation of [CryptoManager] using RSA encryption algorithm to create Public/Private key pair.
@@ -27,7 +27,7 @@ internal class RsaCryptoManager : CryptoManager {
     }
 
     override fun encryptText(
-        text: String
+        text: String,
     ): String {
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
@@ -39,7 +39,7 @@ internal class RsaCryptoManager : CryptoManager {
 
     override fun decryptText(
         text: String,
-        callback: (result: String?) -> Unit
+        callback: (result: String?) -> Unit,
     ) {
         val encryptedBytes = Base64.decode(text, Base64.NO_WRAP)
 
@@ -48,14 +48,14 @@ internal class RsaCryptoManager : CryptoManager {
         initCipherAndDecrypt(
             cipher,
             encryptedBytes,
-            callback
+            callback,
         )
     }
 
     private fun initCipherAndDecrypt(
         cipher: Cipher,
         encryptedBytes: ByteArray,
-        callback: (result: String?) -> Unit
+        callback: (result: String?) -> Unit,
     ) {
         cipher.init(Cipher.DECRYPT_MODE, getKeyEntry(alias).privateKey)
         callback(cipher.doFinal(encryptedBytes).decodeToString())
@@ -78,7 +78,7 @@ internal class RsaCryptoManager : CryptoManager {
     private fun createKeyEntry(alias: String) {
         val kpgSpec = KeyGenParameterSpec.Builder(
             alias,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
         )
             .setKeySize(KEY_SIZE)
             .setBlockModes(BLOCK_MODE)
@@ -93,7 +93,7 @@ internal class RsaCryptoManager : CryptoManager {
             kpgSpec
                 .setUserAuthenticationParameters(
                     KEY_TIMEOUT,
-                    getAuthType(accessControlLevel)
+                    getAuthType(accessControlLevel),
                 )
         }
 
@@ -103,7 +103,7 @@ internal class RsaCryptoManager : CryptoManager {
 
         KeyPairGenerator.getInstance(ALGORITHM, TYPE).apply {
             initialize(
-                kpgSpec.build()
+                kpgSpec.build(),
             )
         }.generateKeyPair()
     }
@@ -114,7 +114,8 @@ internal class RsaCryptoManager : CryptoManager {
             AccessControlLevel.OPEN -> AUTH_TYPE_OPEN
             AccessControlLevel.PASSCODE -> KeyProperties.AUTH_DEVICE_CREDENTIAL
             AccessControlLevel.PASSCODE_AND_ANY_BIOMETRICS,
-            AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS ->
+            AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS,
+            ->
                 KeyProperties.AUTH_DEVICE_CREDENTIAL or KeyProperties.AUTH_BIOMETRIC_STRONG
         }
 

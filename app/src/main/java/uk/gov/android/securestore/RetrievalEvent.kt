@@ -10,7 +10,7 @@ sealed class RetrievalEvent {
      * Successful event, holds the retrieved data value as a [String]
      */
     data class Success(
-        val value: String
+        val value: String,
     ) : RetrievalEvent()
 
     /**
@@ -18,6 +18,6 @@ sealed class RetrievalEvent {
      */
     data class Failed(
         val type: SecureStoreErrorType,
-        val reason: String? = null
+        val reason: String? = null,
     ) : RetrievalEvent()
 }

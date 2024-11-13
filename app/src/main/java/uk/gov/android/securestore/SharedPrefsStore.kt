@@ -5,9 +5,6 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
-import java.security.GeneralSecurityException
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -19,11 +16,14 @@ import uk.gov.android.securestore.crypto.CryptoManager
 import uk.gov.android.securestore.crypto.RsaCryptoManager
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
+import java.security.GeneralSecurityException
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 @Suppress("TooGenericExceptionCaught")
 class SharedPrefsStore(
     private val authenticator: Authenticator = UserAuthenticator(),
-    private val cryptoManager: CryptoManager = RsaCryptoManager()
+    private val cryptoManager: CryptoManager = RsaCryptoManager(),
 ) : SecureStore {
     private val tag = this::class.java.simpleName
     private var configuration: SecureStorageConfiguration? = null
@@ -31,12 +31,12 @@ class SharedPrefsStore(
 
     override fun init(
         context: Context,
-        configuration: SecureStorageConfiguration
+        configuration: SecureStorageConfiguration,
     ) {
         this.configuration = configuration
         cryptoManager.init(
             configuration.id,
-            configuration.accessControlLevel
+            configuration.accessControlLevel,
         )
         sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
     }
@@ -63,13 +63,13 @@ class SharedPrefsStore(
     }
 
     override suspend fun retrieve(
-        key: String
+        key: String,
     ): RetrievalEvent {
         return configuration?.let { configuration ->
             if (configuration.accessControlLevel != AccessControlLevel.OPEN) {
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
-                    "Access control level must be OPEN to use this retrieve method"
+                    "Access control level must be OPEN to use this retrieve method",
                 )
             } else {
                 suspendCoroutine<RetrievalEvent> { continuation ->
@@ -85,30 +85,30 @@ class SharedPrefsStore(
                         Log.e(tag, e.message, e)
                         continuation.resume(
                             RetrievalEvent.Failed(
-                                SecureStoreErrorType.GENERAL
-                            )
+                                SecureStoreErrorType.GENERAL,
+                            ),
                         )
                     }
                 }
             }
         } ?: RetrievalEvent.Failed(
             SecureStoreErrorType.GENERAL,
-            "Must call init on SecureStore first!"
+            "Must call init on SecureStore first!",
         )
     }
 
     override suspend fun retrieveWithAuthentication(
         key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
-        context: FragmentActivity
+        context: FragmentActivity,
     ): Flow<RetrievalEvent> = callbackFlow {
         configuration?.let { configuration ->
             if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
                 trySend(
                     RetrievalEvent.Failed(
                         SecureStoreErrorType.GENERAL,
-                        "Use retrieve method, access control is set to OPEN, no need for auth"
-                    )
+                        "Use retrieve method, access control is set to OPEN, no need for auth",
+                    ),
                 )
             }
             try {
@@ -129,19 +129,19 @@ class SharedPrefsStore(
                             trySend(
                                 RetrievalEvent.Failed(
                                     getErrorType(errorCode),
-                                    errorString.toString()
-                                )
+                                    errorString.toString(),
+                                ),
                             )
                         },
                         onFailure = {
                             trySend(
                                 RetrievalEvent.Failed(
                                     SecureStoreErrorType.FAILED_BIO_PROMPT,
-                                    "Bio Prompt failed"
-                                )
+                                    "Bio Prompt failed",
+                                ),
                             )
-                        }
-                    )
+                        },
+                    ),
                 )
             } catch (e: GeneralSecurityException) {
                 Log.e(tag, e.message, e)
@@ -152,8 +152,8 @@ class SharedPrefsStore(
         } ?: trySend(
             RetrievalEvent.Failed(
                 SecureStoreErrorType.GENERAL,
-                "Must call init on SecureStore first!"
-            )
+                "Must call init on SecureStore first!",
+            ),
         )
 
         awaitClose {
@@ -182,13 +182,13 @@ class SharedPrefsStore(
 
     private fun cryptoDecryptText(
         key: String,
-        onTextReady: (String?) -> Unit
+        onTextReady: (String?) -> Unit,
     ) {
         sharedPrefs?.let {
             try {
                 it.getString(key, null)?.let { encryptedText ->
                     cryptoManager.decryptText(
-                        encryptedText
+                        encryptedText,
                     ) { text -> onTextReady(text) }
                 } ?: onTextReady(null)
             } catch (e: Exception) {

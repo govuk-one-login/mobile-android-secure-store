@@ -21,7 +21,7 @@ interface CryptoManager {
      * @throws [java.security.GeneralSecurityException] If encryption fails
      */
     fun encryptText(
-        text: String
+        text: String,
     ): String
 
     /**
@@ -34,7 +34,7 @@ interface CryptoManager {
      */
     fun decryptText(
         text: String,
-        callback: (result: String?) -> Unit
+        callback: (result: String?) -> Unit,
     )
 
     /**

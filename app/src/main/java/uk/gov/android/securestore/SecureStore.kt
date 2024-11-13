@@ -17,7 +17,7 @@ interface SecureStore {
      */
     fun init(
         context: Context,
-        configuration: SecureStorageConfiguration
+        configuration: SecureStorageConfiguration,
     )
 
     /**
@@ -47,7 +47,7 @@ interface SecureStore {
      *
      */
     suspend fun retrieve(
-        key: String
+        key: String,
     ): RetrievalEvent
 
     /**
@@ -62,7 +62,7 @@ interface SecureStore {
     suspend fun retrieveWithAuthentication(
         key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
-        context: FragmentActivity
+        context: FragmentActivity,
     ): Flow<RetrievalEvent>
 
     /**
