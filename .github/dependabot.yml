@@ -13,8 +13,13 @@ updates:
       prefix: "build"
 
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directories:
+      - "/"
+      - "/config/actions/**"
     schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "ci"
+      interval: "weekly"
+    groups:
+      github-actions:
+        applies-to: version-updates
+        patterns:
+          - "*"
