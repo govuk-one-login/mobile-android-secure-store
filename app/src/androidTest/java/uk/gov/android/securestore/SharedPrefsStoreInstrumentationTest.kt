@@ -1,7 +1,6 @@
 package uk.gov.android.securestore
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import java.security.KeyStore
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -21,6 +20,7 @@ import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
+import java.security.KeyStore
 
 class SharedPrefsStoreInstrumentationTest {
     private val key = "testKey"
@@ -30,7 +30,7 @@ class SharedPrefsStoreInstrumentationTest {
     private val mockAuthenticator: Authenticator = mock()
 
     private val sharedPrefsStore = SharedPrefsStore(
-        authenticator = mockAuthenticator
+        authenticator = mockAuthenticator,
     )
 
     @JvmField
@@ -51,7 +51,7 @@ class SharedPrefsStoreInstrumentationTest {
             runBlocking {
                 sharedPrefsStore.upsert(key, value)
                 val result = sharedPrefsStore.retrieve(
-                    key
+                    key,
                 )
                 assertEquals(RetrievalEvent.Success(value), result)
             }
@@ -66,8 +66,8 @@ class SharedPrefsStoreInstrumentationTest {
             mockAuthenticator.authenticate(
                 any(),
                 any(),
-                any()
-            )
+                any(),
+            ),
         ).thenAnswer {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
@@ -80,7 +80,7 @@ class SharedPrefsStoreInstrumentationTest {
                         val result = sharedPrefsStore.retrieveWithAuthentication(
                             key,
                             AuthenticatorPromptConfiguration("title"),
-                            it
+                            it,
                         )
 
                         assertEquals(value, result)
@@ -102,11 +102,11 @@ class SharedPrefsStoreInstrumentationTest {
 
                 sharedPrefsStore.delete(key)
                 val result = sharedPrefsStore.retrieve(
-                    key
+                    key,
                 )
                 assertEquals(
                     RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND),
-                    result
+                    result,
                 )
             }
         }
@@ -142,8 +142,8 @@ class SharedPrefsStoreInstrumentationTest {
                 context = it,
                 configuration = SecureStorageConfiguration(
                     storeId,
-                    acl
-                )
+                    acl,
+                ),
             )
         }
     }

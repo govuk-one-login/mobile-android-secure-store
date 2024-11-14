@@ -3,8 +3,6 @@ package uk.gov.android.securestore
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.fragment.app.FragmentActivity
-import java.security.GeneralSecurityException
-import java.security.KeyStoreException
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -25,6 +23,8 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
 import uk.gov.android.securestore.crypto.CryptoManager
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
+import java.security.GeneralSecurityException
+import java.security.KeyStoreException
 
 @Suppress("UNCHECKED_CAST")
 class SharedPrefsStoreTest {
@@ -40,12 +40,12 @@ class SharedPrefsStoreTest {
     private val value = "testValue"
     private val encryptedValue = "testEncrypted"
     private val authConfig = AuthenticatorPromptConfiguration(
-        "title"
+        "title",
     )
 
     private val sharedPrefsStore: SecureStore = SharedPrefsStore(
         mockAuthenticator,
-        mockCryptoManager
+        mockCryptoManager,
     )
 
     @Before
@@ -87,8 +87,8 @@ class SharedPrefsStoreTest {
             whenever(
                 mockCryptoManager.decryptText(
                     eq(encryptedValue),
-                    any()
-                )
+                    any(),
+                ),
             ).thenAnswer {
                 (it.arguments[1] as (text: String?) -> Unit).invoke(value)
             }
@@ -107,16 +107,16 @@ class SharedPrefsStoreTest {
                 mockAuthenticator.authenticate(
                     eq(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS),
                     eq(authConfig),
-                    any()
-                )
+                    any(),
+                ),
             ).thenAnswer {
                 (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
             }
             whenever(
                 mockCryptoManager.decryptText(
                     eq(encryptedValue),
-                    any()
-                )
+                    any(),
+                ),
             ).thenAnswer {
                 (it.arguments[1] as (text: String?) -> Unit).invoke(value)
             }
@@ -124,7 +124,7 @@ class SharedPrefsStoreTest {
             val result = sharedPrefsStore.retrieveWithAuthentication(
                 key,
                 authConfig,
-                activityFragment
+                activityFragment,
             ).first()
 
             assertEquals(RetrievalEvent.Success(value), result)
@@ -143,16 +143,16 @@ class SharedPrefsStoreTest {
                 mockAuthenticator.authenticate(
                     eq(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS),
                     eq(authConfig),
-                    any()
-                )
+                    any(),
+                ),
             ).thenAnswer {
                 (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
             }
             whenever(
                 mockCryptoManager.decryptText(
                     eq(encryptedValue),
-                    any()
-                )
+                    any(),
+                ),
             ).thenAnswer {
                 (it.arguments[1] as (text: String?) -> Unit).invoke(null)
             }
@@ -160,7 +160,7 @@ class SharedPrefsStoreTest {
             val result = sharedPrefsStore.retrieveWithAuthentication(
                 key,
                 authConfig,
-                activityFragment
+                activityFragment,
             ).first()
 
             assertEquals(RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND), result)
@@ -205,8 +205,8 @@ class SharedPrefsStoreTest {
         initSecureStore(AccessControlLevel.OPEN)
         given(
             mockCryptoManager.encryptText(
-                value
-            )
+                value,
+            ),
         ).willAnswer { throw GeneralSecurityException() }
 
         assertThrows(SecureStorageError::class.java) {
@@ -241,9 +241,9 @@ class SharedPrefsStoreTest {
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
-                    "Access control level must be OPEN to use this retrieve method"
+                    "Access control level must be OPEN to use this retrieve method",
                 ),
-                result
+                result,
             )
         }
     }
@@ -252,22 +252,22 @@ class SharedPrefsStoreTest {
     fun testRetrieveWithAuthenticationThrowsErrorFromWrongACL() {
         initSecureStore(AccessControlLevel.OPEN)
         val authConfig = AuthenticatorPromptConfiguration(
-            "title"
+            "title",
         )
 
         runBlocking {
             val result = sharedPrefsStore.retrieveWithAuthentication(
                 key,
                 authConfig,
-                activityFragment
+                activityFragment,
             ).first()
 
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
-                    "Use retrieve method, access control is set to OPEN, no need for auth"
+                    "Use retrieve method, access control is set to OPEN, no need for auth",
                 ),
-                result
+                result,
             )
         }
     }
@@ -300,9 +300,9 @@ class SharedPrefsStoreTest {
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
-                    "Must call init on SecureStore first!"
+                    "Must call init on SecureStore first!",
                 ),
-                result
+                result,
             )
         }
     }
@@ -315,9 +315,9 @@ class SharedPrefsStoreTest {
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
-                    "Must call init on SecureStore first!"
+                    "Must call init on SecureStore first!",
                 ),
-                result
+                result,
             )
         }
     }
@@ -343,12 +343,12 @@ class SharedPrefsStoreTest {
     private fun initSecureStore(acl: AccessControlLevel) {
         val config = SecureStorageConfiguration(
             storeId,
-            acl
+            acl,
         )
 
         sharedPrefsStore.init(
             mockContext,
-            config
+            config,
         )
     }
 }

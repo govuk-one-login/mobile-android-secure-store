@@ -15,7 +15,7 @@ internal class UserAuthenticator : Authenticator {
     override fun authenticate(
         accessControlLevel: AccessControlLevel,
         configuration: AuthenticatorPromptConfiguration,
-        handler: AuthenticatorCallbackHandler
+        handler: AuthenticatorCallbackHandler,
     ) {
         val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
             .setTitle(configuration.title)
@@ -26,12 +26,12 @@ internal class UserAuthenticator : Authenticator {
         val biometricPrompt = fragmentContext?.let {
             BiometricPrompt(
                 it,
-                handler
+                handler,
             )
         }
 
         biometricPrompt?.authenticate(
-            promptInfoBuilder.build()
+            promptInfoBuilder.build(),
         )
     }
 
@@ -40,7 +40,8 @@ internal class UserAuthenticator : Authenticator {
             AccessControlLevel.OPEN -> -1
             AccessControlLevel.PASSCODE -> DEVICE_CREDENTIAL
             AccessControlLevel.PASSCODE_AND_ANY_BIOMETRICS,
-            AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS ->
+            AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS,
+            ->
                 BIOMETRIC_STRONG or DEVICE_CREDENTIAL
         }
 

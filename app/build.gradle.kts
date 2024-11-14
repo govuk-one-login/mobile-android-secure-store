@@ -104,9 +104,8 @@ dependencies {
         libs.mockito.kotlin,
     ).forEach(::testImplementation)
 
-
     listOf(
-        libs.androidx.test.orchestrator
+        libs.androidx.test.orchestrator,
     ).forEach {
         androidTestUtil(it)
     }
@@ -115,14 +114,12 @@ dependencies {
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(
-            "secure storage of key-value data"
+            "secure storage of key-value data",
         )
         description.set(
             """
                 Gradle configured Android library for secure storage of data, optionally protected by the user’s biometrics & passcode
-            """.trimIndent()
+            """.trimIndent(),
         )
-
-
     }
 }
