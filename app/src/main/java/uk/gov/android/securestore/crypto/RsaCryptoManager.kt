@@ -124,8 +124,8 @@ internal class RsaCryptoManager : CryptoManager {
         private const val ALGORITHM = KeyProperties.KEY_ALGORITHM_RSA
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_ECB
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
-        private const val KEY_SIZE = 4096
-        private const val KEY_TIMEOUT = 1
+        private const val KEY_SIZE = 2048
+        private const val KEY_TIMEOUT = 2
         private const val AUTH_TYPE_OPEN = -1
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
     }
