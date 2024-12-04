@@ -24,6 +24,8 @@ interface CryptoManager {
         text: String,
     ): String
 
+
+
     /**
      * Decrypt a [String]
      *
