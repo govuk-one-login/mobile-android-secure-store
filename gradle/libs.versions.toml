@@ -15,7 +15,7 @@ kotlin-general = "2.0.21" # https://kotlinlang.org/docs/releases.html#release-de
 ktlint-gradle = "12.1.2" # https://github.com/JLLeitschuh/ktlint-gradle/releases
 mockito = "5.14.2"
 mockito-kotlin = "5.4.0"
-sonarqube-gradle = "6.0.0.5145" # https://github.com/SonarSource/sonar-scanner-gradle/releases
+sonarqube-gradle = "6.0.1.5171" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 androidx-test-orchestrator = "1.5.1"
 
 [libraries]
