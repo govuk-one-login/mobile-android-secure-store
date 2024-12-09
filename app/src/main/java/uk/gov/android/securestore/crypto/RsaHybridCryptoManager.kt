@@ -3,20 +3,26 @@ package uk.gov.android.securestore.crypto
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import android.util.Base64
+import android.util.Log
 import androidx.annotation.RequiresApi
 import uk.gov.android.securestore.AccessControlLevel
+import uk.gov.android.securestore.crypto.limitedmanager.AesCryptoManager
+import uk.gov.android.securestore.crypto.limitedmanager.LimitedCryptoManager.EncryptedData
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.KeyStore.PrivateKeyEntry
 import javax.crypto.Cipher
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
- * Implementation of [CryptoManager] using RSA encryption algorithm to create Public/Private key pair.
+ * Implementation of [HybridCryptoManager] using RSA encryption algorithm to create Public/Private key pair.
  */
-internal class RsaCryptoManager : CryptoManager {
+@OptIn(ExperimentalEncodingApi::class)
+internal class RsaHybridCryptoManager : HybridCryptoManager {
     private lateinit var alias: String
     private lateinit var accessControlLevel: AccessControlLevel
+    private val aesCryptoManager = AesCryptoManager()
     private val keyStore: KeyStore = KeyStore.getInstance(TYPE).apply {
         load(null)
     }
@@ -26,39 +32,46 @@ internal class RsaCryptoManager : CryptoManager {
         this.alias = alias
     }
 
-    override fun encryptText(
-        text: String,
-    ): String {
+
+    override fun encrypt(
+        input: String,
+        callback: (key: ByteArray) -> String?
+    ): EncryptedData {
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
         }
 
-        val encryptedBytes = encryptCipher.doFinal(text.toByteArray())
-        return Base64.encodeToString(encryptedBytes, Base64.NO_WRAP)
+        val encryptedData = aesCryptoManager.encrypt(input) {
+            val encryptedKey = encryptCipher.doFinal(it)
+            val result = Base64.encode(encryptedKey)
+            Log.d("AESKey", it.contentToString() + "for input: $input")
+            Log.d("EncryptedKey", result)
+            result
+        }
+        return encryptedData
     }
 
-    override fun decryptText(
-        text: String,
-        callback: (result: String?) -> Unit,
+    override fun decrypt(
+        encryptedData: String,
+        encryptedKey: String,
+        callback: (data: String?) -> Unit
     ) {
-        val encryptedBytes = Base64.decode(text, Base64.NO_WRAP)
-
         val cipher = Cipher.getInstance(TRANSFORMATION)
-
-        initCipherAndDecrypt(
+        val encryptedKeyBytes = Base64.decode(encryptedKey)
+        val decryptedKey = initCipherAndDecryptKey(
             cipher,
-            encryptedBytes,
-            callback,
+            encryptedKeyBytes
         )
+        aesCryptoManager.decrypt(encryptedData, decryptedKey) { callback(it) }
     }
 
-    private fun initCipherAndDecrypt(
+    private fun initCipherAndDecryptKey(
         cipher: Cipher,
-        encryptedBytes: ByteArray,
-        callback: (result: String?) -> Unit,
-    ) {
+        encryptedKey: ByteArray
+    ): String {
         cipher.init(Cipher.DECRYPT_MODE, getKeyEntry(alias).privateKey)
-        callback(cipher.doFinal(encryptedBytes).decodeToString())
+        val encodedKey = Base64.encode(cipher.doFinal(encryptedKey))
+        return encodedKey
     }
 
     override fun deleteKey() {
