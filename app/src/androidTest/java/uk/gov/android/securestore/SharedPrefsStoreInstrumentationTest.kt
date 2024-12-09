@@ -25,8 +25,6 @@ import java.security.KeyStore
 class SharedPrefsStoreInstrumentationTest {
     private val key = "testKey"
     private val value = "testValue"
-    private val key2 = "testKey2"
-    private val value2 = "testValue2"
     private val storeId = "id"
 
     private val mockAuthenticator: Authenticator = mock()
@@ -148,11 +146,5 @@ class SharedPrefsStoreInstrumentationTest {
                 ),
             )
         }
-    }
-
-    private fun createSecureStoreSuccessResponse(
-        vararg pairs: Pair<String, String>
-    ): Map<String, String> {
-        return mapOf(*pairs)
     }
 }

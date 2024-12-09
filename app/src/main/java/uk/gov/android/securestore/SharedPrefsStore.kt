@@ -109,13 +109,13 @@ class SharedPrefsStore(
         context: FragmentActivity,
     ): RetrievalEvent {
         configuration?.let { configuration ->
-            if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
-                return RetrievalEvent.Failed(
-                    SecureStoreErrorType.GENERAL,
-                    "Use retrieve method, access control is set to OPEN, no need for auth",
-                )
-            }
             return suspendCoroutine { continuation ->
+                if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
+                    RetrievalEvent.Failed(
+                        SecureStoreErrorType.GENERAL,
+                        "Use retrieve method, access control is set to OPEN, no need for auth",
+                    )
+                }
                 try {
                     authenticator.init(context)
                     authenticator.authenticate(
@@ -161,10 +161,10 @@ class SharedPrefsStore(
                     authenticator.close()
                 }
             }
-            }?: return RetrievalEvent.Failed(
-                SecureStoreErrorType.GENERAL,
-                "Must call init on SecureStore first!"
-            )
+        } ?: return RetrievalEvent.Failed(
+            SecureStoreErrorType.GENERAL,
+            "Must call init on SecureStore first!"
+        )
     }
 
     override fun exists(key: String): Boolean {
