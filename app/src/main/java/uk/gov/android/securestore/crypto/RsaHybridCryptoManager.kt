@@ -31,10 +31,9 @@ internal class RsaHybridCryptoManager : HybridCryptoManager {
         this.alias = alias
     }
 
-
     override fun encrypt(
         input: String,
-        callback: (key: ByteArray) -> String?
+        callback: (key: ByteArray) -> String?,
     ): EncryptedData {
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
@@ -51,20 +50,20 @@ internal class RsaHybridCryptoManager : HybridCryptoManager {
     override fun decrypt(
         encryptedData: String,
         encryptedKey: String,
-        callback: (data: String?) -> Unit
+        callback: (data: String?) -> Unit,
     ) {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val encryptedKeyBytes = Base64.decode(encryptedKey)
         val decryptedKey = initCipherAndDecryptKey(
             cipher,
-            encryptedKeyBytes
+            encryptedKeyBytes,
         )
         aesCryptoManager.decrypt(encryptedData, decryptedKey) { callback(it) }
     }
 
     private fun initCipherAndDecryptKey(
         cipher: Cipher,
-        encryptedKey: ByteArray
+        encryptedKey: ByteArray,
     ): String {
         cipher.init(Cipher.DECRYPT_MODE, getKeyEntry(alias).privateKey)
         val encodedKey = Base64.encode(cipher.doFinal(encryptedKey))

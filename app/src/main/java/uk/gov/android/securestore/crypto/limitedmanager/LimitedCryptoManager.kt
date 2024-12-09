@@ -16,7 +16,7 @@ interface LimitedCryptoManager {
      */
     fun encrypt(
         input: String,
-        callback: (key: ByteArray) -> String?
+        callback: (key: ByteArray) -> String?,
     ): EncryptedData
 
     /**
@@ -30,12 +30,12 @@ interface LimitedCryptoManager {
     fun decrypt(
         encryptedData: String,
         key: String,
-        callback: (data: String?) -> Unit
+        callback: (data: String?) -> Unit,
     )
 
     data class EncryptedData(
         val data: String,
-        val key: String
+        val key: String,
     )
 
     sealed class CryptoManagerError(private val error: String) : Exception(error) {
@@ -44,6 +44,6 @@ interface LimitedCryptoManager {
 
     companion object {
         const val NULL_ENCRYPTED_KEY_ERROR = "NullEncryptedKey:" +
-                " Encrypted key shouldn't be null or empty!"
+            " Encrypted key shouldn't be null or empty!"
     }
 }
