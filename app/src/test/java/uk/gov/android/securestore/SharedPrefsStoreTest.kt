@@ -97,7 +97,7 @@ class SharedPrefsStoreTest {
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
                     eq(encryptedKey),
-                    any()
+                    any(),
                 ),
             ).thenAnswer {
                 (it.arguments[2] as (data: String?) -> Unit).invoke(value)
@@ -120,7 +120,7 @@ class SharedPrefsStoreTest {
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
                     eq(encryptedKey),
-                    any()
+                    any(),
                 ),
             ).thenAnswer {
                 (it.arguments[2] as (data: String?) -> Unit).invoke(value)
@@ -131,7 +131,7 @@ class SharedPrefsStoreTest {
                     mockHybridCryptoManager.decrypt(
                         eq(encryptedValue2),
                         eq(encryptedKey2),
-                        any()
+                        any(),
                     ),
                 ).thenAnswer {
                     (it.arguments[2] as (data: String?) -> Unit).invoke(value2)
@@ -163,7 +163,7 @@ class SharedPrefsStoreTest {
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
                     eq(encryptedKey),
-                    any()
+                    any(),
                 ),
             ).thenAnswer {
                 (it.arguments[2] as (text: String?) -> Unit).invoke(value)
@@ -203,7 +203,7 @@ class SharedPrefsStoreTest {
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
                     eq(encryptedKey),
-                    any()
+                    any(),
                 ),
             ).thenAnswer {
                 (it.arguments[2] as (text: String?) -> Unit).invoke(value)
@@ -212,7 +212,7 @@ class SharedPrefsStoreTest {
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue2),
                     eq(encryptedKey2),
-                    any()
+                    any(),
                 ),
             ).thenAnswer {
                 (it.arguments[2] as (text: String?) -> Unit).invoke(value2)
@@ -249,7 +249,7 @@ class SharedPrefsStoreTest {
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
                     eq(encryptedKey),
-                    any()
+                    any(),
                 ),
             ).thenAnswer {
                 (it.arguments[2] as (text: String?) -> Unit).invoke(null)
@@ -258,7 +258,7 @@ class SharedPrefsStoreTest {
             val result = sharedPrefsStore.retrieveWithAuthentication(
                 alias,
                 authPromptConfig = authConfig,
-                context = activityFragment
+                context = activityFragment,
             )
 
             assertEquals(RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND), result)
@@ -396,7 +396,7 @@ class SharedPrefsStoreTest {
                 .retrieveWithAuthentication(
                     alias,
                     authPromptConfig = authConfig,
-                    context = activityFragment
+                    context = activityFragment,
                 )
 
             assertEquals(

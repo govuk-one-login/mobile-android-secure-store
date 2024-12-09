@@ -1,21 +1,21 @@
 package uk.gov.android.securestore.crypto.limitedmanager
 
 import android.security.keystore.KeyProperties
+import uk.gov.android.securestore.crypto.limitedmanager.LimitedCryptoManager.EncryptedData
+import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
-import uk.gov.android.securestore.crypto.limitedmanager.LimitedCryptoManager.EncryptedData
-import java.security.SecureRandom
-import javax.crypto.spec.GCMParameterSpec
 
 @OptIn(ExperimentalEncodingApi::class)
 class AesCryptoManager : LimitedCryptoManager {
     override fun encrypt(
         input: String,
-        callback: (key: ByteArray) -> String?
+        callback: (key: ByteArray) -> String?,
     ): EncryptedData {
         // Create and initialize the Cipher
         val cipher = Cipher.getInstance(AES_ALG)
@@ -42,7 +42,7 @@ class AesCryptoManager : LimitedCryptoManager {
     override fun decrypt(
         encryptedData: String,
         key: String,
-        callback: (data: String?) -> Unit
+        callback: (data: String?) -> Unit,
     ) {
         val decodedKey = Base64.decode(key)
         // Extract the IV and encrypted data
@@ -56,7 +56,7 @@ class AesCryptoManager : LimitedCryptoManager {
         cipher.init(
             Cipher.DECRYPT_MODE,
             SecretKeySpec(decodedKey, KeyProperties.KEY_ALGORITHM_AES),
-            gcmSpec
+            gcmSpec,
         )
 
         // Decrypt the data

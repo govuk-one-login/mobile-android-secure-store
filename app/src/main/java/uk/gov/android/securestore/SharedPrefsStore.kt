@@ -33,7 +33,7 @@ class SharedPrefsStore(
         this.configuration = configuration
         hybridCryptoManager.init(
             configuration.id,
-            configuration.accessControlLevel
+            configuration.accessControlLevel,
         )
         sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
     }
@@ -64,7 +64,7 @@ class SharedPrefsStore(
     }
 
     override suspend fun retrieve(
-        vararg key: String
+        vararg key: String,
     ): RetrievalEvent {
         return configuration?.let { configuration ->
             if (configuration.accessControlLevel != AccessControlLevel.OPEN) {
@@ -88,8 +88,8 @@ class SharedPrefsStore(
                         Log.e(tag, e.message, e)
                         continuation.resume(
                             RetrievalEvent.Failed(
-                                e.type
-                            )
+                                e.type,
+                            ),
                         )
                     } catch (e: GeneralSecurityException) {
                         Log.e(tag, e.message, e)
@@ -163,7 +163,7 @@ class SharedPrefsStore(
             }
         } ?: return RetrievalEvent.Failed(
             SecureStoreErrorType.GENERAL,
-            "Must call init on SecureStore first!"
+            "Must call init on SecureStore first!",
         )
     }
 
@@ -220,6 +220,6 @@ class SharedPrefsStore(
 
     private fun sseNotFound(alias: String): SecureStorageError = SecureStorageError(
         Exception("$alias not found"),
-        SecureStoreErrorType.NOT_FOUND
+        SecureStoreErrorType.NOT_FOUND,
     )
 }

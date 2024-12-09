@@ -102,7 +102,7 @@ class SharedPrefsStoreInstrumentationTest {
 
                 sharedPrefsStore.delete(key)
                 val result = sharedPrefsStore.retrieve(
-                    key
+                    key,
                 )
                 assertEquals(
                     RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND),
