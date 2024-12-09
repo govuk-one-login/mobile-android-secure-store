@@ -65,7 +65,7 @@ class AesCryptoManager : LimitedCryptoManager {
 
     private fun createKey(): SecretKey {
         val keyGenerator = KeyGenerator.getInstance("AES")
-        // Do *not* seed secureRandom! Automatically seeded from system entropy.
+        // Do *not* seed secureRandom - Automatically seeded from system entropy.
         val secureRandom = SecureRandom()
         // Generate a 256-bit key
         keyGenerator.init(KEY_SIZE, secureRandom)

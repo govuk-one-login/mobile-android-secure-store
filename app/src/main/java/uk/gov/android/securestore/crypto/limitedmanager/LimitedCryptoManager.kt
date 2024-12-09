@@ -12,7 +12,7 @@ interface LimitedCryptoManager {
      *
      * @return Encrypted data as a [String]
      *
-     * @throws [java.security.GeneralSecurityException] If encryption fails
+     * @throws [java.security.GeneralSecurityException] if encryption fails
      */
     fun encrypt(
         input: String,
@@ -25,7 +25,7 @@ interface LimitedCryptoManager {
      * @param encryptedData Encrypted [String] to decrypt
      * @param callback Method to use decrypted text (the result)
      *
-     * @throws [java.security.GeneralSecurityException] If decryption fails
+     * @throws [java.security.GeneralSecurityException] if decryption fails
      */
     fun decrypt(
         encryptedData: String,
