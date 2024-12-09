@@ -53,7 +53,7 @@ class SharedPrefsStoreInstrumentationTest {
                 val result = sharedPrefsStore.retrieve(
                     key,
                 )
-                assertEquals(RetrievalEvent.Success(value), result)
+                assertEquals(RetrievalEvent.Success(mapOf(key to value)), result)
             }
         }
     }
@@ -79,8 +79,8 @@ class SharedPrefsStoreInstrumentationTest {
                     runBlocking {
                         val result = sharedPrefsStore.retrieveWithAuthentication(
                             key,
-                            AuthenticatorPromptConfiguration("title"),
-                            it,
+                            authPromptConfig = AuthenticatorPromptConfiguration("title"),
+                            context = it,
                         )
 
                         assertEquals(value, result)

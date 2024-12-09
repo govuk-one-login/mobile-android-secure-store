@@ -54,3 +54,6 @@ veriff
 keystore
 Keystore
 i.e.
+[eE]ncryptedData
+ciphertext
+secureRandom
