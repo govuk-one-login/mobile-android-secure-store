@@ -1,7 +1,6 @@
 package uk.gov.android.securestore.crypto.limitedmanager
 
 import android.security.keystore.KeyProperties
-import android.util.Log
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -19,9 +18,8 @@ class AesCryptoManager : LimitedCryptoManager {
         callback: (key: ByteArray) -> String?
     ): EncryptedData {
         // Create and initialize the Cipher
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        val cipher = Cipher.getInstance(AES_ALG)
         val aesKey = createKey()
-        println("generate symmetric key: ${aesKey.encoded} for $input")
         cipher.init(
             Cipher.ENCRYPT_MODE,
             SecretKeySpec(aesKey.encoded, KeyProperties.KEY_ALGORITHM_AES),
@@ -49,21 +47,17 @@ class AesCryptoManager : LimitedCryptoManager {
         val decodedKey = Base64.decode(key)
         // Extract the IV and encrypted data
         val encryptedDataBytes = Base64.decode(encryptedData)
-        val encryptionIv = encryptedDataBytes.copyOfRange(0, 12)
-        val ciphertext = encryptedDataBytes.copyOfRange(12, encryptedDataBytes.size)
+        val encryptionIv = encryptedDataBytes.copyOfRange(OFFSET, IV_BYTES_SIZE)
+        val ciphertext = encryptedDataBytes.copyOfRange(IV_BYTES_SIZE, encryptedDataBytes.size)
 
         // Create and initialize the Cipher for decryption
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val gcmSpec = GCMParameterSpec(128, encryptionIv)
+        val cipher = Cipher.getInstance(AES_ALG)
+        val gcmSpec = GCMParameterSpec(TAG_LENGTH, encryptionIv)
         cipher.init(
             Cipher.DECRYPT_MODE,
             SecretKeySpec(decodedKey, KeyProperties.KEY_ALGORITHM_AES),
             gcmSpec
         )
-
-        Log.d("AesKey", key)
-        Log.d("EncryptedDataAES", encryptedData)
-        Log.d("DecryptedDataAES", cipher.doFinal(ciphertext).decodeToString())
 
         // Decrypt the data
         callback(cipher.doFinal(ciphertext).decodeToString())
@@ -80,5 +74,9 @@ class AesCryptoManager : LimitedCryptoManager {
 
     companion object {
         private const val KEY_SIZE = 256
+        private const val IV_BYTES_SIZE = 12
+        private const val TAG_LENGTH = 128
+        private const val OFFSET = 0
+        private const val AES_ALG = "AES/GCM/NoPadding"
     }
 }

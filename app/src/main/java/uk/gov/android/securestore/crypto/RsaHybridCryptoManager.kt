@@ -3,7 +3,6 @@ package uk.gov.android.securestore.crypto
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
-import android.util.Log
 import androidx.annotation.RequiresApi
 import uk.gov.android.securestore.AccessControlLevel
 import uk.gov.android.securestore.crypto.limitedmanager.AesCryptoManager
@@ -44,8 +43,6 @@ internal class RsaHybridCryptoManager : HybridCryptoManager {
         val encryptedData = aesCryptoManager.encrypt(input) {
             val encryptedKey = encryptCipher.doFinal(it)
             val result = Base64.encode(encryptedKey)
-            Log.d("AESKey", it.contentToString() + "for input: $input")
-            Log.d("EncryptedKey", result)
             result
         }
         return encryptedData
