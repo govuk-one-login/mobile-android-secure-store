@@ -25,6 +25,8 @@ import java.security.KeyStore
 class SharedPrefsStoreInstrumentationTest {
     private val key = "testKey"
     private val value = "testValue"
+    private val key2 = "testKey2"
+    private val value2 = "testValue2"
     private val storeId = "id"
 
     private val mockAuthenticator: Authenticator = mock()
@@ -53,7 +55,7 @@ class SharedPrefsStoreInstrumentationTest {
                 val result = sharedPrefsStore.retrieve(
                     key,
                 )
-                assertEquals(RetrievalEvent.Success(value), result)
+                assertEquals(RetrievalEvent.Success(mapOf(key to value)), result)
             }
         }
     }
@@ -79,8 +81,8 @@ class SharedPrefsStoreInstrumentationTest {
                     runBlocking {
                         val result = sharedPrefsStore.retrieveWithAuthentication(
                             key,
-                            AuthenticatorPromptConfiguration("title"),
-                            it,
+                            authPromptConfig = AuthenticatorPromptConfiguration("title"),
+                            context = it,
                         )
 
                         assertEquals(value, result)
@@ -102,7 +104,7 @@ class SharedPrefsStoreInstrumentationTest {
 
                 sharedPrefsStore.delete(key)
                 val result = sharedPrefsStore.retrieve(
-                    key,
+                    key
                 )
                 assertEquals(
                     RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND),
@@ -146,5 +148,11 @@ class SharedPrefsStoreInstrumentationTest {
                 ),
             )
         }
+    }
+
+    private fun createSecureStoreSuccessResponse(
+        vararg pairs: Pair<String, String>
+    ): Map<String, String> {
+        return mapOf(*pairs)
     }
 }

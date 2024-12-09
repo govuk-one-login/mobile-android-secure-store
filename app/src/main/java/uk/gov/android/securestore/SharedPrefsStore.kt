@@ -5,15 +5,12 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 import uk.gov.android.securestore.authentication.UserAuthenticator
-import uk.gov.android.securestore.crypto.CryptoManager
-import uk.gov.android.securestore.crypto.RsaCryptoManager
+import uk.gov.android.securestore.crypto.HybridCryptoManager
+import uk.gov.android.securestore.crypto.RsaHybridCryptoManager
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
 import java.security.GeneralSecurityException
@@ -23,7 +20,7 @@ import kotlin.coroutines.suspendCoroutine
 @Suppress("TooGenericExceptionCaught")
 class SharedPrefsStore(
     private val authenticator: Authenticator = UserAuthenticator(),
-    private val cryptoManager: CryptoManager = RsaCryptoManager(),
+    private val hybridCryptoManager: HybridCryptoManager = RsaHybridCryptoManager(),
 ) : SecureStore {
     private val tag = this::class.java.simpleName
     private var configuration: SecureStorageConfiguration? = null
@@ -34,9 +31,9 @@ class SharedPrefsStore(
         configuration: SecureStorageConfiguration,
     ) {
         this.configuration = configuration
-        cryptoManager.init(
+        hybridCryptoManager.init(
             configuration.id,
-            configuration.accessControlLevel,
+            configuration.accessControlLevel
         )
         sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
     }
@@ -44,9 +41,13 @@ class SharedPrefsStore(
     override suspend fun upsert(key: String, value: String): String {
         return suspendCoroutine { continuation ->
             try {
-                val result = cryptoManager.encryptText(value)
-                    .also { writeToPrefs(key, it) }
-                continuation.resumeWith(Result.success(result))
+                // The callback is not needed in this implementation which is why is set to null
+                val result = hybridCryptoManager.encrypt(value) { null }
+                    .also {
+                        writeToPrefs(key, it.data)
+                        writeToPrefs(key + "Key", it.key)
+                    }
+                continuation.resumeWith(Result.success(result.data))
             } catch (e: Exception) {
                 throw SecureStorageError(e)
             }
@@ -56,14 +57,14 @@ class SharedPrefsStore(
     override fun delete(key: String) {
         writeToPrefs(key, null)
         try {
-            cryptoManager.deleteKey()
+            hybridCryptoManager.deleteKey()
         } catch (e: Exception) {
             throw SecureStorageError(e)
         }
     }
 
     override suspend fun retrieve(
-        key: String,
+        vararg key: String
     ): RetrievalEvent {
         return configuration?.let { configuration ->
             if (configuration.accessControlLevel != AccessControlLevel.OPEN) {
@@ -74,91 +75,96 @@ class SharedPrefsStore(
             } else {
                 suspendCoroutine<RetrievalEvent> { continuation ->
                     try {
-                        cryptoDecryptText(key) {
-                            val event = it?.let {
-                                RetrievalEvent.Success(it)
-                            } ?: RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND)
-
-                            continuation.resume(event)
+                        val results = mutableMapOf<String, String>()
+                        key.forEach { alias ->
+                            cryptoDecryptText(alias) { data ->
+                                data?.let {
+                                    results[alias] = data
+                                } ?: throw sseNotFound(alias)
+                            }
                         }
+                        continuation.resume(RetrievalEvent.Success(results))
                     } catch (e: SecureStorageError) {
                         Log.e(tag, e.message, e)
                         continuation.resume(
                             RetrievalEvent.Failed(
-                                SecureStoreErrorType.GENERAL,
-                            ),
+                                e.type
+                            )
                         )
+                    } catch (e: GeneralSecurityException) {
+                        Log.e(tag, e.message, e)
+                        continuation.resume(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL))
                     }
                 }
             }
-        } ?: RetrievalEvent.Failed(
+        } ?: return RetrievalEvent.Failed(
             SecureStoreErrorType.GENERAL,
             "Must call init on SecureStore first!",
         )
     }
 
     override suspend fun retrieveWithAuthentication(
-        key: String,
+        vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
         context: FragmentActivity,
-    ): Flow<RetrievalEvent> = callbackFlow {
+    ): RetrievalEvent {
         configuration?.let { configuration ->
             if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
-                trySend(
-                    RetrievalEvent.Failed(
-                        SecureStoreErrorType.GENERAL,
-                        "Use retrieve method, access control is set to OPEN, no need for auth",
-                    ),
+                return RetrievalEvent.Failed(
+                    SecureStoreErrorType.GENERAL,
+                    "Use retrieve method, access control is set to OPEN, no need for auth",
                 )
             }
-            try {
-                authenticator.init(context)
-                authenticator.authenticate(
-                    configuration.accessControlLevel,
-                    authPromptConfig,
-                    AuthenticatorCallbackHandler(
-                        onSuccess = {
-                            cryptoDecryptText(key) {
-                                val event = it?.let {
-                                    RetrievalEvent.Success(it)
-                                } ?: RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND)
-                                trySend(event)
-                            }
-                        },
-                        onError = { errorCode, errorString ->
-                            trySend(
-                                RetrievalEvent.Failed(
-                                    getErrorType(errorCode),
-                                    errorString.toString(),
-                                ),
-                            )
-                        },
-                        onFailure = {
-                            trySend(
-                                RetrievalEvent.Failed(
-                                    SecureStoreErrorType.FAILED_BIO_PROMPT,
-                                    "Bio Prompt failed",
-                                ),
-                            )
-                        },
-                    ),
-                )
-            } catch (e: GeneralSecurityException) {
-                Log.e(tag, e.message, e)
-                trySend(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL))
-            } finally {
-                authenticator.close()
+            return suspendCoroutine { continuation ->
+                try {
+                    authenticator.init(context)
+                    authenticator.authenticate(
+                        configuration.accessControlLevel,
+                        authPromptConfig,
+                        AuthenticatorCallbackHandler(
+                            onSuccess = {
+                                val results = mutableMapOf<String, String>()
+                                key.forEach { alias ->
+                                    cryptoDecryptText(alias) { data ->
+                                        data?.let {
+                                            results[alias] = data
+                                        } ?: throw sseNotFound(alias)
+                                    }
+                                }
+                                continuation.resume(RetrievalEvent.Success(results))
+                            },
+                            onError = { errorCode, errorString ->
+                                continuation.resume(
+                                    RetrievalEvent.Failed(
+                                        getErrorType(errorCode),
+                                        errorString.toString(),
+                                    ),
+                                )
+                            },
+                            onFailure = {
+                                continuation.resume(
+                                    RetrievalEvent.Failed(
+                                        SecureStoreErrorType.FAILED_BIO_PROMPT,
+                                        "Bio Prompt failed",
+                                    ),
+                                )
+                            },
+                        ),
+                    )
+                } catch (e: SecureStorageError) {
+                    Log.e(tag, e.message, e)
+                    continuation.resume(RetrievalEvent.Failed(e.type))
+                } catch (e: GeneralSecurityException) {
+                    Log.e(tag, e.message, e)
+                    continuation.resume(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL))
+                } finally {
+                    authenticator.close()
+                }
             }
-        } ?: trySend(
-            RetrievalEvent.Failed(
+            }?: return RetrievalEvent.Failed(
                 SecureStoreErrorType.GENERAL,
-                "Must call init on SecureStore first!",
-            ),
-        )
-
-        awaitClose {
-            channel.close()
-        }
+                "Must call init on SecureStore first!"
+            )
     }
 
     override fun exists(key: String): Boolean {
@@ -181,16 +187,20 @@ class SharedPrefsStore(
     }
 
     private fun cryptoDecryptText(
-        key: String,
+        alias: String,
         onTextReady: (String?) -> Unit,
     ) {
         sharedPrefs?.let {
             try {
-                it.getString(key, null)?.let { encryptedText ->
-                    cryptoManager.decryptText(
-                        encryptedText,
-                    ) { text -> onTextReady(text) }
-                } ?: onTextReady(null)
+                val encryptedData = it.getString(alias, null)
+                val encryptedKey = it.getString(alias + "Key", null)
+                if (encryptedData.isNullOrEmpty() || encryptedKey.isNullOrEmpty()) {
+                    onTextReady(null)
+                } else {
+                    hybridCryptoManager.decrypt(encryptedData, encryptedKey) { result ->
+                        onTextReady(result)
+                    }
+                }
             } catch (e: Exception) {
                 throw SecureStorageError(e)
             }
@@ -207,4 +217,9 @@ class SharedPrefsStore(
             SecureStoreErrorType.GENERAL
         }
     }
+
+    private fun sseNotFound(alias: String): SecureStorageError = SecureStorageError(
+        Exception("$alias not found"),
+        SecureStoreErrorType.NOT_FOUND
+    )
 }
