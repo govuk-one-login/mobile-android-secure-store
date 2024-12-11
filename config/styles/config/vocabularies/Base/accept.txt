@@ -57,4 +57,4 @@ i.e.
 [Ee]ncryptedData
 ciphertext
 secureRandom
-[An]ndroid
+[Aa]ndroid
