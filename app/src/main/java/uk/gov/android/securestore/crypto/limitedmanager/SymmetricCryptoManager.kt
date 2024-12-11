@@ -10,7 +10,7 @@ interface SymmetricCryptoManager {
      * Encrypt a [String]
      *
      * @param input Plain text to encrypt
-     * @param callback Additional encryption for the key that is used for encrypting the data
+     * @param encryptAesKey Additional encryption for the key that is used for encrypting the data
      *
      * @return Encrypted data as a [EncryptedData] returning an encrypted key and encrypted data
      *
@@ -20,7 +20,7 @@ interface SymmetricCryptoManager {
      */
     fun encrypt(
         input: String,
-        callback: (key: ByteArray) -> String?,
+        encryptAesKey: (key: ByteArray) -> String?,
     ): EncryptedData
 
     /**

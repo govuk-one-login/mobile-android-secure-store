@@ -15,7 +15,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 class AesCryptoManager : SymmetricCryptoManager {
     override fun encrypt(
         input: String,
-        callback: (key: ByteArray) -> String?,
+        encryptAesKey: (key: ByteArray) -> String?,
     ): EncryptedData {
         // Create and initialize the Cipher
         val cipher = Cipher.getInstance(AES_ALG)
@@ -25,7 +25,7 @@ class AesCryptoManager : SymmetricCryptoManager {
             SecretKeySpec(aesKey.encoded, KeyProperties.KEY_ALGORITHM_AES),
         )
 
-        val encryptedKey = callback(aesKey.encoded)
+        val encryptedKey = encryptAesKey(aesKey.encoded)
         // Encrypt the data with the AES key
         val encryptionIv = cipher.iv // Store this IV for decryption
         val encryptedDataByteArr = cipher.doFinal(input.toByteArray())
