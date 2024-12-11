@@ -42,7 +42,7 @@ class SharedPrefsStore(
         return suspendCoroutine { continuation ->
             try {
                 // The callback is not needed in this implementation which is why is set to null
-                val result = hybridCryptoManager.encrypt(value) { null }
+                val result = hybridCryptoManager.encrypt(value)
                     .also {
                         writeToPrefs(key, it.data)
                         writeToPrefs(key + "Key", it.key)
@@ -97,7 +97,7 @@ class SharedPrefsStore(
                     }
                 }
             }
-        } ?: return RetrievalEvent.Failed(
+        } ?: RetrievalEvent.Failed(
             SecureStoreErrorType.GENERAL,
             "Must call init on SecureStore first!",
         )
@@ -108,13 +108,13 @@ class SharedPrefsStore(
         authPromptConfig: AuthenticatorPromptConfiguration,
         context: FragmentActivity,
     ): RetrievalEvent {
-        configuration?.let { configuration ->
-            return suspendCoroutine { continuation ->
+        return configuration?.let { configuration ->
+            suspendCoroutine { continuation ->
                 if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
-                    RetrievalEvent.Failed(
+                    continuation.resume(RetrievalEvent.Failed(
                         SecureStoreErrorType.GENERAL,
                         "Use retrieve method, access control is set to OPEN, no need for auth",
-                    )
+                    ))
                 }
                 try {
                     authenticator.init(context)
@@ -161,7 +161,7 @@ class SharedPrefsStore(
                     authenticator.close()
                 }
             }
-        } ?: return RetrievalEvent.Failed(
+        } ?: RetrievalEvent.Failed(
             SecureStoreErrorType.GENERAL,
             "Must call init on SecureStore first!",
         )

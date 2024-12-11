@@ -1,12 +1,12 @@
 package uk.gov.android.securestore.crypto.limitedmanager
 
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
-import org.junit.Assert.assertThrows
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertThrows
 import java.security.GeneralSecurityException
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalEncodingApi::class)
 class AesCryptoManagerTest {

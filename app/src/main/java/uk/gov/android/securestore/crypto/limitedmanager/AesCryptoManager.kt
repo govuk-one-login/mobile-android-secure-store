@@ -1,7 +1,7 @@
 package uk.gov.android.securestore.crypto.limitedmanager
 
 import android.security.keystore.KeyProperties
-import uk.gov.android.securestore.crypto.limitedmanager.LimitedCryptoManager.EncryptedData
+import uk.gov.android.securestore.crypto.EncryptedData
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -12,7 +12,7 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @OptIn(ExperimentalEncodingApi::class)
-class AesCryptoManager : LimitedCryptoManager {
+class AesCryptoManager : SymmetricCryptoManager {
     override fun encrypt(
         input: String,
         callback: (key: ByteArray) -> String?,
@@ -35,7 +35,7 @@ class AesCryptoManager : LimitedCryptoManager {
         if (!encryptedKey.isNullOrEmpty()) {
             return EncryptedData(data = encryptedData, key = encryptedKey)
         } else {
-            throw LimitedCryptoManager.CryptoManagerError.NullEncryptedKey
+            throw SymmetricCryptoManager.CryptoManagerError.NullEncryptedKey
         }
     }
 

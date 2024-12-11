@@ -4,12 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.BeforeEach
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
@@ -20,12 +17,16 @@ import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
+import uk.gov.android.securestore.crypto.EncryptedData
 import uk.gov.android.securestore.crypto.HybridCryptoManager
-import uk.gov.android.securestore.crypto.limitedmanager.LimitedCryptoManager
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
 import java.security.GeneralSecurityException
 import java.security.KeyStoreException
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @Suppress("UNCHECKED_CAST")
 class SharedPrefsStoreTest {
@@ -45,7 +46,7 @@ class SharedPrefsStoreTest {
     private val value2 = "testValue"
     private val encryptedKey2 = "encryptedAESKey"
     private val encryptedValue2 = "testEncrypted"
-    private val encryptedData = LimitedCryptoManager.EncryptedData(encryptedValue, encryptedKey)
+    private val encryptedData = EncryptedData(encryptedValue, encryptedKey)
     private val authConfig = AuthenticatorPromptConfiguration(
         "title",
     )
@@ -55,7 +56,7 @@ class SharedPrefsStoreTest {
         mockHybridCryptoManager,
     )
 
-    @Before
+    @BeforeEach
     fun setUp() {
         whenever(mockContext.getSharedPreferences(eq(storeId), eq(Context.MODE_PRIVATE)))
             .thenReturn(mockSharedPreferences)
@@ -65,12 +66,12 @@ class SharedPrefsStoreTest {
     @Test
     fun testUpsert() {
         initSecureStore(AccessControlLevel.OPEN)
-        whenever(mockHybridCryptoManager.encrypt(eq(value), any())).thenReturn(encryptedData)
+        whenever(mockHybridCryptoManager.encrypt(eq(value))).thenReturn(encryptedData)
 
         runBlocking {
             sharedPrefsStore.upsert(alias, value)
 
-            verify(mockHybridCryptoManager).encrypt(eq(value), any())
+            verify(mockHybridCryptoManager).encrypt(eq(value))
             verify(mockEditor).putString(alias, encryptedValue)
             verify(mockEditor).putString(alias + "Key", encryptedKey)
             verify(mockEditor, times(2)).apply()
@@ -304,7 +305,7 @@ class SharedPrefsStoreTest {
         given(
             mockHybridCryptoManager.encrypt(
                 value,
-            ) { encryptedValue },
+            ),
         ).willAnswer { throw GeneralSecurityException() }
 
         assertThrows(SecureStorageError::class.java) {
@@ -348,27 +349,27 @@ class SharedPrefsStoreTest {
     }
 
     @Test
-    fun testRetrieveWithAuthenticationThrowsErrorFromWrongACL() {
+    fun testRetrieveWithAuthenticationThrowsErrorFromWrongACL() = runTest {
         initSecureStore(AccessControlLevel.OPEN)
         val authConfig = AuthenticatorPromptConfiguration(
             "title",
         )
+        whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
+        whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
-        runBlocking {
-            val result = sharedPrefsStore.retrieveWithAuthentication(
-                alias,
-                authPromptConfig = authConfig,
-                context = activityFragment,
-            )
+        val result = sharedPrefsStore.retrieveWithAuthentication(
+            alias,
+            authPromptConfig = authConfig,
+            context = activityFragment,
+        )
 
-            assertEquals(
-                RetrievalEvent.Failed(
-                    SecureStoreErrorType.GENERAL,
-                    "Use retrieve method, access control is set to OPEN, no need for auth",
-                ),
-                result,
-            )
-        }
+        assertEquals(
+            RetrievalEvent.Failed(
+                SecureStoreErrorType.GENERAL,
+                "Use retrieve method, access control is set to OPEN, no need for auth",
+            ),
+            result,
+        )
     }
 
     @Test

@@ -6,7 +6,6 @@ import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
 import uk.gov.android.securestore.AccessControlLevel
 import uk.gov.android.securestore.crypto.limitedmanager.AesCryptoManager
-import uk.gov.android.securestore.crypto.limitedmanager.LimitedCryptoManager.EncryptedData
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.KeyStore.PrivateKeyEntry
@@ -33,7 +32,6 @@ internal class RsaHybridCryptoManager : HybridCryptoManager {
 
     override fun encrypt(
         input: String,
-        callback: (key: ByteArray) -> String?,
     ): EncryptedData {
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
