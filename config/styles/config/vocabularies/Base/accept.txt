@@ -54,6 +54,7 @@ veriff
 keystore
 Keystore
 i.e.
-[eE]ncryptedData
+[Ee]ncryptedData
 ciphertext
 secureRandom
+[An]ndroid

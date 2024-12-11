@@ -26,7 +26,7 @@ class AesCryptoManager : SymmetricCryptoManager {
         )
 
         val encryptedKey = encryptAesKey(aesKey.encoded)
-        // Encrypt the data with the AES key
+        // Encrypt the data with the Advanced Encryption Standard (AES) key
         val encryptionIv = cipher.iv // Store this IV for decryption
         val encryptedDataByteArr = cipher.doFinal(input.toByteArray())
         val encryptedData = Base64.encode(encryptionIv + encryptedDataByteArr)
