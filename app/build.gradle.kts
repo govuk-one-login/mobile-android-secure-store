@@ -106,7 +106,7 @@ dependencies {
         libs.androidx.test,
         libs.mockito,
         libs.mockito.kotlin,
-        libs.kotlinx.coroutines.test
+        libs.kotlinx.coroutines.test,
     ).forEach(::testImplementation)
 
     listOf(
