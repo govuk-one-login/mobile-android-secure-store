@@ -2,6 +2,7 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.authentication.Authenticator
@@ -83,6 +84,7 @@ class SharedPrefsStore(
                             ),
                         )
                     } catch (e: GeneralSecurityException) {
+                        Log.e(tag, e.message, e)
                         continuation.resume(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL))
                     }
                 }
@@ -140,6 +142,7 @@ class SharedPrefsStore(
                 } catch (e: SecureStorageError) {
                     continuation.resume(RetrievalEvent.Failed(e.type))
                 } catch (e: GeneralSecurityException) {
+                    Log.e(tag, e.message, e)
                     continuation.resume(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL))
                 } finally {
                     authenticator.close()
