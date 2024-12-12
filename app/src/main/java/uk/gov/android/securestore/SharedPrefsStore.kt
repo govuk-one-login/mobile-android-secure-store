@@ -111,10 +111,13 @@ class SharedPrefsStore(
         return configuration?.let { configuration ->
             suspendCoroutine { continuation ->
                 if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
-                    continuation.resume(RetrievalEvent.Failed(
-                        SecureStoreErrorType.GENERAL,
-                        "Use retrieve method, access control is set to OPEN, no need for auth",
-                    ))
+                    continuation.resume(
+                        RetrievalEvent.Failed(
+                            SecureStoreErrorType.GENERAL,
+                            "Use retrieve method, access control is set to OPEN, " +
+                                "no need for auth",
+                        ),
+                    )
                 }
                 try {
                     authenticator.init(context)
