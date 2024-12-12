@@ -75,14 +75,7 @@ class SharedPrefsStore(
             } else {
                 suspendCoroutine<RetrievalEvent> { continuation ->
                     try {
-                        val results = mutableMapOf<String, String>()
-                        key.forEach { alias ->
-                            cryptoDecryptText(alias) { data ->
-                                data?.let {
-                                    results[alias] = data
-                                } ?: throw sseNotFound(alias)
-                            }
-                        }
+                        val results = handleResults(*key)
                         continuation.resume(RetrievalEvent.Success(results))
                     } catch (e: SecureStorageError) {
                         Log.e(tag, e.message, e)
@@ -126,14 +119,7 @@ class SharedPrefsStore(
                         authPromptConfig,
                         AuthenticatorCallbackHandler(
                             onSuccess = {
-                                val results = mutableMapOf<String, String>()
-                                key.forEach { alias ->
-                                    cryptoDecryptText(alias) { data ->
-                                        data?.let {
-                                            results[alias] = data
-                                        } ?: throw sseNotFound(alias)
-                                    }
-                                }
+                                val results = handleResults(*key)
                                 continuation.resume(RetrievalEvent.Success(results))
                             },
                             onError = { errorCode, errorString ->
@@ -221,8 +207,22 @@ class SharedPrefsStore(
         }
     }
 
-    private fun sseNotFound(alias: String): SecureStorageError = SecureStorageError(
-        Exception("$alias not found"),
-        SecureStoreErrorType.NOT_FOUND,
-    )
+    private fun handleResults(vararg key: String): MutableMap<String, String> {
+        val results = mutableMapOf<String, String>()
+        key.forEach { alias ->
+            cryptoDecryptText(alias) { data ->
+                data?.let {
+                    results[alias] = data
+                } ?: throw sseNotFound(alias)
+            }
+        }
+        return results
+    }
+
+    companion object {
+        private fun sseNotFound(alias: String): SecureStorageError = SecureStorageError(
+            Exception("$alias not found"),
+            SecureStoreErrorType.NOT_FOUND,
+        )
+    }
 }
