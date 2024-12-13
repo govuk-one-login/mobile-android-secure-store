@@ -180,7 +180,7 @@ class SharedPrefsStore(
         sharedPrefs?.let {
             try {
                 val encryptedData = it.getString(alias, null)
-                val encryptedKey = it.getString(alias + "Key", null)
+                val encryptedKey = it.getString(alias + KEY_ADDITION, null)
                 if (encryptedData.isNullOrEmpty() || encryptedKey.isNullOrEmpty()) {
                     onTextReady(null)
                 } else {
@@ -218,6 +218,7 @@ class SharedPrefsStore(
     }
 
     companion object {
+        private const val KEY_ADDITION = "Key"
         private fun sseNotFound(alias: String): SecureStorageError = SecureStorageError(
             Exception("$alias not found"),
             SecureStoreErrorType.NOT_FOUND,
