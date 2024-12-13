@@ -45,7 +45,7 @@ class SharedPrefsStore(
                 val result = hybridCryptoManager.encrypt(value)
                     .also {
                         writeToPrefs(key, it.data)
-                        writeToPrefs(key + "Key", it.key)
+                        writeToPrefs(key + KEY_SUFFIX, it.key)
                     }
                 continuation.resumeWith(Result.success(result.data))
             } catch (e: Exception) {
@@ -180,7 +180,7 @@ class SharedPrefsStore(
         sharedPrefs?.let {
             try {
                 val encryptedData = it.getString(alias, null)
-                val encryptedKey = it.getString(alias + KEY_ADDITION, null)
+                val encryptedKey = it.getString(alias + KEY_SUFFIX, null)
                 if (encryptedData.isNullOrEmpty() || encryptedKey.isNullOrEmpty()) {
                     onTextReady(null)
                 } else {
@@ -218,7 +218,7 @@ class SharedPrefsStore(
     }
 
     companion object {
-        private const val KEY_ADDITION = "Key"
+        private const val KEY_SUFFIX = "Key"
         private fun sseNotFound(alias: String): SecureStorageError = SecureStorageError(
             Exception("$alias not found"),
             SecureStoreErrorType.NOT_FOUND,
