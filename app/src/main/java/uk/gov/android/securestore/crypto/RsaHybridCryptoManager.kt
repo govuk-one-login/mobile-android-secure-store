@@ -15,6 +15,8 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
  * Implementation of [HybridCryptoManager] using RSA encryption algorithm to create Public/Private key pair.
+ * It allows for creation of RSA key-pair which would be used to encrypt/ decrypt an AES key that will
+ * be used to encrypt/ decrypt the data provided.
  */
 @OptIn(ExperimentalEncodingApi::class)
 internal class RsaHybridCryptoManager : HybridCryptoManager {
