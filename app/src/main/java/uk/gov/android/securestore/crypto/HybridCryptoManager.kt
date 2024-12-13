@@ -3,9 +3,9 @@ package uk.gov.android.securestore.crypto
 import uk.gov.android.securestore.AccessControlLevel
 
 /**
- * Class to handle encryption and decryption of [String] data
+ * Interface to handle encryption and decryption of [String] data
  */
-interface CryptoManager {
+interface HybridCryptoManager {
     /**
      *Init the [AccessControlLevel] and alias, this must be done before using the CryptoManager
      */
@@ -14,27 +14,28 @@ interface CryptoManager {
     /**
      * Encrypt a [String]
      *
-     * @param text Plain text to encrypt
+     * @param input Plain text to encrypt
      *
-     * @return Encrypted data as a [String]
+     * @return Encrypted data as a [EncryptedData] returning an encrypted key and encrypted data
      *
-     * @throws [java.security.GeneralSecurityException] If encryption fails
+     * @throws [java.security.GeneralSecurityException] if encryption fails
      */
-    fun encryptText(
-        text: String,
-    ): String
+    fun encrypt(
+        input: String,
+    ): EncryptedData
 
     /**
      * Decrypt a [String]
      *
-     * @param text Encrypted [String] to decrypt
+     * @param encryptedData Encrypted [String] to decrypt
      * @param callback Method to use decrypted text (the result)
      *
-     * @throws [java.security.GeneralSecurityException] If decryption fails
+     * @throws [java.security.GeneralSecurityException] if decryption fails
      */
-    fun decryptText(
-        text: String,
-        callback: (result: String?) -> Unit,
+    fun decrypt(
+        encryptedData: String,
+        key: String,
+        callback: (data: String?) -> Unit,
     )
 
     /**

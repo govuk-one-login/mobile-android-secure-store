@@ -56,6 +56,7 @@ android {
         execution = "ANDROIDX_TEST_ORCHESTRATOR"
         animationsDisabled = true
         unitTests.all {
+            it.useJUnitPlatform()
             it.testLogging {
                 events =
                     setOf(
@@ -98,10 +99,14 @@ dependencies {
     ).forEach(::implementation)
 
     listOf(
+        kotlin("test"),
+        kotlin("test-junit5"),
+        libs.bundles.test,
+        platform(libs.junit.bom),
         libs.androidx.test,
-        libs.junit,
         libs.mockito,
         libs.mockito.kotlin,
+        libs.kotlinx.coroutines.test,
     ).forEach(::testImplementation)
 
     listOf(

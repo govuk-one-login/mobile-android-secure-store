@@ -1,4 +1,3 @@
-(?i)Android
 APIs
 (?i)ASM
 Composable
@@ -30,7 +29,6 @@ Snackbar
 VIZes
 Zsh
 alphagov
-android
 asm
 async
 avdmanager
@@ -54,3 +52,7 @@ veriff
 keystore
 Keystore
 i.e.
+[Ee]ncryptedData
+ciphertext
+secureRandom
+[Aa]ndroid

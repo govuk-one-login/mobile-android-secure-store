@@ -17,6 +17,8 @@ mockito = "5.14.2"
 mockito-kotlin = "5.4.0"
 sonarqube-gradle = "6.0.1.5171" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 androidx-test-orchestrator = "1.5.1"
+junit = "5.11.3"
+kotlinxCoroutines = "1.7.3"
 
 [libraries]
 
@@ -30,7 +32,6 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 detekt-gradle = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt-gradle" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
-junit = { group = "junit", name = "junit", version.ref = "junit4" }
 kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin-general" }
 ktlint-gradle = { group = "org.jlleitschuh.gradle", name = "ktlint-gradle", version.ref = "ktlint-gradle" }
 mockito = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
@@ -38,6 +39,16 @@ mockito-android = { group = "org.mockito", name = "mockito-android", version.ref
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockito-kotlin" }
 sonarqube-gradle = { module = "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin", version.ref = "sonarqube-gradle" }
 androidx-test-orchestrator = { group = "androidx.test", name = "orchestrator", version.ref = "androidx-test-orchestrator" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+
+#Unit test
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+
+[bundles]
+test = [ "junit-jupiter", "junit-jupiter-params", "junit-jupiter-engine"]
 
 [plugins]
 
