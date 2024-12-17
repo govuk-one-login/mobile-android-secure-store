@@ -17,7 +17,7 @@ mockito = "5.14.2"
 mockito-kotlin = "5.4.0"
 sonarqube-gradle = "6.0.1.5171" # https://github.com/SonarSource/sonar-scanner-gradle/releases
 androidx-test-orchestrator = "1.5.1"
-junit = "5.11.3"
+junit = "5.11.4"
 kotlinxCoroutines = "1.9.0"
 
 [libraries]
