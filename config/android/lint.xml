@@ -10,5 +10,8 @@
     <issue id="PermissionNamingConvention">
         <ignore path="**/AndroidManifest.xml" />
     </issue>
+
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+    <issue id="NewerVersionAvailable" severity="ignore" />
 </lint>
 
