@@ -10,5 +10,7 @@
     <issue id="PermissionNamingConvention">
         <ignore path="**/AndroidManifest.xml" />
     </issue>
+
+    <issue id="SyntheticAccessor" severity="ignore"/>
 </lint>
 
