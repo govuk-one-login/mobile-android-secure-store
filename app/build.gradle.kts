@@ -79,6 +79,10 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    ktlint {
+        version = libs.versions.ktlint.cli
+    }
 }
 
 dependencies {
