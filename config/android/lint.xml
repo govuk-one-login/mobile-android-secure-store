@@ -12,5 +12,6 @@
     </issue>
 
     <issue id="SyntheticAccessor" severity="ignore"/>
+    <issue id="NewerVersionAvailable" severity="ignore" />
 </lint>
 
