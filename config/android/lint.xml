@@ -12,6 +12,6 @@
     </issue>
 
     <issue id="SyntheticAccessor" severity="ignore"/>
-    <issue id="NewerVersionAvailable" severity="ignore" />
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
 </lint>
 
