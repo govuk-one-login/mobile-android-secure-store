@@ -18,7 +18,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
-import uk.gov.android.securestore.crypto.HybridCryptoManager
 import uk.gov.android.securestore.crypto.RsaHybridCryptoManager
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
@@ -30,11 +29,9 @@ class SharedPrefsStoreInstrumentationTest {
     private val storeId = "id"
 
     private val mockAuthenticator: Authenticator = mock()
-    private val mockHybridCryptoManager: RsaHybridCryptoManager = mock()
 
     private val sharedPrefsStore = SharedPrefsStore(
         authenticator = mockAuthenticator,
-        mockHybridCryptoManager
     )
 
     @JvmField
@@ -58,8 +55,6 @@ class SharedPrefsStoreInstrumentationTest {
                     key,
                 )
                 assertEquals(RetrievalEvent.Success(mapOf(key to value)), result)
-                verify(mockHybridCryptoManager).init(any(), any())
-                verify(mockHybridCryptoManager).decrypt(any(), any(), any())
             }
         }
     }
@@ -95,8 +90,6 @@ class SharedPrefsStoreInstrumentationTest {
 
                 verify(mockAuthenticator, times(2)).init(it)
                 verify(mockAuthenticator, times(2)).close()
-                verify(mockHybridCryptoManager).init(any(), any())
-                verify(mockHybridCryptoManager).decrypt(any(), any(), any())
             }
         }
     }
@@ -116,9 +109,6 @@ class SharedPrefsStoreInstrumentationTest {
                     RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND),
                     result,
                 )
-
-                verify(mockHybridCryptoManager).init(any(), any())
-                verify(mockHybridCryptoManager).deleteKey()
             }
         }
     }
