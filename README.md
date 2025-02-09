@@ -7,7 +7,7 @@ The data will be encrypted before storage and decrypted on retrieval, when an in
 
 ## Updating gradle-wrapper
 
-Gradle SHA pinning is in place through the `distributionSha256Sum` attribute in gradle-wrapper.properties. This means the gradle-wrapper must be upgraded properly through the `./gradlew wrapper` command.
+Gradle secure hash algorithm (SHA) pinning is in place through the `distributionSha256Sum` attribute in gradle-wrapper.properties. This means the gradle-wrapper must upgrade through the `./gradlew wrapper` command.
 Example gradle-wrapper.properties
 ```
 distributionBase=GRADLE_USER_HOME
