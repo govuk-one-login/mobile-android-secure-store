@@ -10,7 +10,7 @@ import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 import uk.gov.android.securestore.authentication.UserAuthenticator
 import uk.gov.android.securestore.crypto.HybridCryptoManager
-import uk.gov.android.securestore.crypto.RsaHybridCryptoManager
+import uk.gov.android.securestore.crypto.HybridCryptoManagerRsa
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
 import java.security.GeneralSecurityException
@@ -20,7 +20,7 @@ import kotlin.coroutines.suspendCoroutine
 @Suppress("TooGenericExceptionCaught")
 class SharedPrefsStore(
     private val authenticator: Authenticator = UserAuthenticator(),
-    private val hybridCryptoManager: HybridCryptoManager = RsaHybridCryptoManager(),
+    private val hybridCryptoManager: HybridCryptoManager = HybridCryptoManagerRsa(),
 ) : SecureStore {
     private val tag = this::class.java.simpleName
     private var configuration: SecureStorageConfiguration? = null
