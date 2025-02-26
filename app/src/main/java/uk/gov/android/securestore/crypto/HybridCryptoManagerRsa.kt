@@ -19,7 +19,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
  * be used to encrypt/ decrypt the data provided.
  */
 @OptIn(ExperimentalEncodingApi::class)
-class RsaHybridCryptoManager : HybridCryptoManager {
+internal class HybridCryptoManagerRsa : HybridCryptoManager {
     private lateinit var alias: String
     private lateinit var accessControlLevel: AccessControlLevel
     private val aesCryptoManager = AesCryptoManager()
