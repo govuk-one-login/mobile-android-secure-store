@@ -1,5 +1,4 @@
 # Taps (data sources)
-#tap "homebrew/homebrew-cask" # Not needed to be called explicitly
 
 # terminal programs
 brew "awscli" unless system "aws", "--version"
