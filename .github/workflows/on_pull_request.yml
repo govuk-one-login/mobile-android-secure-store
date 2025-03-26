@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Run pull request workflow
-        uses: govuk-one-login/mobile-android-pipelines@855fdc5a213d33089c258a556c5fe3b0885ce457
+        uses: govuk-one-login/mobile-android-pipelines@297a376fe1d8f5ad1f99c57049c7927b2b77fbe2
         with:
           sonar_token: ${{ secrets.SONAR_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
