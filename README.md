@@ -40,3 +40,10 @@ You can use the following command to check the SHA 256 checksum of a file
 ```bash
 shasum -a 256 gradle-8.10.2-bin.zip
 ```
+## Usage
+
+Add to your version catalog as per below:
+
+```
+secure-store = { group = "uk.gov.securestore", name = "app", version = "0.8.0" }
+```
