@@ -88,6 +88,16 @@ class SharedPrefsStoreTest {
     }
 
     @Test
+    fun testDeletePrefsThrows() {
+        whenever(mockEditor.remove(any()))
+            .thenThrow(SecurityException())
+        initSecureStore(AccessControlLevel.OPEN)
+        assertThrows(SecureStorageError::class.java) {
+            sharedPrefsStore.delete(alias)
+        }
+    }
+
+    @Test
     fun testDeleteNoInit() {
         sharedPrefsStore.delete(alias)
 

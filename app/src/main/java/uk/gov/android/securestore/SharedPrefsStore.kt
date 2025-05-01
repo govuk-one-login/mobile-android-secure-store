@@ -55,11 +55,15 @@ class SharedPrefsStore(
     }
 
     override fun delete(key: String) {
-        sharedPrefs?.let {
-            with(it.edit()) {
-                remove(key)
-                apply()
+        try {
+            sharedPrefs?.let {
+                with(it.edit()) {
+                    remove(key)
+                    apply()
+                }
             }
+        } catch (e: Exception) {
+            throw SecureStorageError(e)
         }
     }
 
