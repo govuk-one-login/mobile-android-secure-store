@@ -13,6 +13,7 @@ import org.mockito.kotlin.given
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
@@ -22,7 +23,6 @@ import uk.gov.android.securestore.crypto.HybridCryptoManager
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
 import java.security.GeneralSecurityException
-import java.security.KeyStoreException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -79,12 +79,19 @@ class SharedPrefsStoreTest {
     }
 
     @Test
-    fun testDelete() {
+    fun testDeleteAfterInit() {
         initSecureStore(AccessControlLevel.OPEN)
         sharedPrefsStore.delete(alias)
 
-        verify(mockEditor).putString(alias, null)
+        verify(mockEditor).remove(alias)
         verify(mockEditor).apply()
+    }
+
+    @Test
+    fun testDeleteNoInit() {
+        sharedPrefsStore.delete(alias)
+
+        verifyNoInteractions(mockEditor)
     }
 
     @Test
@@ -373,15 +380,6 @@ class SharedPrefsStoreTest {
     }
 
     @Test
-    fun testDeleteThrowsError() {
-        initSecureStore(AccessControlLevel.OPEN)
-        given(mockHybridCryptoManager.deleteKey()).willAnswer { throw KeyStoreException() }
-        assertThrows(SecureStorageError::class.java) {
-            sharedPrefsStore.delete(alias)
-        }
-    }
-
-    @Test
     fun testUpsertThrowsIfNotInit() {
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
@@ -430,15 +428,6 @@ class SharedPrefsStoreTest {
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
                 sharedPrefsStore.exists(alias)
-            }
-        }
-    }
-
-    @Test
-    fun testDeleteThrowsIfNotInit() {
-        assertThrows(SecureStorageError::class.java) {
-            runBlocking {
-                sharedPrefsStore.delete(alias)
             }
         }
     }

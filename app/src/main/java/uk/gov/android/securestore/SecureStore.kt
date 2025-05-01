@@ -35,7 +35,6 @@ interface SecureStore {
      *
      * @param [key] The unique identifier for the value to delete
      *
-     * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to delete
      */
     fun delete(key: String)
 

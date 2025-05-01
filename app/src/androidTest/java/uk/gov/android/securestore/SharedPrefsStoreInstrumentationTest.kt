@@ -94,7 +94,7 @@ class SharedPrefsStoreInstrumentationTest {
     }
 
     @Test
-    fun testDeleteAndRetrieveNonExistentKey() {
+    fun testDeleteAndRetrieveNonExistentKeyAfterInit() {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {

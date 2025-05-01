@@ -55,11 +55,11 @@ class SharedPrefsStore(
     }
 
     override fun delete(key: String) {
-        writeToPrefs(key, null)
-        try {
-            hybridCryptoManager.deleteKey()
-        } catch (e: Exception) {
-            throw SecureStorageError(e)
+        sharedPrefs?.let {
+            with(it.edit()) {
+                remove(key)
+                apply()
+            }
         }
     }
 
