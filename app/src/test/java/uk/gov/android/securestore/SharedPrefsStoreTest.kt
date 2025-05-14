@@ -83,7 +83,7 @@ class SharedPrefsStoreTest {
         initSecureStore(AccessControlLevel.OPEN)
         sharedPrefsStore.delete(alias)
 
-        verify(mockEditor).putString(alias, null)
+        verify(mockEditor).remove(alias)
         verify(mockEditor).apply()
     }
 
@@ -146,14 +146,14 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveWithAuthentication() {
-        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
         runBlocking {
             whenever(
                 mockAuthenticator.authenticate(
-                    eq(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS),
+                    eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
                     eq(authConfig),
                     any(),
                 ),
@@ -184,7 +184,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveWithAuthenticationMultiple() {
-        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
         whenever(mockSharedPreferences.getString(alias2, null)).thenReturn(encryptedValue2)
@@ -193,7 +193,7 @@ class SharedPrefsStoreTest {
         runBlocking {
             whenever(
                 mockAuthenticator.authenticate(
-                    eq(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS),
+                    eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
                     eq(authConfig),
                     any(),
                 ),
@@ -233,13 +233,13 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveWithAuthenticationNull() {
-        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(null)
 
         runBlocking {
             whenever(
                 mockAuthenticator.authenticate(
-                    eq(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS),
+                    eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
                     eq(authConfig),
                     any(),
                 ),
@@ -262,7 +262,13 @@ class SharedPrefsStoreTest {
                 context = activityFragment,
             )
 
-            assertEquals(RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND), result)
+            assertEquals(
+                RetrievalEvent.Failed(
+                    SecureStoreErrorType.NOT_FOUND,
+                    "java.lang.Exception: test not found",
+                ),
+                result,
+            )
             verify(mockAuthenticator).init(activityFragment)
             verify(mockAuthenticator).close()
         }
@@ -333,7 +339,7 @@ class SharedPrefsStoreTest {
 
     @Test
     fun testRetrieveThrowsErrorFromWrongACL() {
-        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
 
         runBlocking {
             val result = sharedPrefsStore.retrieve(alias)
@@ -373,11 +379,11 @@ class SharedPrefsStoreTest {
     }
 
     @Test
-    fun testDeleteThrowsError() {
+    fun testDeleteAllThrowsError() {
         initSecureStore(AccessControlLevel.OPEN)
         given(mockHybridCryptoManager.deleteKey()).willAnswer { throw KeyStoreException() }
         assertThrows(SecureStorageError::class.java) {
-            sharedPrefsStore.delete(alias)
+            sharedPrefsStore.deleteAll()
         }
     }
 
@@ -422,24 +428,6 @@ class SharedPrefsStoreTest {
                 ),
                 result,
             )
-        }
-    }
-
-    @Test
-    fun testExistsThrowsIfNotInit() {
-        assertThrows(SecureStorageError::class.java) {
-            runBlocking {
-                sharedPrefsStore.exists(alias)
-            }
-        }
-    }
-
-    @Test
-    fun testDeleteThrowsIfNotInit() {
-        assertThrows(SecureStorageError::class.java) {
-            runBlocking {
-                sharedPrefsStore.delete(alias)
-            }
         }
     }
 
