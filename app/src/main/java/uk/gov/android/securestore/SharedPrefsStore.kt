@@ -14,7 +14,6 @@ import uk.gov.android.securestore.crypto.HybridCryptoManager
 import uk.gov.android.securestore.crypto.HybridCryptoManagerImpl
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
-import java.security.GeneralSecurityException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -87,9 +86,10 @@ class SharedPrefsStore(
                         continuation.resume(
                             RetrievalEvent.Failed(
                                 e.type,
+                                e.message,
                             ),
                         )
-                    } catch (e: GeneralSecurityException) {
+                    } catch (e: Exception) {
                         Log.e(tag, e.message, e)
                         continuation.resume(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL))
                     }
@@ -223,7 +223,7 @@ class SharedPrefsStore(
 
     companion object {
         private const val KEY_SUFFIX = "Key"
-        private fun sseNotFound(alias: String): SecureStorageError = SecureStorageError(
+        private fun sseNotFound(alias: String) = SecureStorageError(
             Exception("$alias not found"),
             SecureStoreErrorType.NOT_FOUND,
         )
