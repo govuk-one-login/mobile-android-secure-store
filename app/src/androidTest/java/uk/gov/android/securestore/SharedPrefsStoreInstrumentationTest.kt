@@ -108,7 +108,10 @@ class SharedPrefsStoreInstrumentationTest {
                     key,
                 )
                 assertEquals(
-                    RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND),
+                    RetrievalEvent.Failed(
+                        SecureStoreErrorType.NOT_FOUND,
+                        "java.lang.Exception: testKey not found",
+                    ),
                     result2,
                 )
             }
