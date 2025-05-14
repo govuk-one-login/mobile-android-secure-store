@@ -430,15 +430,6 @@ class SharedPrefsStoreTest {
                     eq(authConfig),
                     any(),
                 ),
-            ).thenAnswer {
-                (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
-            }
-            whenever(
-                mockHybridCryptoManager.decrypt(
-                    eq(encryptedValue),
-                    eq(encryptedKey),
-                    any(),
-                ),
             ).thenThrow(RuntimeException("Error"))
 
             val result = sharedPrefsStore.retrieveWithAuthentication(
@@ -450,7 +441,7 @@ class SharedPrefsStoreTest {
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
-                    "java.lang.RuntimeException: Error",
+                    "Error",
                 ),
                 result,
             )
@@ -625,6 +616,16 @@ class SharedPrefsStoreTest {
                 ),
                 result,
             )
+        }
+    }
+
+    @Test
+    fun testMethodsWithNullSharedPrefs() {
+        runBlocking {
+            sharedPrefsStore.deleteAll()
+            sharedPrefsStore.delete(encryptedKey)
+
+            assertFalse(sharedPrefsStore.exists(encryptedKey))
         }
     }
 

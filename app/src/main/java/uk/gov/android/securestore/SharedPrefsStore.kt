@@ -89,9 +89,6 @@ class SharedPrefsStore(
                                 e.message,
                             ),
                         )
-                    } catch (e: Exception) {
-                        Log.e(tag, e.message, e)
-                        continuation.resume(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL))
                     }
                 }
             }
