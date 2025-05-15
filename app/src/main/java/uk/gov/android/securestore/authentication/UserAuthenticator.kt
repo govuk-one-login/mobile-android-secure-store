@@ -1,5 +1,6 @@
 package uk.gov.android.securestore.authentication
 
+import android.os.Build
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
@@ -17,11 +18,21 @@ internal class UserAuthenticator : Authenticator {
         configuration: AuthenticatorPromptConfiguration,
         handler: AuthenticatorCallbackHandler,
     ) {
+        require(accessControlLevel != AccessControlLevel.OPEN)
+
         val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
             .setTitle(configuration.title)
             .setSubtitle(configuration.subTitle)
             .setDescription(configuration.description)
-            .setAllowedAuthenticators(getRequireAuthenticators(accessControlLevel))
+            .setConfirmationRequired(false)
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            promptInfoBuilder
+                .setDeviceCredentialAllowed(true)
+        } else {
+            promptInfoBuilder
+                .setAllowedAuthenticators(getRequireAuthenticators(accessControlLevel))
+        }
 
         val biometricPrompt = fragmentContext?.let {
             BiometricPrompt(
@@ -39,9 +50,7 @@ internal class UserAuthenticator : Authenticator {
         when (accessControl) {
             AccessControlLevel.OPEN -> -1
             AccessControlLevel.PASSCODE -> DEVICE_CREDENTIAL
-            AccessControlLevel.PASSCODE_AND_ANY_BIOMETRICS,
-            AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS,
-            ->
+            AccessControlLevel.PASSCODE_AND_BIOMETRICS ->
                 BIOMETRIC_STRONG or DEVICE_CREDENTIAL
         }
 

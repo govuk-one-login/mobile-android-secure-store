@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.biometric.BiometricPrompt
+import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
@@ -13,11 +14,10 @@ import uk.gov.android.securestore.crypto.HybridCryptoManager
 import uk.gov.android.securestore.crypto.HybridCryptoManagerImpl
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
-import java.security.GeneralSecurityException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-@Suppress("TooGenericExceptionCaught")
+@Suppress("TooGenericExceptionCaught", "TooManyFunctions")
 class SharedPrefsStore(
     private val authenticator: Authenticator = UserAuthenticator(),
     private val hybridCryptoManager: HybridCryptoManager = HybridCryptoManagerImpl(),
@@ -39,29 +39,30 @@ class SharedPrefsStore(
     }
 
     override suspend fun upsert(key: String, value: String): String {
-        return suspendCoroutine { continuation ->
-            try {
-                // The callback is not needed in this implementation which is why is set to null
-                val result = hybridCryptoManager.encrypt(value)
-                    .also {
-                        writeToPrefs(key, it.data)
-                        writeToPrefs(key + KEY_SUFFIX, it.key)
-                    }
-                continuation.resumeWith(Result.success(result.data))
-            } catch (e: Exception) {
-                throw SecureStorageError(e)
-            }
+        return try {
+            val result = hybridCryptoManager.encrypt(value)
+                .also {
+                    writeToPrefs(key, it.data)
+                    writeToPrefs(key + KEY_SUFFIX, it.key)
+                }
+            result.data
+        } catch (e: Exception) {
+            throw SecureStorageError(e)
         }
     }
 
     override fun delete(key: String) {
+        sharedPrefs?.edit {
+            remove(key)
+        }
+    }
+
+    override fun deleteAll() {
+        sharedPrefs?.edit {
+            clear()
+        }
         try {
-            sharedPrefs?.let {
-                with(it.edit()) {
-                    remove(key)
-                    apply()
-                }
-            }
+            hybridCryptoManager.deleteKey()
         } catch (e: Exception) {
             throw SecureStorageError(e)
         }
@@ -85,11 +86,9 @@ class SharedPrefsStore(
                         continuation.resume(
                             RetrievalEvent.Failed(
                                 e.type,
+                                e.message,
                             ),
                         )
-                    } catch (e: GeneralSecurityException) {
-                        Log.e(tag, e.message, e)
-                        continuation.resume(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL))
                     }
                 }
             }
@@ -144,10 +143,15 @@ class SharedPrefsStore(
                         ),
                     )
                 } catch (e: SecureStorageError) {
-                    continuation.resume(RetrievalEvent.Failed(e.type))
-                } catch (e: GeneralSecurityException) {
+                    continuation.resume(RetrievalEvent.Failed(e.type, e.message))
+                } catch (e: Exception) {
                     Log.e(tag, e.message, e)
-                    continuation.resume(RetrievalEvent.Failed(SecureStoreErrorType.GENERAL))
+                    continuation.resume(
+                        RetrievalEvent.Failed(
+                            SecureStoreErrorType.GENERAL,
+                            e.message,
+                        ),
+                    )
                 } finally {
                     authenticator.close()
                 }
@@ -159,20 +163,13 @@ class SharedPrefsStore(
     }
 
     override fun exists(key: String): Boolean {
-        sharedPrefs?.let {
-            try {
-                return it.contains(key)
-            } catch (e: NullPointerException) {
-                throw SecureStorageError(e)
-            }
-        } ?: throw SecureStorageError(Exception("You must call init first!"))
+        return sharedPrefs?.contains(key) == true
     }
 
     private fun writeToPrefs(key: String, value: String?) {
         sharedPrefs?.let {
-            with(it.edit()) {
+            it.edit {
                 putString(key, value)
-                apply()
             }
         } ?: throw SecureStorageError(Exception("You must call init first!"))
     }
@@ -223,7 +220,7 @@ class SharedPrefsStore(
 
     companion object {
         private const val KEY_SUFFIX = "Key"
-        private fun sseNotFound(alias: String): SecureStorageError = SecureStorageError(
+        private fun sseNotFound(alias: String) = SecureStorageError(
             Exception("$alias not found"),
             SecureStoreErrorType.NOT_FOUND,
         )

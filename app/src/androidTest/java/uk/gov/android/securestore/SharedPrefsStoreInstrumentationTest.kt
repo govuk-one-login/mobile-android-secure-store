@@ -4,7 +4,6 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Ignore
@@ -12,13 +11,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
-import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
 import java.security.KeyStore
 
@@ -61,7 +58,7 @@ class SharedPrefsStoreInstrumentationTest {
     @Test
     @Ignore("Currently don't know if we can simulate biometrics on emulator")
     fun testUpsertAndRetrieveWithAuth() {
-        initSecureStore(AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS)
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
         whenever(
             mockAuthenticator.authenticate(
                 any(),
@@ -75,21 +72,23 @@ class SharedPrefsStoreInstrumentationTest {
         rule.scenario.onActivity {
             runBlocking {
                 sharedPrefsStore.upsert(key, value)
-                assertThrows(SecureStorageError::class.java) {
-                    runBlocking {
-                        val result = sharedPrefsStore.retrieveWithAuthentication(
-                            key,
-                            authPromptConfig = AuthenticatorPromptConfiguration("title"),
-                            context = it,
-                        )
+                val result = sharedPrefsStore.retrieveWithAuthentication(
+                    key,
+                    authPromptConfig = AuthenticatorPromptConfiguration("title"),
+                    context = it,
+                )
 
-                        assertEquals(value, result)
-                    }
-                }
-
-                verify(mockAuthenticator, times(2)).init(it)
-                verify(mockAuthenticator, times(2)).close()
+                assertEquals(
+                    RetrievalEvent.Failed(
+                        SecureStoreErrorType.GENERAL,
+                        "android.security.keystore.UserNotAuthenticatedException: User not authenticated",
+                    ),
+                    result,
+                )
             }
+
+            verify(mockAuthenticator).init(it)
+            verify(mockAuthenticator).close()
         }
     }
 
@@ -99,15 +98,53 @@ class SharedPrefsStoreInstrumentationTest {
         rule.scenario.onActivity {
             runBlocking {
                 sharedPrefsStore.upsert(key, value)
+                val result1 = sharedPrefsStore.retrieve(
+                    key,
+                )
+                assertEquals(RetrievalEvent.Success(mapOf(key to value)), result1)
 
                 sharedPrefsStore.delete(key)
-                val result = sharedPrefsStore.retrieve(
+                val result2 = sharedPrefsStore.retrieve(
                     key,
                 )
                 assertEquals(
-                    RetrievalEvent.Failed(SecureStoreErrorType.NOT_FOUND),
-                    result,
+                    RetrievalEvent.Failed(
+                        SecureStoreErrorType.NOT_FOUND,
+                        "java.lang.Exception: testKey not found",
+                    ),
+                    result2,
                 )
+            }
+        }
+    }
+
+    @Test
+    fun testDeleteAll() {
+        val anotherValue = "anotherValue"
+        val anotherKey = "anotherKey"
+        initSecureStore(AccessControlLevel.OPEN)
+        rule.scenario.onActivity {
+            runBlocking {
+                sharedPrefsStore.upsert(key, value)
+                sharedPrefsStore.upsert(anotherKey, anotherValue)
+                val result1 = sharedPrefsStore.retrieve(
+                    key,
+                    anotherKey,
+                )
+                assertEquals(
+                    RetrievalEvent.Success(
+                        mapOf(
+                            key to value,
+                            anotherKey to anotherValue,
+                        ),
+                    ),
+                    result1,
+                )
+
+                sharedPrefsStore.deleteAll()
+
+                assertFalse(sharedPrefsStore.exists(key))
+                assertFalse(sharedPrefsStore.exists(anotherKey))
             }
         }
     }

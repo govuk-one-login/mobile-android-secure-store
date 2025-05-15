@@ -23,7 +23,7 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
     private lateinit var alias: String
     private lateinit var accessControlLevel: AccessControlLevel
     private val aesCryptoManager = AesCryptoManager()
-    private val keyStore: KeyStore = KeyStore.getInstance(TYPE).apply {
+    private val keyStore: KeyStore = KeyStore.getInstance(PROVIDER).apply {
         load(null)
     }
 
@@ -106,11 +106,7 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
                 )
         }
 
-        if (accessControlLevel == AccessControlLevel.PASSCODE_AND_ANY_BIOMETRICS) {
-            kpgSpec.setInvalidatedByBiometricEnrollment(false)
-        }
-
-        KeyPairGenerator.getInstance(ALGORITHM, TYPE).apply {
+        KeyPairGenerator.getInstance(ALGORITHM, PROVIDER).apply {
             initialize(
                 kpgSpec.build(),
             )
@@ -121,15 +117,14 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
     private fun getAuthType(accessLevel: AccessControlLevel): Int =
         when (accessLevel) {
             AccessControlLevel.OPEN -> AUTH_TYPE_OPEN
-            AccessControlLevel.PASSCODE -> KeyProperties.AUTH_DEVICE_CREDENTIAL
-            AccessControlLevel.PASSCODE_AND_ANY_BIOMETRICS,
-            AccessControlLevel.PASSCODE_AND_CURRENT_BIOMETRICS,
+            AccessControlLevel.PASSCODE,
+            AccessControlLevel.PASSCODE_AND_BIOMETRICS,
             ->
                 KeyProperties.AUTH_DEVICE_CREDENTIAL or KeyProperties.AUTH_BIOMETRIC_STRONG
         }
 
     companion object {
-        private const val TYPE = "AndroidKeyStore"
+        private const val PROVIDER = "AndroidKeyStore"
         private const val ALGORITHM = KeyProperties.KEY_ALGORITHM_RSA
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_ECB
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
