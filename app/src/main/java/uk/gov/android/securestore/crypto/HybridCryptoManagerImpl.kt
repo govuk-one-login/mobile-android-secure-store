@@ -38,7 +38,6 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
         }
-
         val encryptedData = aesCryptoManager.encrypt(input) {
             val encryptedKey = encryptCipher.doFinal(it)
             val result = Base64.encode(encryptedKey)
