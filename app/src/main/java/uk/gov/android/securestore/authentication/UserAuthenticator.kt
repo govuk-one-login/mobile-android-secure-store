@@ -24,6 +24,8 @@ internal class UserAuthenticator : Authenticator {
             .setTitle(configuration.title)
             .setSubtitle(configuration.subTitle)
             .setDescription(configuration.description)
+            .setConfirmationRequired(false)
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             promptInfoBuilder
                 .setDeviceCredentialAllowed(true)
