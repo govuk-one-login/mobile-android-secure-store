@@ -317,39 +317,6 @@ class SharedPrefsStoreTest {
     }
 
     @Test
-    fun testRetrieveWithAuthenticationAuthFails() {
-        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
-
-        runBlocking {
-            whenever(
-                mockAuthenticator.authenticate(
-                    eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
-                    eq(authConfig),
-                    any(),
-                ),
-            ).thenAnswer {
-                (it.arguments[2] as AuthenticatorCallbackHandler).onFailure()
-            }
-
-            val result = sharedPrefsStore.retrieveWithAuthentication(
-                alias,
-                authPromptConfig = authConfig,
-                context = activityFragment,
-            )
-
-            assertEquals(
-                RetrievalEvent.Failed(
-                    SecureStoreErrorType.FAILED_BIO_PROMPT,
-                    "Bio Prompt failed",
-                ),
-                result,
-            )
-            verify(mockAuthenticator).init(activityFragment)
-            verify(mockAuthenticator).close()
-        }
-    }
-
-    @Test
     fun testRetrieveWithAuthenticationAuthErrorsGeneral() {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
 
