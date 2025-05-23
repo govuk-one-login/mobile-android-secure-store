@@ -133,12 +133,7 @@ class SharedPrefsStore(
                                 )
                             },
                             onFailure = {
-                                continuation.resume(
-                                    RetrievalEvent.Failed(
-                                        SecureStoreErrorType.FAILED_BIO_PROMPT,
-                                        "Bio Prompt failed",
-                                    ),
-                                )
+                                Log.e(tag, "Bio Prompt Failed")
                             },
                         ),
                     )
