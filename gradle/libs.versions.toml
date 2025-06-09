@@ -5,7 +5,7 @@
 android-gradle = "8.8.1" # https://developer.android.com/studio/releases/gradle-plugin
 androidx-test = "1.6.1"
 androidx-junit = "1.2.1"
-appcompat = "1.7.0" # https://developer.android.com/jetpack/androidx/releases/appcompat
+appcompat = "1.7.1" # https://developer.android.com/jetpack/androidx/releases/appcompat
 biometric = "1.1.0"
 core-ktx = "1.16.0"
 detekt-gradle = "1.23.8" # https://github.com/detekt/detekt/releases/tag/v1.23.6
