@@ -121,8 +121,12 @@ class SharedPrefsStore(
                         authPromptConfig,
                         AuthenticatorCallbackHandler(
                             onSuccess = {
-                                val results = handleResults(*key)
-                                continuation.resume(RetrievalEvent.Success(results))
+                                val results = try {
+                                    RetrievalEvent.Success(handleResults(*key))
+                                } catch (e: SecureStorageError) {
+                                    RetrievalEvent.Failed(e.type, e.message)
+                                }
+                                continuation.resume(results)
                             },
                             onError = { errorCode, errorString ->
                                 continuation.resume(
