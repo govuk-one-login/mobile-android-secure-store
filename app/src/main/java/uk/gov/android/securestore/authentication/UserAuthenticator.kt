@@ -28,6 +28,8 @@ internal class UserAuthenticator : Authenticator {
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             promptInfoBuilder
+                .setNegativeButtonText("Close")
+                .setAllowedAuthenticators(BIOMETRIC_STRONG)
                 .setDeviceCredentialAllowed(true)
         } else {
             promptInfoBuilder
