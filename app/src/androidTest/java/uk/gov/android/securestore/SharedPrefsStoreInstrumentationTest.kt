@@ -150,6 +150,22 @@ class SharedPrefsStoreInstrumentationTest {
     }
 
     @Test
+    @Suppress("SwallowedException")
+    fun testDeleteAllUnInitialized() {
+        rule.scenario.onActivity {
+            runBlocking {
+                val exceptionNotThrown = try {
+                    sharedPrefsStore.deleteAll()
+                    true
+                } catch (e: Exception) {
+                    false
+                }
+                assert(exceptionNotThrown)
+            }
+        }
+    }
+
+    @Test
     fun testExists() {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
