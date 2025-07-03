@@ -150,6 +150,7 @@ class SharedPrefsStoreInstrumentationTest {
     }
 
     @Test
+    @Suppress("SwallowedException")
     fun testDeleteAllUnInitialized() {
         rule.scenario.onActivity {
             runBlocking {
