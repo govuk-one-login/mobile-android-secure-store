@@ -70,7 +70,9 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
     }
 
     override fun deleteKey() {
-        keyStore.deleteEntry(alias)
+        if (this::alias.isInitialized) {
+            keyStore.deleteEntry(alias)
+        }
     }
 
     private fun getKeyEntry(alias: String): PrivateKeyEntry {
