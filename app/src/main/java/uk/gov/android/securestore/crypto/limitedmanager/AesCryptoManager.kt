@@ -20,9 +20,16 @@ class AesCryptoManager : SymmetricCryptoManager {
         // Create and initialize the Cipher
         val cipher = Cipher.getInstance(AES_ALG)
         val aesKey = createKey()
+        val iv = ByteArray(IV_BYTES_SIZE)
+        SecureRandom().nextBytes(iv)
+        val gcmSpec = GCMParameterSpec(TAG_LENGTH, iv)
         cipher.init(
             Cipher.ENCRYPT_MODE,
-            SecretKeySpec(aesKey.encoded, KeyProperties.KEY_ALGORITHM_AES),
+            SecretKeySpec(
+                aesKey.encoded,
+                KeyProperties.KEY_ALGORITHM_AES,
+            ),
+            gcmSpec,
         )
 
         val encryptedKey = encryptAesKey(aesKey.encoded)
