@@ -3,7 +3,7 @@
 
 [versions]
 android-gradle = "8.8.1" # https://developer.android.com/studio/releases/gradle-plugin
-androidx-test = "1.6.1"
+androidx-test = "1.7.0"
 androidx-junit = "1.2.1"
 appcompat = "1.7.1" # https://developer.android.com/jetpack/androidx/releases/appcompat
 biometric = "1.1.0"
