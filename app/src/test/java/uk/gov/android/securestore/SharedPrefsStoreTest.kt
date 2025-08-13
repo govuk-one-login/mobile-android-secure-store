@@ -596,6 +596,18 @@ class SharedPrefsStoreTest {
         }
     }
 
+    @Test
+    fun testRetrievalEventFailedString() {
+        val expectedText = "Secure store retrieval failed: " +
+            "\ntype - ${SecureStoreErrorType.GENERAL}" +
+            "\nreason - reason"
+        val actualText = RetrievalEvent.Failed(
+            type = SecureStoreErrorType.GENERAL,
+            reason = "reason",
+        ).toString()
+        assertEquals(expectedText, actualText)
+    }
+
     private fun initSecureStore(acl: AccessControlLevel) {
         val config = SecureStorageConfiguration(
             storeId,

@@ -19,5 +19,11 @@ sealed class RetrievalEvent {
     data class Failed(
         val type: SecureStoreErrorType,
         val reason: String? = null,
-    ) : RetrievalEvent()
+    ) : RetrievalEvent() {
+        override fun toString(): String {
+            return "Secure store retrieval failed: " +
+                "\ntype - $type" +
+                "\nreason - $reason"
+        }
+    }
 }
