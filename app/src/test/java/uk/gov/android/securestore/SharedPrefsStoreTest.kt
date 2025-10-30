@@ -489,7 +489,7 @@ class SharedPrefsStoreTest {
                 ),
             ).thenAnswer {
                 (it.arguments[2] as AuthenticatorCallbackHandler)
-                    .onError(BiometricPrompt.ERROR_UNABLE_TO_PROCESS, "face scan timeout")
+                    .onError(BiometricPrompt.ERROR_TIMEOUT, "face scan timeout")
             }
 
             sharedPrefsStore.retrieveWithAuthentication(
