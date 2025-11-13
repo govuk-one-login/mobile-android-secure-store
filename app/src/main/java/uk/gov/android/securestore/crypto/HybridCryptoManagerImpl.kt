@@ -4,6 +4,7 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.CoroutineDispatcher
 import uk.gov.android.securestore.AccessControlLevel
 import uk.gov.android.securestore.crypto.limitedmanager.AesCryptoManager
 import java.security.KeyPairGenerator
@@ -22,14 +23,16 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 internal class HybridCryptoManagerImpl : HybridCryptoManager {
     private lateinit var alias: String
     private lateinit var accessControlLevel: AccessControlLevel
+    private lateinit var dispatcher: CoroutineDispatcher
     private val aesCryptoManager = AesCryptoManager()
     private val keyStore: KeyStore = KeyStore.getInstance(PROVIDER).apply {
         load(null)
     }
 
-    override fun init(alias: String, acl: AccessControlLevel) {
+    override fun init(alias: String, acl: AccessControlLevel, dispatcher: CoroutineDispatcher) {
         accessControlLevel = acl
         this.alias = alias
+        this.dispatcher = dispatcher
     }
 
     override fun encrypt(

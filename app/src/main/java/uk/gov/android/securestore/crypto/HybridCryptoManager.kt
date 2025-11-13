@@ -1,5 +1,6 @@
 package uk.gov.android.securestore.crypto
 
+import kotlinx.coroutines.CoroutineDispatcher
 import uk.gov.android.securestore.AccessControlLevel
 
 /**
@@ -9,7 +10,7 @@ interface HybridCryptoManager {
     /**
      *Init the [AccessControlLevel] and alias, this must be done before using the CryptoManager
      */
-    fun init(alias: String, acl: AccessControlLevel)
+    fun init(alias: String, acl: AccessControlLevel, dispatcher: CoroutineDispatcher)
 
     /**
      * Encrypt a [String]
