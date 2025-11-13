@@ -78,18 +78,14 @@ class SharedPrefsStore(
                     "Access control level must be OPEN to use this retrieve method",
                 )
             } else {
-                suspendCoroutine<RetrievalEvent> { continuation ->
-                    try {
-                        val results = handleResults(*key)
-                        continuation.resume(RetrievalEvent.Success(results))
-                    } catch (e: SecureStorageError) {
-                        continuation.resume(
-                            RetrievalEvent.Failed(
-                                e.type,
-                                e.message,
-                            ),
-                        )
-                    }
+                try {
+                    val results = handleResults(*key)
+                    RetrievalEvent.Success(results)
+                } catch (e: SecureStorageError) {
+                    RetrievalEvent.Failed(
+                        e.type,
+                        e.message,
+                    )
                 }
             }
         } ?: RetrievalEvent.Failed(
