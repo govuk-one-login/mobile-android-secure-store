@@ -100,18 +100,16 @@ class SharedPrefsStore(
         context: FragmentActivity,
     ): RetrievalEvent {
         return configuration?.let { configuration ->
-            suspendCoroutine { continuation ->
-                if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
-                    continuation.resume(
-                        RetrievalEvent.Failed(
-                            SecureStoreErrorType.GENERAL,
-                            "Use retrieve method, access control is set to OPEN, " +
-                                "no need for auth",
-                        ),
-                    )
-                }
-                try {
-                    authenticator.init(context)
+            if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
+                RetrievalEvent.Failed(
+                    SecureStoreErrorType.GENERAL,
+                    "Use retrieve method, access control is set to OPEN, " +
+                            "no need for auth",
+                )
+            }
+            try {
+                authenticator.init(context)
+                suspendCoroutine<RetrievalEvent> { continuation ->
                     authenticator.authenticate(
                         configuration.accessControlLevel,
                         authPromptConfig,
@@ -137,19 +135,17 @@ class SharedPrefsStore(
                             },
                         ),
                     )
-                } catch (e: SecureStorageError) {
-                    continuation.resume(RetrievalEvent.Failed(e.type, e.message))
-                } catch (e: Exception) {
-                    Log.e(tag, e.message, e)
-                    continuation.resume(
-                        RetrievalEvent.Failed(
-                            SecureStoreErrorType.GENERAL,
-                            e.message,
-                        ),
-                    )
-                } finally {
-                    authenticator.close()
                 }
+            } catch (e: SecureStorageError) {
+                RetrievalEvent.Failed(e.type, e.message)
+            } catch (e: Exception) {
+                Log.e(tag, e.message, e)
+                RetrievalEvent.Failed(
+                    SecureStoreErrorType.GENERAL,
+                    e.message,
+                )
+            } finally {
+                authenticator.close()
             }
         } ?: RetrievalEvent.Failed(
             SecureStoreErrorType.GENERAL,
