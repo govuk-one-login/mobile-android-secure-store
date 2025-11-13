@@ -21,7 +21,7 @@ interface HybridCryptoManager {
      *
      * @throws [java.security.GeneralSecurityException] if encryption fails
      */
-    fun encrypt(
+    suspend fun encrypt(
         input: String,
     ): EncryptedData
 

@@ -34,6 +34,7 @@ class SharedPrefsStore(
         hybridCryptoManager.init(
             configuration.id,
             configuration.accessControlLevel,
+            configuration.dispatcher,
         )
         sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
     }
@@ -197,6 +198,7 @@ class SharedPrefsStore(
         }
     }
 
+    // TODO: create thread for each key and use suspendCoroutine to reduce callback hell
     private fun handleResults(vararg key: String): MutableMap<String, String> {
         val results = mutableMapOf<String, String>()
         key.forEach { alias ->

@@ -5,6 +5,9 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uk.gov.android.securestore.AccessControlLevel
 import uk.gov.android.securestore.crypto.limitedmanager.AesCryptoManager
 import java.security.KeyPairGenerator
@@ -35,32 +38,35 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
         this.dispatcher = dispatcher
     }
 
-    override fun encrypt(
+    override suspend fun encrypt(
         input: String,
-    ): EncryptedData {
-        val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
-            init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
+    ): EncryptedData =
+        withContext(dispatcher) {
+            val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
+                init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
+            }
+            val encryptedData = aesCryptoManager.encrypt(input) {
+                val encryptedKey = encryptCipher.doFinal(it)
+                val result = Base64.encode(encryptedKey)
+                result
+            }
+            return@withContext encryptedData
         }
-        val encryptedData = aesCryptoManager.encrypt(input) {
-            val encryptedKey = encryptCipher.doFinal(it)
-            val result = Base64.encode(encryptedKey)
-            result
-        }
-        return encryptedData
-    }
 
     override fun decrypt(
         encryptedData: String,
-        encryptedKey: String,
+        key: String,
         callback: (data: String?) -> Unit,
     ) {
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        val encryptedKeyBytes = Base64.decode(encryptedKey)
-        val decryptedKey = initCipherAndDecryptKey(
-            cipher,
-            encryptedKeyBytes,
-        )
-        aesCryptoManager.decrypt(encryptedData, decryptedKey) { callback(it) }
+        CoroutineScope(dispatcher).launch {
+            val cipher = Cipher.getInstance(TRANSFORMATION)
+            val encryptedKeyBytes = Base64.decode(key)
+            val decryptedKey = initCipherAndDecryptKey(
+                cipher,
+                encryptedKeyBytes,
+            )
+            aesCryptoManager.decrypt(encryptedData, decryptedKey) { callback(it) }
+        }
     }
 
     private fun initCipherAndDecryptKey(
@@ -74,7 +80,9 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
 
     override fun deleteKey() {
         if (this::alias.isInitialized) {
-            keyStore.deleteEntry(alias)
+            CoroutineScope(dispatcher).launch {
+                keyStore.deleteEntry(alias)
+            }
         }
     }
 
