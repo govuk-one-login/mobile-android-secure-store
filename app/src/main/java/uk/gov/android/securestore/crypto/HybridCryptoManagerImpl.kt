@@ -5,8 +5,6 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uk.gov.android.securestore.AccessControlLevel
 import uk.gov.android.securestore.crypto.limitedmanager.AesCryptoManager
@@ -38,27 +36,26 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
         this.dispatcher = dispatcher
     }
 
-    override suspend fun encrypt(
+    override fun encrypt(
         input: String,
-    ): EncryptedData =
-        withContext(dispatcher) {
-            val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
-                init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
-            }
-            val encryptedData = aesCryptoManager.encrypt(input) {
-                val encryptedKey = encryptCipher.doFinal(it)
-                val result = Base64.encode(encryptedKey)
-                result
-            }
-            return@withContext encryptedData
+    ): EncryptedData {
+        val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
+            init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
         }
+        val encryptedData = aesCryptoManager.encrypt(input) {
+            val encryptedKey = encryptCipher.doFinal(it)
+            val result = Base64.encode(encryptedKey)
+            result
+        }
+        return encryptedData
+    }
 
-    override fun decrypt(
+    override suspend fun decrypt(
         encryptedData: String,
         key: String,
         callback: (data: String?) -> Unit,
     ) {
-        CoroutineScope(dispatcher).launch {
+        withContext(dispatcher) {
             val cipher = Cipher.getInstance(TRANSFORMATION)
             val encryptedKeyBytes = Base64.decode(key)
             val decryptedKey = initCipherAndDecryptKey(
@@ -80,9 +77,7 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
 
     override fun deleteKey() {
         if (this::alias.isInitialized) {
-            CoroutineScope(dispatcher).launch {
-                keyStore.deleteEntry(alias)
-            }
+            keyStore.deleteEntry(alias)
         }
     }
 
@@ -131,7 +126,7 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
             AccessControlLevel.OPEN -> AUTH_TYPE_OPEN
             AccessControlLevel.PASSCODE,
             AccessControlLevel.PASSCODE_AND_BIOMETRICS,
-            ->
+                ->
                 KeyProperties.AUTH_DEVICE_CREDENTIAL or KeyProperties.AUTH_BIOMETRIC_STRONG
         }
 

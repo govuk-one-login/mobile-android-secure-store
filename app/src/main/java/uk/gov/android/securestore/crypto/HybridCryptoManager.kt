@@ -21,7 +21,7 @@ interface HybridCryptoManager {
      *
      * @throws [java.security.GeneralSecurityException] if encryption fails
      */
-    suspend fun encrypt(
+    fun encrypt(
         input: String,
     ): EncryptedData
 
@@ -33,7 +33,7 @@ interface HybridCryptoManager {
      *
      * @throws [java.security.GeneralSecurityException] if decryption fails
      */
-    fun decrypt(
+    suspend fun decrypt(
         encryptedData: String,
         key: String,
         callback: (data: String?) -> Unit,
