@@ -67,7 +67,9 @@ class SharedPrefsStoreTest {
     @Test
     fun testUpsert() {
         initSecureStore(AccessControlLevel.OPEN)
-        whenever(mockHybridCryptoManager.encrypt(eq(value))).thenReturn(encryptedData)
+        whenever(runBlocking {
+            mockHybridCryptoManager.encrypt(eq(value))
+        }).thenReturn(encryptedData)
 
         runBlocking {
             sharedPrefsStore.upsert(alias, value)
@@ -569,11 +571,11 @@ class SharedPrefsStoreTest {
     @Test
     fun testUpsertThrowsError() {
         initSecureStore(AccessControlLevel.OPEN)
-        given(
+        given(runBlocking {
             mockHybridCryptoManager.encrypt(
                 value,
-            ),
-        ).willAnswer { throw GeneralSecurityException() }
+            )
+        }).willAnswer { throw GeneralSecurityException() }
 
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
@@ -586,7 +588,15 @@ class SharedPrefsStoreTest {
     fun testRetrieveReturnsErrorFromCryptoThrows() {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
-        given(mockHybridCryptoManager.decrypt(eq(encryptedValue), eq(encryptedKey), any()))
+        given(
+            runBlocking {
+                mockHybridCryptoManager.decrypt(
+                    eq(encryptedValue),
+                    eq(encryptedKey),
+                    any()
+                )
+            }
+        )
             .willAnswer {
                 throw GeneralSecurityException()
             }
@@ -648,9 +658,15 @@ class SharedPrefsStoreTest {
     @Test
     fun testDeleteAllThrowsError() {
         initSecureStore(AccessControlLevel.OPEN)
-        given(mockHybridCryptoManager.deleteKey()).willAnswer { throw KeyStoreException() }
+        given(
+            runBlocking {
+                mockHybridCryptoManager.deleteKey()
+            }
+        ).willAnswer { throw KeyStoreException() }
         assertThrows(SecureStorageError::class.java) {
-            sharedPrefsStore.deleteAll()
+            runBlocking {
+                sharedPrefsStore.deleteAll()
+            }
         }
     }
 
@@ -711,8 +727,8 @@ class SharedPrefsStoreTest {
     @Test
     fun testRetrievalEventFailedString() {
         val expectedText = "Secure store retrieval failed: " +
-            "\ntype - ${SecureStoreErrorType.GENERAL}" +
-            "\nreason - reason"
+                "\ntype - ${SecureStoreErrorType.GENERAL}" +
+                "\nreason - reason"
         val actualText = RetrievalEvent.Failed(
             type = SecureStoreErrorType.GENERAL,
             reason = "reason",

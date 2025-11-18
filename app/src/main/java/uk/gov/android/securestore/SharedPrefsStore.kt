@@ -127,9 +127,11 @@ class SharedPrefsStore(
                                         getErrorType(errorCode),
                                         errorString.toString(),
                                     )
+                                    continuation.resumeWith(Result.success(false))
                                 },
                                 onFailure = {
                                     Log.e(tag, "Bio Prompt Failed")
+                                    continuation.resumeWith(Result.success(false))
                                 },
                             ),
                         )
