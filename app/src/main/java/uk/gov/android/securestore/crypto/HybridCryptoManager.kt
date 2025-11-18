@@ -21,7 +21,7 @@ interface HybridCryptoManager {
      *
      * @throws [java.security.GeneralSecurityException] if encryption fails
      */
-    fun encrypt(
+    suspend fun encrypt(
         input: String,
     ): EncryptedData
 
@@ -44,5 +44,5 @@ interface HybridCryptoManager {
      *
      * @throws [java.security.KeyStoreException] If Keystore is not initialized or entry not removed
      */
-    fun deleteKey()
+    suspend fun deleteKey()
 }

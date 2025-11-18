@@ -36,9 +36,9 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
         this.dispatcher = dispatcher
     }
 
-    override fun encrypt(
+    override suspend fun encrypt(
         input: String,
-    ): EncryptedData {
+    ): EncryptedData = withContext(dispatcher) {
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
         }
@@ -47,7 +47,7 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
             val result = Base64.encode(encryptedKey)
             result
         }
-        return encryptedData
+        return@withContext encryptedData
     }
 
     override suspend fun decrypt(
@@ -75,9 +75,11 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
         return encodedKey
     }
 
-    override fun deleteKey() {
+    override suspend fun deleteKey() {
         if (this::alias.isInitialized) {
-            keyStore.deleteEntry(alias)
+            withContext(dispatcher) {
+                keyStore.deleteEntry(alias)
+            }
         }
     }
 

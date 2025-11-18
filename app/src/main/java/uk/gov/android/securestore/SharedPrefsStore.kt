@@ -57,7 +57,7 @@ class SharedPrefsStore(
         }
     }
 
-    override fun deleteAll() {
+    override suspend fun deleteAll() {
         sharedPrefs?.edit {
             clear()
         }
