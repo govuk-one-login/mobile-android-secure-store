@@ -128,7 +128,7 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
             AccessControlLevel.OPEN -> AUTH_TYPE_OPEN
             AccessControlLevel.PASSCODE,
             AccessControlLevel.PASSCODE_AND_BIOMETRICS,
-                ->
+            ->
                 KeyProperties.AUTH_DEVICE_CREDENTIAL or KeyProperties.AUTH_BIOMETRIC_STRONG
         }
 

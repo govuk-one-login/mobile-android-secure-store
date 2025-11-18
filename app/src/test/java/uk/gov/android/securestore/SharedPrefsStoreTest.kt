@@ -67,9 +67,11 @@ class SharedPrefsStoreTest {
     @Test
     fun testUpsert() {
         initSecureStore(AccessControlLevel.OPEN)
-        whenever(runBlocking {
-            mockHybridCryptoManager.encrypt(eq(value))
-        }).thenReturn(encryptedData)
+        whenever(
+            runBlocking {
+                mockHybridCryptoManager.encrypt(eq(value))
+            },
+        ).thenReturn(encryptedData)
 
         runBlocking {
             sharedPrefsStore.upsert(alias, value)
@@ -532,6 +534,40 @@ class SharedPrefsStoreTest {
     }
 
     @Test
+    fun testRetrieveWithAuthenticationAuthFailsGeneral() {
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
+
+        runBlocking {
+            whenever(
+                mockAuthenticator.authenticate(
+                    eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
+                    eq(authConfig),
+                    any(),
+                ),
+            ).thenAnswer {
+                (it.arguments[2] as AuthenticatorCallbackHandler)
+                    .onFailure()
+            }
+
+            val result = sharedPrefsStore.retrieveWithAuthentication(
+                alias,
+                authPromptConfig = authConfig,
+                context = activityFragment,
+            )
+
+            assertEquals(
+                RetrievalEvent.Failed(
+                    SecureStoreErrorType.GENERAL,
+                    "Bio prompt failed",
+                ),
+                result,
+            )
+            verify(mockAuthenticator).init(activityFragment)
+            verify(mockAuthenticator).close()
+        }
+    }
+
+    @Test
     fun testRetrieveNonExistentKey() {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(eq(alias), any())).thenReturn(null)
@@ -571,11 +607,13 @@ class SharedPrefsStoreTest {
     @Test
     fun testUpsertThrowsError() {
         initSecureStore(AccessControlLevel.OPEN)
-        given(runBlocking {
-            mockHybridCryptoManager.encrypt(
-                value,
-            )
-        }).willAnswer { throw GeneralSecurityException() }
+        given(
+            runBlocking {
+                mockHybridCryptoManager.encrypt(
+                    value,
+                )
+            },
+        ).willAnswer { throw GeneralSecurityException() }
 
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
@@ -593,9 +631,9 @@ class SharedPrefsStoreTest {
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
                     eq(encryptedKey),
-                    any()
+                    any(),
                 )
-            }
+            },
         )
             .willAnswer {
                 throw GeneralSecurityException()
@@ -661,7 +699,7 @@ class SharedPrefsStoreTest {
         given(
             runBlocking {
                 mockHybridCryptoManager.deleteKey()
-            }
+            },
         ).willAnswer { throw KeyStoreException() }
         assertThrows(SecureStorageError::class.java) {
             runBlocking {
@@ -727,8 +765,8 @@ class SharedPrefsStoreTest {
     @Test
     fun testRetrievalEventFailedString() {
         val expectedText = "Secure store retrieval failed: " +
-                "\ntype - ${SecureStoreErrorType.GENERAL}" +
-                "\nreason - reason"
+            "\ntype - ${SecureStoreErrorType.GENERAL}" +
+            "\nreason - reason"
         val actualText = RetrievalEvent.Failed(
             type = SecureStoreErrorType.GENERAL,
             reason = "reason",

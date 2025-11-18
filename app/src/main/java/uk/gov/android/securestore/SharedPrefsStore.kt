@@ -109,7 +109,7 @@ class SharedPrefsStore(
                 result = RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
                     "Use retrieve method, access control is set to OPEN, " +
-                            "no need for auth",
+                        "no need for auth",
                 )
             } else {
                 try {
@@ -130,13 +130,20 @@ class SharedPrefsStore(
                                     continuation.resumeWith(Result.success(false))
                                 },
                                 onFailure = {
+                                    result = RetrievalEvent.Failed(
+                                        SecureStoreErrorType.GENERAL,
+                                        "Bio prompt failed",
+                                    )
                                     Log.e(tag, "Bio Prompt Failed")
                                     continuation.resumeWith(Result.success(false))
                                 },
                             ),
                         )
                     }
-                    if (authenticateResultSuccess) result = RetrievalEvent.Success(handleResults(*key))
+                    if (authenticateResultSuccess) {
+                        result =
+                            RetrievalEvent.Success(handleResults(*key))
+                    }
                 } catch (e: SecureStorageError) {
                     result = RetrievalEvent.Failed(e.type, e.message)
                 } catch (e: Exception) {
@@ -197,7 +204,6 @@ class SharedPrefsStore(
         }
     }
 
-    // TODO: create thread for each key and use suspendCoroutine to reduce callback hell
     private suspend fun handleResults(vararg key: String): MutableMap<String, String> {
         val results = mutableMapOf<String, String>()
         key.forEach { alias ->
