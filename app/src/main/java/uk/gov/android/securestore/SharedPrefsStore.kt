@@ -94,7 +94,7 @@ class SharedPrefsStore(
         )
     }
 
-    @Suppress("NestedBlockDepth")
+    @Suppress("NestedBlockDepth", "LongMethod")
     override suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
