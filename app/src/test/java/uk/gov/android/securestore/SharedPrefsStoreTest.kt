@@ -4,13 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
+import org.mockito.kotlin.givenBlocking
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
@@ -65,22 +65,18 @@ class SharedPrefsStoreTest {
     }
 
     @Test
-    fun testUpsert() {
+    fun testUpsert() = runTest {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(
-            runBlocking {
-                mockHybridCryptoManager.encrypt(eq(value))
-            },
+            mockHybridCryptoManager.encrypt(eq(value)),
         ).thenReturn(encryptedData)
 
-        runBlocking {
-            sharedPrefsStore.upsert(alias, value)
+        sharedPrefsStore.upsert(alias, value)
 
-            verify(mockHybridCryptoManager).encrypt(eq(value))
-            verify(mockEditor).putString(alias, encryptedValue)
-            verify(mockEditor).putString(alias + "Key", encryptedKey)
-            verify(mockEditor, times(2)).apply()
-        }
+        verify(mockHybridCryptoManager).encrypt(eq(value))
+        verify(mockEditor).putString(alias, encryptedValue)
+        verify(mockEditor).putString(alias + "Key", encryptedKey)
+        verify(mockEditor, times(2)).apply()
     }
 
     @Test
@@ -98,7 +94,7 @@ class SharedPrefsStoreTest {
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
@@ -119,7 +115,7 @@ class SharedPrefsStoreTest {
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
@@ -144,7 +140,7 @@ class SharedPrefsStoreTest {
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
@@ -171,7 +167,7 @@ class SharedPrefsStoreTest {
         whenever(mockSharedPreferences.getString(alias2, null)).thenReturn(encryptedValue2)
         whenever(mockSharedPreferences.getString(alias2 + "Key", null)).thenReturn(encryptedKey2)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockHybridCryptoManager.decrypt(
                     eq(encryptedValue),
@@ -182,16 +178,14 @@ class SharedPrefsStoreTest {
                 (it.arguments[2] as (data: String?) -> Unit).invoke(value)
             }
 
-            runBlocking {
-                whenever(
-                    mockHybridCryptoManager.decrypt(
-                        eq(encryptedValue2),
-                        eq(encryptedKey2),
-                        any(),
-                    ),
-                ).thenAnswer {
-                    (it.arguments[2] as (data: String?) -> Unit).invoke(value2)
-                }
+            whenever(
+                mockHybridCryptoManager.decrypt(
+                    eq(encryptedValue2),
+                    eq(encryptedKey2),
+                    any(),
+                ),
+            ).thenAnswer {
+                (it.arguments[2] as (data: String?) -> Unit).invoke(value2)
             }
 
             val result = sharedPrefsStore.retrieve(alias, alias2)
@@ -205,7 +199,7 @@ class SharedPrefsStoreTest {
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockAuthenticator.authenticate(
                     eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
@@ -245,7 +239,7 @@ class SharedPrefsStoreTest {
         whenever(mockSharedPreferences.getString(alias2, null)).thenReturn(encryptedValue2)
         whenever(mockSharedPreferences.getString(alias2 + "Key", null)).thenReturn(encryptedKey2)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockAuthenticator.authenticate(
                     eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
@@ -291,7 +285,7 @@ class SharedPrefsStoreTest {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(null)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockAuthenticator.authenticate(
                     eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
@@ -324,7 +318,7 @@ class SharedPrefsStoreTest {
     fun testRetrieveWithAuthenticationAuthErrorsGeneral() {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockAuthenticator.authenticate(
                     eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
@@ -358,7 +352,7 @@ class SharedPrefsStoreTest {
     fun testRetrieveWithAuthenticationAuthErrorsUserCancelled() {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockAuthenticator.authenticate(
                     eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
@@ -394,7 +388,7 @@ class SharedPrefsStoreTest {
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
-        runBlocking {
+        runTest {
             whenever(
                 mockAuthenticator.authenticate(
                     eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
@@ -534,54 +528,50 @@ class SharedPrefsStoreTest {
     }
 
     @Test
-    fun testRetrieveWithAuthenticationAuthFailsGeneral() {
+    fun testRetrieveWithAuthenticationAuthFailsGeneral() = runTest {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
 
-        runBlocking {
-            whenever(
-                mockAuthenticator.authenticate(
-                    eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
-                    eq(authConfig),
-                    any(),
-                ),
-            ).thenAnswer {
-                (it.arguments[2] as AuthenticatorCallbackHandler)
-                    .onFailure()
-            }
-
-            val result = sharedPrefsStore.retrieveWithAuthentication(
-                alias,
-                authPromptConfig = authConfig,
-                context = activityFragment,
-            )
-
-            assertEquals(
-                RetrievalEvent.Failed(
-                    SecureStoreErrorType.GENERAL,
-                    "Bio prompt failed",
-                ),
-                result,
-            )
-            verify(mockAuthenticator).init(activityFragment)
-            verify(mockAuthenticator).close()
+        whenever(
+            mockAuthenticator.authenticate(
+                eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
+                eq(authConfig),
+                any(),
+            ),
+        ).thenAnswer {
+            (it.arguments[2] as AuthenticatorCallbackHandler)
+                .onFailure()
         }
+
+        val result = sharedPrefsStore.retrieveWithAuthentication(
+            alias,
+            authPromptConfig = authConfig,
+            context = activityFragment,
+        )
+
+        assertEquals(
+            RetrievalEvent.Failed(
+                SecureStoreErrorType.GENERAL,
+                "Bio prompt failed",
+            ),
+            result,
+        )
+        verify(mockAuthenticator).init(activityFragment)
+        verify(mockAuthenticator).close()
     }
 
     @Test
-    fun testRetrieveNonExistentKey() {
+    fun testRetrieveNonExistentKey() = runTest {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(eq(alias), any())).thenReturn(null)
-        runBlocking {
-            val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStore.retrieve(alias)
 
-            assertEquals(
-                RetrievalEvent.Failed(
-                    SecureStoreErrorType.NOT_FOUND,
-                    "java.lang.Exception: test not found",
-                ),
-                result,
-            )
-        }
+        assertEquals(
+            RetrievalEvent.Failed(
+                SecureStoreErrorType.NOT_FOUND,
+                "java.lang.Exception: test not found",
+            ),
+            result,
+        )
     }
 
     @Test
@@ -607,66 +597,58 @@ class SharedPrefsStoreTest {
     @Test
     fun testUpsertThrowsError() {
         initSecureStore(AccessControlLevel.OPEN)
-        given(
-            runBlocking {
-                mockHybridCryptoManager.encrypt(
-                    value,
-                )
-            },
-        ).willAnswer { throw GeneralSecurityException() }
+        givenBlocking {
+            mockHybridCryptoManager.encrypt(
+                value,
+            )
+        }.willAnswer { throw GeneralSecurityException() }
 
         assertThrows(SecureStorageError::class.java) {
-            runBlocking {
+            runTest {
                 sharedPrefsStore.upsert(alias, value)
             }
         }
     }
 
     @Test
-    fun testRetrieveReturnsErrorFromCryptoThrows() {
+    fun testRetrieveReturnsErrorFromCryptoThrows() = runTest {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         given(
-            runBlocking {
-                mockHybridCryptoManager.decrypt(
-                    eq(encryptedValue),
-                    eq(encryptedKey),
-                    any(),
-                )
-            },
+            mockHybridCryptoManager.decrypt(
+                eq(encryptedValue),
+                eq(encryptedKey),
+                any(),
+            ),
         )
             .willAnswer {
                 throw GeneralSecurityException()
             }
 
-        runBlocking {
-            val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStore.retrieve(alias)
 
-            assertEquals(
-                RetrievalEvent.Failed(
-                    SecureStoreErrorType.NOT_FOUND,
-                    "java.lang.Exception: test not found",
-                ),
-                result,
-            )
-        }
+        assertEquals(
+            RetrievalEvent.Failed(
+                SecureStoreErrorType.NOT_FOUND,
+                "java.lang.Exception: test not found",
+            ),
+            result,
+        )
     }
 
     @Test
-    fun testRetrieveThrowsErrorFromWrongACL() {
+    fun testRetrieveThrowsErrorFromWrongACL() = runTest {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
 
-        runBlocking {
-            val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStore.retrieve(alias)
 
-            assertEquals(
-                RetrievalEvent.Failed(
-                    SecureStoreErrorType.GENERAL,
-                    "Access control level must be OPEN to use this retrieve method",
-                ),
-                result,
-            )
-        }
+        assertEquals(
+            RetrievalEvent.Failed(
+                SecureStoreErrorType.GENERAL,
+                "Access control level must be OPEN to use this retrieve method",
+            ),
+            result,
+        )
     }
 
     @Test
@@ -696,13 +678,11 @@ class SharedPrefsStoreTest {
     @Test
     fun testDeleteAllThrowsError() {
         initSecureStore(AccessControlLevel.OPEN)
-        given(
-            runBlocking {
-                mockHybridCryptoManager.deleteKey()
-            },
-        ).willAnswer { throw KeyStoreException() }
+        givenBlocking {
+            mockHybridCryptoManager.deleteKey()
+        }.willAnswer { throw KeyStoreException() }
         assertThrows(SecureStorageError::class.java) {
-            runBlocking {
+            runTest {
                 sharedPrefsStore.deleteAll()
             }
         }
@@ -711,55 +691,49 @@ class SharedPrefsStoreTest {
     @Test
     fun testUpsertThrowsIfNotInit() {
         assertThrows(SecureStorageError::class.java) {
-            runBlocking {
+            runTest {
                 sharedPrefsStore.upsert(alias, value)
             }
         }
     }
 
     @Test
-    fun testRetrieveWithAuthThrowsIfNotInit() {
-        runBlocking {
-            val result = sharedPrefsStore
-                .retrieveWithAuthentication(
-                    alias,
-                    authPromptConfig = authConfig,
-                    context = activityFragment,
-                )
-
-            assertEquals(
-                RetrievalEvent.Failed(
-                    SecureStoreErrorType.GENERAL,
-                    "Must call init on SecureStore first!",
-                ),
-                result,
+    fun testRetrieveWithAuthThrowsIfNotInit() = runTest {
+        val result = sharedPrefsStore
+            .retrieveWithAuthentication(
+                alias,
+                authPromptConfig = authConfig,
+                context = activityFragment,
             )
-        }
+
+        assertEquals(
+            RetrievalEvent.Failed(
+                SecureStoreErrorType.GENERAL,
+                "Must call init on SecureStore first!",
+            ),
+            result,
+        )
     }
 
     @Test
-    fun testRetrieveThrowsIfNotInit() {
-        runBlocking {
-            val result = sharedPrefsStore.retrieve(alias)
+    fun testRetrieveThrowsIfNotInit() = runTest {
+        val result = sharedPrefsStore.retrieve(alias)
 
-            assertEquals(
-                RetrievalEvent.Failed(
-                    SecureStoreErrorType.GENERAL,
-                    "Must call init on SecureStore first!",
-                ),
-                result,
-            )
-        }
+        assertEquals(
+            RetrievalEvent.Failed(
+                SecureStoreErrorType.GENERAL,
+                "Must call init on SecureStore first!",
+            ),
+            result,
+        )
     }
 
     @Test
-    fun testMethodsWithNullSharedPrefs() {
-        runBlocking {
-            sharedPrefsStore.deleteAll()
-            sharedPrefsStore.delete(encryptedKey)
+    fun testMethodsWithNullSharedPrefs() = runTest {
+        sharedPrefsStore.deleteAll()
+        sharedPrefsStore.delete(encryptedKey)
 
-            assertFalse(sharedPrefsStore.exists(encryptedKey))
-        }
+        assertFalse(sharedPrefsStore.exists(encryptedKey))
     }
 
     @Test
