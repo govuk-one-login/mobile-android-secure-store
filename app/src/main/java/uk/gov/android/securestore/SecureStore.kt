@@ -43,7 +43,7 @@ interface SecureStore {
      *
      * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to delete
      */
-    fun deleteAll()
+    suspend fun deleteAll()
 
     /**
      * Access the data for a given key when authentication is not required; access control level is set to OPEN
