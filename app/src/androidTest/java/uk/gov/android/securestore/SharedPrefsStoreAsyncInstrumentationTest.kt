@@ -19,14 +19,14 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
 import uk.gov.android.securestore.error.SecureStoreErrorType
 import java.security.KeyStore
 
-class SharedPrefsStoreInstrumentationTest {
+class SharedPrefsStoreAsyncInstrumentationTest {
     private val key = "testKey"
     private val value = "testValue"
     private val storeId = "id"
 
     private val mockAuthenticator: Authenticator = mock()
 
-    private val sharedPrefsStore = SharedPrefsStore(
+    private val sharedPrefsStoreAsync = SharedPrefsStoreAsync(
         authenticator = mockAuthenticator,
     )
 
@@ -46,8 +46,8 @@ class SharedPrefsStoreInstrumentationTest {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
-                sharedPrefsStore.upsert(key, value)
-                val result = sharedPrefsStore.retrieve(
+                sharedPrefsStoreAsync.upsert(key, value)
+                val result = sharedPrefsStoreAsync.retrieve(
                     key,
                 )
                 assertEquals(RetrievalEvent.Success(mapOf(key to value)), result)
@@ -71,8 +71,8 @@ class SharedPrefsStoreInstrumentationTest {
 
         rule.scenario.onActivity {
             runBlocking {
-                sharedPrefsStore.upsert(key, value)
-                val result = sharedPrefsStore.retrieveWithAuthentication(
+                sharedPrefsStoreAsync.upsert(key, value)
+                val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
                     key,
                     authPromptConfig = AuthenticatorPromptConfiguration("title"),
                     context = it,
@@ -97,14 +97,14 @@ class SharedPrefsStoreInstrumentationTest {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
-                sharedPrefsStore.upsert(key, value)
-                val result1 = sharedPrefsStore.retrieve(
+                sharedPrefsStoreAsync.upsert(key, value)
+                val result1 = sharedPrefsStoreAsync.retrieve(
                     key,
                 )
                 assertEquals(RetrievalEvent.Success(mapOf(key to value)), result1)
 
-                sharedPrefsStore.delete(key)
-                val result2 = sharedPrefsStore.retrieve(
+                sharedPrefsStoreAsync.delete(key)
+                val result2 = sharedPrefsStoreAsync.retrieve(
                     key,
                 )
                 assertEquals(
@@ -125,9 +125,9 @@ class SharedPrefsStoreInstrumentationTest {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
-                sharedPrefsStore.upsert(key, value)
-                sharedPrefsStore.upsert(anotherKey, anotherValue)
-                val result1 = sharedPrefsStore.retrieve(
+                sharedPrefsStoreAsync.upsert(key, value)
+                sharedPrefsStoreAsync.upsert(anotherKey, anotherValue)
+                val result1 = sharedPrefsStoreAsync.retrieve(
                     key,
                     anotherKey,
                 )
@@ -141,10 +141,10 @@ class SharedPrefsStoreInstrumentationTest {
                     result1,
                 )
 
-                sharedPrefsStore.deleteAll()
+                sharedPrefsStoreAsync.deleteAll()
 
-                assertFalse(sharedPrefsStore.exists(key))
-                assertFalse(sharedPrefsStore.exists(anotherKey))
+                assertFalse(sharedPrefsStoreAsync.exists(key))
+                assertFalse(sharedPrefsStoreAsync.exists(anotherKey))
             }
         }
     }
@@ -155,7 +155,7 @@ class SharedPrefsStoreInstrumentationTest {
         rule.scenario.onActivity {
             runBlocking {
                 val exceptionNotThrown = try {
-                    sharedPrefsStore.deleteAll()
+                    sharedPrefsStoreAsync.deleteAll()
                     true
                 } catch (e: Exception) {
                     false
@@ -170,9 +170,9 @@ class SharedPrefsStoreInstrumentationTest {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
             runBlocking {
-                sharedPrefsStore.upsert(key, value)
+                sharedPrefsStoreAsync.upsert(key, value)
 
-                val result = sharedPrefsStore.exists(key)
+                val result = sharedPrefsStoreAsync.exists(key)
 
                 assertTrue(result)
             }
@@ -183,7 +183,7 @@ class SharedPrefsStoreInstrumentationTest {
     fun testDoesNotExist() {
         initSecureStore(AccessControlLevel.OPEN)
         rule.scenario.onActivity {
-            val result = sharedPrefsStore.exists("nonExistentKey")
+            val result = sharedPrefsStoreAsync.exists("nonExistentKey")
 
             assertFalse(result)
         }
@@ -191,9 +191,9 @@ class SharedPrefsStoreInstrumentationTest {
 
     private fun initSecureStore(acl: AccessControlLevel) {
         rule.scenario.onActivity {
-            sharedPrefsStore.init(
+            sharedPrefsStoreAsync.init(
                 context = it,
-                configuration = SecureStorageConfiguration(
+                configurationAsync = SecureStorageConfigurationAsync(
                     storeId,
                     acl,
                 ),
