@@ -13,11 +13,11 @@ interface SecureStoreAsync {
      *This must be called before using an instance of secure store, it sets the [AccessControlLevel] for the [SecureStoreAsync]
      *
      * @param context Just a basic context to allow initialisation of storage
-     * @param configuration [SecureStorageConfiguration] to allow setting of [AccessControlLevel] and store ID
+     * @param configurationAsync [SecureStorageConfigurationAsync] to allow setting of [AccessControlLevel] and store ID
      */
     fun init(
         context: Context,
-        configuration: SecureStorageConfiguration,
+        configurationAsync: SecureStorageConfigurationAsync,
     )
 
     /**

@@ -193,7 +193,7 @@ class SharedPrefsStoreInstrumentationTest {
         rule.scenario.onActivity {
             sharedPrefsStore.init(
                 context = it,
-                configuration = SecureStorageConfiguration(
+                configurationAsync = SecureStorageConfigurationAsync(
                     storeId,
                     acl,
                 ),

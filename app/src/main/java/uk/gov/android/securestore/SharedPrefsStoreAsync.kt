@@ -22,20 +22,20 @@ class SharedPrefsStoreAsync(
     private val hybridCryptoManager: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl(),
 ) : SecureStoreAsync {
     private val tag = this::class.java.simpleName
-    private var configuration: SecureStorageConfiguration? = null
+    private var configurationAsync: SecureStorageConfigurationAsync? = null
     private var sharedPrefs: SharedPreferences? = null
 
     override fun init(
         context: Context,
-        configuration: SecureStorageConfiguration,
+        configurationAsync: SecureStorageConfigurationAsync,
     ) {
-        this.configuration = configuration
+        this.configurationAsync = configurationAsync
         hybridCryptoManager.init(
-            configuration.id,
-            configuration.accessControlLevel,
-            configuration.dispatcher,
+            configurationAsync.id,
+            configurationAsync.accessControlLevel,
+            configurationAsync.dispatcher,
         )
-        sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
+        sharedPrefs = context.getSharedPreferences(configurationAsync.id, Context.MODE_PRIVATE)
     }
 
     override suspend fun upsert(key: String, value: String): String {
@@ -71,7 +71,7 @@ class SharedPrefsStoreAsync(
     override suspend fun retrieve(
         vararg key: String,
     ): RetrievalEvent {
-        return configuration?.let { configuration ->
+        return configurationAsync?.let { configuration ->
             if (configuration.accessControlLevel != AccessControlLevel.OPEN) {
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
@@ -104,7 +104,7 @@ class SharedPrefsStoreAsync(
             SecureStoreErrorType.GENERAL,
             "Must call init on SecureStore first!",
         )
-        configuration?.let { configuration ->
+        configurationAsync?.let { configuration ->
             if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
                 result = RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
