@@ -33,7 +33,7 @@ class SharedPrefsStoreAsyncTest {
     private val mockContext: FragmentActivity = mock()
     private val mockSharedPreferences: SharedPreferences = mock()
     private val mockEditor: SharedPreferences.Editor = mock()
-    private val mockHybridCryptoManager: HybridCryptoManagerAsync = mock()
+    private val mockHybridCryptoManagerAsync: HybridCryptoManagerAsync = mock()
     private val mockAuthenticator: Authenticator = mock()
     private val activityFragment: FragmentActivity = mock()
 
@@ -51,9 +51,9 @@ class SharedPrefsStoreAsyncTest {
         "title",
     )
 
-    private val sharedPrefsStore: SecureStoreAsync = SharedPrefsStoreAsync(
+    private val sharedPrefsStoreAsync: SecureStoreAsync = SharedPrefsStoreAsync(
         mockAuthenticator,
-        mockHybridCryptoManager,
+        mockHybridCryptoManagerAsync,
     )
 
     @BeforeEach
@@ -67,12 +67,12 @@ class SharedPrefsStoreAsyncTest {
     fun testUpsert() = runTest {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(
-            mockHybridCryptoManager.encrypt(eq(value)),
+            mockHybridCryptoManagerAsync.encrypt(eq(value)),
         ).thenReturn(encryptedData)
 
-        sharedPrefsStore.upsert(alias, value)
+        sharedPrefsStoreAsync.upsert(alias, value)
 
-        verify(mockHybridCryptoManager).encrypt(eq(value))
+        verify(mockHybridCryptoManagerAsync).encrypt(eq(value))
         verify(mockEditor).putString(alias, encryptedValue)
         verify(mockEditor).putString(alias + "Key", encryptedKey)
         verify(mockEditor, times(2)).apply()
@@ -81,7 +81,7 @@ class SharedPrefsStoreAsyncTest {
     @Test
     fun testDelete() {
         initSecureStore(AccessControlLevel.OPEN)
-        sharedPrefsStore.delete(alias)
+        sharedPrefsStoreAsync.delete(alias)
 
         verify(mockEditor).remove(alias)
         verify(mockEditor).apply()
@@ -94,7 +94,7 @@ class SharedPrefsStoreAsyncTest {
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
                 any(),
@@ -102,7 +102,7 @@ class SharedPrefsStoreAsyncTest {
         ).thenAnswer {
             (it.arguments[2] as (data: String?) -> Unit).invoke(value)
         }
-        val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStoreAsync.retrieve(alias)
         assertEquals(RetrievalEvent.Success(mapOf(alias to value)), result)
     }
 
@@ -113,13 +113,13 @@ class SharedPrefsStoreAsyncTest {
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
                 any(),
             ),
         ).thenThrow(SecureStorageError(Exception("Error"), SecureStoreErrorType.NOT_FOUND))
-        val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStoreAsync.retrieve(alias)
         assertEquals(
             RetrievalEvent.Failed(
                 SecureStoreErrorType.NOT_FOUND,
@@ -136,13 +136,13 @@ class SharedPrefsStoreAsyncTest {
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
                 any(),
             ),
         ).thenThrow(RuntimeException("Error"))
-        val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStoreAsync.retrieve(alias)
         assertEquals(
             RetrievalEvent.Failed(
                 SecureStoreErrorType.GENERAL,
@@ -161,7 +161,7 @@ class SharedPrefsStoreAsyncTest {
         whenever(mockSharedPreferences.getString(alias2 + "Key", null)).thenReturn(encryptedKey2)
 
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
                 any(),
@@ -171,7 +171,7 @@ class SharedPrefsStoreAsyncTest {
         }
 
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue2),
                 eq(encryptedKey2),
                 any(),
@@ -180,7 +180,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as (data: String?) -> Unit).invoke(value2)
         }
 
-        val result = sharedPrefsStore.retrieve(alias, alias2)
+        val result = sharedPrefsStoreAsync.retrieve(alias, alias2)
         assertEquals(RetrievalEvent.Success(mapOf(alias to value, alias2 to value2)), result)
     }
 
@@ -200,7 +200,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
                 any(),
@@ -209,7 +209,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as (text: String?) -> Unit).invoke(value)
         }
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -238,7 +238,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
                 any(),
@@ -247,7 +247,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as (text: String?) -> Unit).invoke(value)
         }
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue2),
                 eq(encryptedKey2),
                 any(),
@@ -256,7 +256,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as (text: String?) -> Unit).invoke(value2)
         }
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -282,7 +282,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -314,7 +314,7 @@ class SharedPrefsStoreAsyncTest {
                 .onError(1, "error")
         }
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -346,7 +346,7 @@ class SharedPrefsStoreAsyncTest {
                 .onError(BiometricPrompt.ERROR_USER_CANCELED, "error")
         }
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -377,7 +377,7 @@ class SharedPrefsStoreAsyncTest {
             ),
         ).thenThrow(RuntimeException("Error"))
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -412,7 +412,7 @@ class SharedPrefsStoreAsyncTest {
                 .onError(BiometricPrompt.ERROR_UNABLE_TO_PROCESS, "face scan not recognised")
         }
 
-        sharedPrefsStore.retrieveWithAuthentication(
+        sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -428,7 +428,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
                 any(),
@@ -437,7 +437,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as (text: String?) -> Unit).invoke(value)
         }
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -466,7 +466,7 @@ class SharedPrefsStoreAsyncTest {
                 .onError(BiometricPrompt.ERROR_TIMEOUT, "face scan timeout")
         }
 
-        sharedPrefsStore.retrieveWithAuthentication(
+        sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -482,7 +482,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
         whenever(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
                 any(),
@@ -491,7 +491,7 @@ class SharedPrefsStoreAsyncTest {
             (it.arguments[2] as (text: String?) -> Unit).invoke(value)
         }
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -517,7 +517,7 @@ class SharedPrefsStoreAsyncTest {
                 .onFailure()
         }
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -538,7 +538,7 @@ class SharedPrefsStoreAsyncTest {
     fun testRetrieveNonExistentKey() = runTest {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(eq(alias), any())).thenReturn(null)
-        val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStoreAsync.retrieve(alias)
 
         assertEquals(
             RetrievalEvent.Failed(
@@ -554,7 +554,7 @@ class SharedPrefsStoreAsyncTest {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.contains(alias)).thenReturn(true)
 
-        val result = sharedPrefsStore.exists(alias)
+        val result = sharedPrefsStoreAsync.exists(alias)
 
         assertTrue(result)
     }
@@ -564,7 +564,7 @@ class SharedPrefsStoreAsyncTest {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.contains(alias)).thenReturn(false)
 
-        val result = sharedPrefsStore.exists(alias)
+        val result = sharedPrefsStoreAsync.exists(alias)
 
         assertFalse(result)
     }
@@ -573,13 +573,13 @@ class SharedPrefsStoreAsyncTest {
     fun testUpsertThrowsError() = runTest {
         initSecureStore(AccessControlLevel.OPEN)
         given(
-            mockHybridCryptoManager.encrypt(
+            mockHybridCryptoManagerAsync.encrypt(
                 value,
             ),
         ).willAnswer { throw GeneralSecurityException() }
 
         assertFailsWith<SecureStorageError> {
-            sharedPrefsStore.upsert(alias, value)
+            sharedPrefsStoreAsync.upsert(alias, value)
         }
     }
 
@@ -588,7 +588,7 @@ class SharedPrefsStoreAsyncTest {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         given(
-            mockHybridCryptoManager.decrypt(
+            mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
                 any(),
@@ -598,7 +598,7 @@ class SharedPrefsStoreAsyncTest {
                 throw GeneralSecurityException()
             }
 
-        val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStoreAsync.retrieve(alias)
 
         assertEquals(
             RetrievalEvent.Failed(
@@ -613,7 +613,7 @@ class SharedPrefsStoreAsyncTest {
     fun testRetrieveThrowsErrorFromWrongACL() = runTest {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
 
-        val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStoreAsync.retrieve(alias)
 
         assertEquals(
             RetrievalEvent.Failed(
@@ -633,7 +633,7 @@ class SharedPrefsStoreAsyncTest {
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
-        val result = sharedPrefsStore.retrieveWithAuthentication(
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
             context = activityFragment,
@@ -652,23 +652,23 @@ class SharedPrefsStoreAsyncTest {
     fun testDeleteAllThrowsError() = runTest {
         initSecureStore(AccessControlLevel.OPEN)
         given(
-            mockHybridCryptoManager.deleteKey(),
+            mockHybridCryptoManagerAsync.deleteKey(),
         ).willAnswer { throw KeyStoreException() }
         assertFailsWith<SecureStorageError> {
-            sharedPrefsStore.deleteAll()
+            sharedPrefsStoreAsync.deleteAll()
         }
     }
 
     @Test
     fun testUpsertThrowsIfNotInit() = runTest {
         assertFailsWith<SecureStorageError> {
-            sharedPrefsStore.upsert(alias, value)
+            sharedPrefsStoreAsync.upsert(alias, value)
         }
     }
 
     @Test
     fun testRetrieveWithAuthThrowsIfNotInit() = runTest {
-        val result = sharedPrefsStore
+        val result = sharedPrefsStoreAsync
             .retrieveWithAuthentication(
                 alias,
                 authPromptConfig = authConfig,
@@ -686,7 +686,7 @@ class SharedPrefsStoreAsyncTest {
 
     @Test
     fun testRetrieveThrowsIfNotInit() = runTest {
-        val result = sharedPrefsStore.retrieve(alias)
+        val result = sharedPrefsStoreAsync.retrieve(alias)
 
         assertEquals(
             RetrievalEvent.Failed(
@@ -699,10 +699,10 @@ class SharedPrefsStoreAsyncTest {
 
     @Test
     fun testMethodsWithNullSharedPrefs() = runTest {
-        sharedPrefsStore.deleteAll()
-        sharedPrefsStore.delete(encryptedKey)
+        sharedPrefsStoreAsync.deleteAll()
+        sharedPrefsStoreAsync.delete(encryptedKey)
 
-        assertFalse(sharedPrefsStore.exists(encryptedKey))
+        assertFalse(sharedPrefsStoreAsync.exists(encryptedKey))
     }
 
     @Test
@@ -723,7 +723,7 @@ class SharedPrefsStoreAsyncTest {
             acl,
         )
 
-        sharedPrefsStore.init(
+        sharedPrefsStoreAsync.init(
             mockContext,
             config,
         )
