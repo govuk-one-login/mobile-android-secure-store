@@ -721,7 +721,7 @@ class SharedPrefsStoreTest {
     }
 
     private fun initSecureStore(acl: AccessControlLevel) {
-        val config = SecureStorageConfigurationAsync(
+        val config = SecureStorageConfiguration(
             storeId,
             acl,
         )

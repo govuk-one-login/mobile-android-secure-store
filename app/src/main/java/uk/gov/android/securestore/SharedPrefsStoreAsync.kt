@@ -19,7 +19,7 @@ import kotlin.coroutines.suspendCoroutine
 @Suppress("TooGenericExceptionCaught", "TooManyFunctions")
 class SharedPrefsStoreAsync(
     private val authenticator: Authenticator = UserAuthenticator(),
-    private val hybridCryptoManager: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl(),
+    private val hybridCryptoManagerAsync: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl(),
 ) : SecureStoreAsync {
     private val tag = this::class.java.simpleName
     private var configurationAsync: SecureStorageConfigurationAsync? = null
@@ -30,7 +30,7 @@ class SharedPrefsStoreAsync(
         configurationAsync: SecureStorageConfigurationAsync,
     ) {
         this.configurationAsync = configurationAsync
-        hybridCryptoManager.init(
+        hybridCryptoManagerAsync.init(
             configurationAsync.id,
             configurationAsync.accessControlLevel,
             configurationAsync.dispatcher,
@@ -40,7 +40,7 @@ class SharedPrefsStoreAsync(
 
     override suspend fun upsert(key: String, value: String): String {
         return try {
-            val result = hybridCryptoManager.encrypt(value)
+            val result = hybridCryptoManagerAsync.encrypt(value)
                 .also {
                     writeToPrefs(key, it.data)
                     writeToPrefs(key + KEY_SUFFIX, it.key)
@@ -62,7 +62,7 @@ class SharedPrefsStoreAsync(
             clear()
         }
         try {
-            hybridCryptoManager.deleteKey()
+            hybridCryptoManagerAsync.deleteKey()
         } catch (e: Exception) {
             throw SecureStorageError(e)
         }
@@ -183,7 +183,7 @@ class SharedPrefsStoreAsync(
                 if (encryptedData.isNullOrEmpty() || encryptedKey.isNullOrEmpty()) {
                     onTextReady(null)
                 } else {
-                    hybridCryptoManager.decrypt(encryptedData, encryptedKey) { result ->
+                    hybridCryptoManagerAsync.decrypt(encryptedData, encryptedKey) { result ->
                         onTextReady(result)
                     }
                 }
