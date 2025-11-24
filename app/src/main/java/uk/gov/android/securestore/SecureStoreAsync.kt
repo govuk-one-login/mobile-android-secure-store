@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.Flow
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
 /**
- * Create an instance of [SecureStore] to save, query and delete data. Data stored as a key value pair, with the value being a [String]
+ * Create an instance of [SecureStoreAsync] to save, query and delete data. Data stored as a key value pair, with the value being a [String]
  */
-interface SecureStore {
+interface SecureStoreAsync {
     /**
-     *This must be called before using an instance of secure store, it sets the [AccessControlLevel] for the [SecureStore]
+     *This must be called before using an instance of secure store, it sets the [AccessControlLevel] for the [SecureStoreAsync]
      *
      * @param context Just a basic context to allow initialisation of storage
      * @param configuration [SecureStorageConfiguration] to allow setting of [AccessControlLevel] and store ID
@@ -43,7 +43,7 @@ interface SecureStore {
      *
      * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to delete
      */
-    fun deleteAll()
+    suspend fun deleteAll()
 
     /**
      * Access the data for a given key when authentication is not required; access control level is set to OPEN

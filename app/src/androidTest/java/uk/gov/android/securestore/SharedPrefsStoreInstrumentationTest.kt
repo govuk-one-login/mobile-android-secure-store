@@ -26,7 +26,7 @@ class SharedPrefsStoreInstrumentationTest {
 
     private val mockAuthenticator: Authenticator = mock()
 
-    private val sharedPrefsStore = SharedPrefsStore(
+    private val sharedPrefsStore = SharedPrefsStoreAsync(
         authenticator = mockAuthenticator,
     )
 

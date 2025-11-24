@@ -17,7 +17,7 @@ import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 import uk.gov.android.securestore.crypto.EncryptedData
-import uk.gov.android.securestore.crypto.HybridCryptoManager
+import uk.gov.android.securestore.crypto.HybridCryptoManagerAsync
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
 import java.security.GeneralSecurityException
@@ -29,11 +29,11 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @Suppress("UNCHECKED_CAST", "LargeClass")
-class SharedPrefsStoreTest {
+class SharedPrefsStoreAsyncTest {
     private val mockContext: FragmentActivity = mock()
     private val mockSharedPreferences: SharedPreferences = mock()
     private val mockEditor: SharedPreferences.Editor = mock()
-    private val mockHybridCryptoManager: HybridCryptoManager = mock()
+    private val mockHybridCryptoManager: HybridCryptoManagerAsync = mock()
     private val mockAuthenticator: Authenticator = mock()
     private val activityFragment: FragmentActivity = mock()
 
@@ -51,7 +51,7 @@ class SharedPrefsStoreTest {
         "title",
     )
 
-    private val sharedPrefsStore: SecureStore = SharedPrefsStore(
+    private val sharedPrefsStore: SecureStoreAsync = SharedPrefsStoreAsync(
         mockAuthenticator,
         mockHybridCryptoManager,
     )
