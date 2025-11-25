@@ -57,7 +57,7 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
             cipher,
             encryptedKeyBytes,
         )
-        aesCryptoManager.decrypt(encryptedData, decryptedKey) { callback(it) }
+        callback(aesCryptoManager.decrypt(encryptedData, decryptedKey))
     }
 
     private fun initCipherAndDecryptKey(

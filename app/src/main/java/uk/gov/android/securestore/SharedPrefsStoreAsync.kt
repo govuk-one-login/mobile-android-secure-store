@@ -183,9 +183,7 @@ class SharedPrefsStoreAsync(
                 if (encryptedData.isNullOrEmpty() || encryptedKey.isNullOrEmpty()) {
                     onTextReady(null)
                 } else {
-                    hybridCryptoManagerAsync.decrypt(encryptedData, encryptedKey) { result ->
-                        onTextReady(result)
-                    }
+                    onTextReady(hybridCryptoManagerAsync.decrypt(encryptedData, encryptedKey))
                 }
             } catch (e: Exception) {
                 throw SecureStorageError(e)

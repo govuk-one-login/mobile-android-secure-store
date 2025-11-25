@@ -47,23 +47,20 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
             val result = Base64.encode(encryptedKey)
             result
         }
-        return@withContext encryptedData
+        encryptedData
     }
 
     override suspend fun decrypt(
         encryptedData: String,
         key: String,
-        callback: (data: String?) -> Unit,
-    ) {
-        withContext(dispatcher) {
-            val cipher = Cipher.getInstance(TRANSFORMATION)
-            val encryptedKeyBytes = Base64.decode(key)
-            val decryptedKey = initCipherAndDecryptKey(
-                cipher,
-                encryptedKeyBytes,
-            )
-            aesCryptoManager.decrypt(encryptedData, decryptedKey) { callback(it) }
-        }
+    ): String = withContext(dispatcher) {
+        val cipher = Cipher.getInstance(TRANSFORMATION)
+        val encryptedKeyBytes = Base64.decode(key)
+        val decryptedKey = initCipherAndDecryptKey(
+            cipher,
+            encryptedKeyBytes,
+        )
+        aesCryptoManager.decrypt(encryptedData, decryptedKey)
     }
 
     private fun initCipherAndDecryptKey(

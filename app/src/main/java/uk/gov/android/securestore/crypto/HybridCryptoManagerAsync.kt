@@ -36,8 +36,7 @@ interface HybridCryptoManagerAsync {
     suspend fun decrypt(
         encryptedData: String,
         key: String,
-        callback: (data: String?) -> Unit,
-    )
+    ): String
 
     /**
      * Remove an encryption key entry from the Keystore

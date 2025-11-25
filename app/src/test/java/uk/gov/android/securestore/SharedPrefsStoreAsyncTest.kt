@@ -97,11 +97,8 @@ class SharedPrefsStoreAsyncTest {
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
-                any(),
             ),
-        ).thenAnswer {
-            (it.arguments[2] as (data: String?) -> Unit).invoke(value)
-        }
+        ).thenReturn(value)
         val result = sharedPrefsStoreAsync.retrieve(alias)
         assertEquals(RetrievalEvent.Success(mapOf(alias to value)), result)
     }
@@ -116,7 +113,6 @@ class SharedPrefsStoreAsyncTest {
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
-                any(),
             ),
         ).thenThrow(SecureStorageError(Exception("Error"), SecureStoreErrorType.NOT_FOUND))
         val result = sharedPrefsStoreAsync.retrieve(alias)
@@ -139,7 +135,6 @@ class SharedPrefsStoreAsyncTest {
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
-                any(),
             ),
         ).thenThrow(RuntimeException("Error"))
         val result = sharedPrefsStoreAsync.retrieve(alias)
@@ -164,21 +159,15 @@ class SharedPrefsStoreAsyncTest {
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
-                any(),
             ),
-        ).thenAnswer {
-            (it.arguments[2] as (data: String?) -> Unit).invoke(value)
-        }
+        ).thenReturn(value)
 
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue2),
                 eq(encryptedKey2),
-                any(),
             ),
-        ).thenAnswer {
-            (it.arguments[2] as (data: String?) -> Unit).invoke(value2)
-        }
+        ).thenReturn(value2)
 
         val result = sharedPrefsStoreAsync.retrieve(alias, alias2)
         assertEquals(RetrievalEvent.Success(mapOf(alias to value, alias2 to value2)), result)
@@ -203,11 +192,8 @@ class SharedPrefsStoreAsyncTest {
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
-                any(),
             ),
-        ).thenAnswer {
-            (it.arguments[2] as (text: String?) -> Unit).invoke(value)
-        }
+        ).thenReturn(value)
 
         val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
@@ -241,20 +227,14 @@ class SharedPrefsStoreAsyncTest {
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
-                any(),
             ),
-        ).thenAnswer {
-            (it.arguments[2] as (text: String?) -> Unit).invoke(value)
-        }
+        ).thenReturn(value)
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue2),
                 eq(encryptedKey2),
-                any(),
             ),
-        ).thenAnswer {
-            (it.arguments[2] as (text: String?) -> Unit).invoke(value2)
-        }
+        ).thenReturn(value2)
 
         val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
@@ -431,11 +411,8 @@ class SharedPrefsStoreAsyncTest {
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
-                any(),
             ),
-        ).thenAnswer {
-            (it.arguments[2] as (text: String?) -> Unit).invoke(value)
-        }
+        ).thenReturn(value)
 
         val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
@@ -485,11 +462,8 @@ class SharedPrefsStoreAsyncTest {
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
-                any(),
             ),
-        ).thenAnswer {
-            (it.arguments[2] as (text: String?) -> Unit).invoke(value)
-        }
+        ).thenReturn(value)
 
         val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
@@ -591,7 +565,6 @@ class SharedPrefsStoreAsyncTest {
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
                 eq(encryptedKey),
-                any(),
             ),
         )
             .willAnswer {
