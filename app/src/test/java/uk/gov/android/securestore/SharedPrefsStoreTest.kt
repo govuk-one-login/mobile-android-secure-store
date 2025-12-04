@@ -318,6 +318,40 @@ class SharedPrefsStoreTest {
     }
 
     @Test
+    fun testRetrieveWithAuthenticationAuthenticatorThrowsSecureStoreException() {
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
+        whenever(mockSharedPreferences.getString(alias, null)).thenReturn(null)
+
+        runBlocking {
+            whenever(
+                mockAuthenticator.authenticate(
+                    eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
+                    eq(authConfig),
+                    any(),
+                ),
+            ).thenAnswer {
+                throw SecureStorageError(InvalidKeyException("error"))
+            }
+
+            val result = sharedPrefsStore.retrieveWithAuthentication(
+                alias,
+                authPromptConfig = authConfig,
+                context = activityFragment,
+            )
+
+            assertEquals(
+                RetrievalEvent.Failed(
+                    SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
+                    "java.security.InvalidKeyException: error",
+                ),
+                result,
+            )
+            verify(mockAuthenticator).init(activityFragment)
+            verify(mockAuthenticator).close()
+        }
+    }
+
+    @Test
     fun testRetrieveWithAuthenticationUserNotAuthenticated() {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(null)
