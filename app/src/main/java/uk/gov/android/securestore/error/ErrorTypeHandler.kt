@@ -6,9 +6,10 @@ import java.security.InvalidKeyException
 object ErrorTypeHandler {
     fun getErrorType(error: SecureStorageError): SecureStoreErrorType {
         return when (error.cause) {
-            is UserNotAuthenticatedException -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
-            is InvalidKeyException -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
-            is UnsupportedOperationException -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
+            is UserNotAuthenticatedException,
+            is InvalidKeyException,
+            is UnsupportedOperationException,
+            -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
             else -> error.type
         }
     }
