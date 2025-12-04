@@ -2,7 +2,6 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.edit
@@ -13,9 +12,9 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
 import uk.gov.android.securestore.authentication.UserAuthenticator
 import uk.gov.android.securestore.crypto.HybridCryptoManager
 import uk.gov.android.securestore.crypto.HybridCryptoManagerImpl
+import uk.gov.android.securestore.error.ErrorTypeHandler
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
-import java.security.InvalidKeyException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -126,7 +125,10 @@ class SharedPrefsStore(
                                 val results = try {
                                     RetrievalEvent.Success(handleResults(*key))
                                 } catch (e: SecureStorageError) {
-                                    RetrievalEvent.Failed(getErrorType(e), e.message)
+                                    RetrievalEvent.Failed(
+                                        ErrorTypeHandler.getErrorType(e),
+                                        e.message,
+                                    )
                                 }
                                 continuation.resume(results)
                             },
@@ -144,7 +146,12 @@ class SharedPrefsStore(
                         ),
                     )
                 } catch (e: SecureStorageError) {
-                    continuation.resume(RetrievalEvent.Failed(getErrorType(e), e.message))
+                    continuation.resume(
+                        RetrievalEvent.Failed(
+                            ErrorTypeHandler.getErrorType(e),
+                            e.message,
+                        ),
+                    )
                 } catch (e: Exception) {
                     Log.e(tag, e.message, e)
                     continuation.resume(
@@ -208,15 +215,6 @@ class SharedPrefsStore(
             -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
 
             else -> SecureStoreErrorType.GENERAL
-        }
-    }
-
-    private fun getErrorType(error: SecureStorageError): SecureStoreErrorType {
-        return when (error.cause) {
-            is UserNotAuthenticatedException -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
-            is InvalidKeyException -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
-            is UnsupportedOperationException -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
-            else -> error.type
         }
     }
 
