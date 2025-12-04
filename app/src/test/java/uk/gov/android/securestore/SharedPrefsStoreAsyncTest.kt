@@ -477,38 +477,6 @@ class SharedPrefsStoreAsyncTest {
     }
 
     @Test
-    fun testRetrieveWithAuthenticationAuthFailsGeneral() = runTest {
-        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
-
-        whenever(
-            mockAuthenticator.authenticate(
-                eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
-                eq(authConfig),
-                any(),
-            ),
-        ).thenAnswer {
-            (it.arguments[2] as AuthenticatorCallbackHandler)
-                .onFailure()
-        }
-
-        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
-            alias,
-            authPromptConfig = authConfig,
-            context = activityFragment,
-        )
-
-        assertEquals(
-            RetrievalEvent.Failed(
-                SecureStoreErrorType.GENERAL,
-                "Bio prompt failed",
-            ),
-            result,
-        )
-        verify(mockAuthenticator).init(activityFragment)
-        verify(mockAuthenticator).close()
-    }
-
-    @Test
     fun testRetrieveNonExistentKey() = runTest {
         initSecureStore(AccessControlLevel.OPEN)
         whenever(mockSharedPreferences.getString(eq(alias), any())).thenReturn(null)

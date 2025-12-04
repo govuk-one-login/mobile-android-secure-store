@@ -130,12 +130,7 @@ class SharedPrefsStoreAsync(
                                     continuation.resumeWith(Result.success(false))
                                 },
                                 onFailure = {
-                                    result = RetrievalEvent.Failed(
-                                        SecureStoreErrorType.GENERAL,
-                                        "Bio prompt failed",
-                                    )
-                                    Log.e(tag, "Bio Prompt Failed")
-                                    continuation.resumeWith(Result.success(false))
+                                    // Do nothing to allow user to try again
                                 },
                             ),
                         )
