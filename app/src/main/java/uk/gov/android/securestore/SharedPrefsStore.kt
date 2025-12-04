@@ -2,6 +2,7 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.edit
@@ -14,6 +15,7 @@ import uk.gov.android.securestore.crypto.HybridCryptoManager
 import uk.gov.android.securestore.crypto.HybridCryptoManagerImpl
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
+import java.security.InvalidKeyException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -124,7 +126,7 @@ class SharedPrefsStore(
                                 val results = try {
                                     RetrievalEvent.Success(handleResults(*key))
                                 } catch (e: SecureStorageError) {
-                                    RetrievalEvent.Failed(e.type, e.message)
+                                    RetrievalEvent.Failed(getErrorType(e), e.message)
                                 }
                                 continuation.resume(results)
                             },
@@ -132,7 +134,7 @@ class SharedPrefsStore(
                                 continuation.resume(
                                     RetrievalEvent.Failed(
                                         getErrorType(errorCode),
-                                        errorString.toString(),
+                                        "$BIOMETRIC_PREFIX$errorCode $errorString",
                                     ),
                                 )
                             },
@@ -142,7 +144,7 @@ class SharedPrefsStore(
                         ),
                     )
                 } catch (e: SecureStorageError) {
-                    continuation.resume(RetrievalEvent.Failed(e.type, e.message))
+                    continuation.resume(RetrievalEvent.Failed(getErrorType(e), e.message))
                 } catch (e: Exception) {
                     Log.e(tag, e.message, e)
                     continuation.resume(
@@ -195,13 +197,26 @@ class SharedPrefsStore(
     }
 
     private fun getErrorType(errorCode: Int): SecureStoreErrorType {
-        return if (
-            errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
-            errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON
-        ) {
-            SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
-        } else {
-            SecureStoreErrorType.GENERAL
+        return when (errorCode) {
+            BiometricPrompt.ERROR_USER_CANCELED,
+            BiometricPrompt.ERROR_NEGATIVE_BUTTON,
+            BiometricPrompt.ERROR_TIMEOUT,
+            BiometricPrompt.ERROR_UNABLE_TO_PROCESS,
+            BiometricPrompt.ERROR_NO_BIOMETRICS,
+            BiometricPrompt.ERROR_HW_UNAVAILABLE,
+            BiometricPrompt.ERROR_CANCELED,
+            -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
+
+            else -> SecureStoreErrorType.GENERAL
+        }
+    }
+
+    private fun getErrorType(error: SecureStorageError): SecureStoreErrorType {
+        return when (error.cause) {
+            is UserNotAuthenticatedException -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
+            is InvalidKeyException -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
+            is UnsupportedOperationException -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
+            else -> error.type
         }
     }
 
@@ -219,6 +234,7 @@ class SharedPrefsStore(
 
     companion object {
         private const val KEY_SUFFIX = "Key"
+        private const val BIOMETRIC_PREFIX = "biometric error code "
         private fun sseNotFound(alias: String) = SecureStorageError(
             Exception("$alias not found"),
             SecureStoreErrorType.NOT_FOUND,
