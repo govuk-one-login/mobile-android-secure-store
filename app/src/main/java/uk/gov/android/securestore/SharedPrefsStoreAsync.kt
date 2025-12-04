@@ -10,42 +10,37 @@ import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 import uk.gov.android.securestore.authentication.UserAuthenticator
-import uk.gov.android.securestore.crypto.HybridCryptoManager
-import uk.gov.android.securestore.crypto.HybridCryptoManagerImpl
+import uk.gov.android.securestore.crypto.HybridCryptoManagerAsync
+import uk.gov.android.securestore.crypto.HybridCryptoManagerAsyncImpl
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
-import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @Suppress("TooGenericExceptionCaught", "TooManyFunctions")
-@Deprecated(
-    message = "This has been replaced by a more coroutine-friendly implementation of Secure Store.",
-    replaceWith = ReplaceWith("uk.gov.android.securestore.SharedPrefsStoreAsync"),
-    level = DeprecationLevel.WARNING,
-)
-class SharedPrefsStore(
+class SharedPrefsStoreAsync(
     private val authenticator: Authenticator = UserAuthenticator(),
-    private val hybridCryptoManager: HybridCryptoManager = HybridCryptoManagerImpl(),
-) : SecureStore {
+    private val hybridCryptoManagerAsync: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl(),
+) : SecureStoreAsync {
     private val tag = this::class.java.simpleName
-    private var configuration: SecureStorageConfiguration? = null
+    private var configurationAsync: SecureStorageConfigurationAsync? = null
     private var sharedPrefs: SharedPreferences? = null
 
     override fun init(
         context: Context,
-        configuration: SecureStorageConfiguration,
+        configurationAsync: SecureStorageConfigurationAsync,
     ) {
-        this.configuration = configuration
-        hybridCryptoManager.init(
-            configuration.id,
-            configuration.accessControlLevel,
+        this.configurationAsync = configurationAsync
+        hybridCryptoManagerAsync.init(
+            configurationAsync.id,
+            configurationAsync.accessControlLevel,
+            configurationAsync.dispatcher,
         )
-        sharedPrefs = context.getSharedPreferences(configuration.id, Context.MODE_PRIVATE)
+        sharedPrefs = context.getSharedPreferences(configurationAsync.id, Context.MODE_PRIVATE)
     }
 
     override suspend fun upsert(key: String, value: String): String {
         return try {
-            val result = hybridCryptoManager.encrypt(value)
+            val result = hybridCryptoManagerAsync.encrypt(value)
                 .also {
                     writeToPrefs(key, it.data)
                     writeToPrefs(key + KEY_SUFFIX, it.key)
@@ -62,12 +57,12 @@ class SharedPrefsStore(
         }
     }
 
-    override fun deleteAll() {
+    override suspend fun deleteAll() {
         sharedPrefs?.edit {
             clear()
         }
         try {
-            hybridCryptoManager.deleteKey()
+            hybridCryptoManagerAsync.deleteKey()
         } catch (e: Exception) {
             throw SecureStorageError(e)
         }
@@ -76,25 +71,21 @@ class SharedPrefsStore(
     override suspend fun retrieve(
         vararg key: String,
     ): RetrievalEvent {
-        return configuration?.let { configuration ->
+        return configurationAsync?.let { configuration ->
             if (configuration.accessControlLevel != AccessControlLevel.OPEN) {
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
                     "Access control level must be OPEN to use this retrieve method",
                 )
             } else {
-                suspendCoroutine<RetrievalEvent> { continuation ->
-                    try {
-                        val results = handleResults(*key)
-                        continuation.resume(RetrievalEvent.Success(results))
-                    } catch (e: SecureStorageError) {
-                        continuation.resume(
-                            RetrievalEvent.Failed(
-                                e.type,
-                                e.message,
-                            ),
-                        )
-                    }
+                try {
+                    val results = handleResults(*key)
+                    RetrievalEvent.Success(results)
+                } catch (e: SecureStorageError) {
+                    RetrievalEvent.Failed(
+                        e.type,
+                        e.message,
+                    )
                 }
             }
         } ?: RetrievalEvent.Failed(
@@ -103,67 +94,65 @@ class SharedPrefsStore(
         )
     }
 
+    @Suppress("NestedBlockDepth", "LongMethod")
     override suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
         context: FragmentActivity,
     ): RetrievalEvent {
-        return configuration?.let { configuration ->
-            suspendCoroutine { continuation ->
-                if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
-                    continuation.resume(
-                        RetrievalEvent.Failed(
-                            SecureStoreErrorType.GENERAL,
-                            "Use retrieve method, access control is set to OPEN, " +
-                                "no need for auth",
-                        ),
-                    )
-                }
+        var result: RetrievalEvent = RetrievalEvent.Failed(
+            SecureStoreErrorType.GENERAL,
+            "Must call init on SecureStore first!",
+        )
+        configurationAsync?.let { configuration ->
+            if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
+                result = RetrievalEvent.Failed(
+                    SecureStoreErrorType.GENERAL,
+                    "Use retrieve method, access control is set to OPEN, " +
+                        "no need for auth",
+                )
+            } else {
                 try {
                     authenticator.init(context)
-                    authenticator.authenticate(
-                        configuration.accessControlLevel,
-                        authPromptConfig,
-                        AuthenticatorCallbackHandler(
-                            onSuccess = {
-                                val results = try {
-                                    RetrievalEvent.Success(handleResults(*key))
-                                } catch (e: SecureStorageError) {
-                                    RetrievalEvent.Failed(e.type, e.message)
-                                }
-                                continuation.resume(results)
-                            },
-                            onError = { errorCode, errorString ->
-                                continuation.resume(
-                                    RetrievalEvent.Failed(
+                    val authenticateResultSuccess: Boolean = suspendCoroutine { continuation ->
+                        authenticator.authenticate(
+                            configuration.accessControlLevel,
+                            authPromptConfig,
+                            AuthenticatorCallbackHandler(
+                                onSuccess = {
+                                    continuation.resumeWith(Result.success(true))
+                                },
+                                onError = { errorCode, errorString ->
+                                    result = RetrievalEvent.Failed(
                                         getErrorType(errorCode),
                                         errorString.toString(),
-                                    ),
-                                )
-                            },
-                            onFailure = {
-                                Log.e(tag, "Bio Prompt Failed")
-                            },
-                        ),
-                    )
+                                    )
+                                    continuation.resumeWith(Result.success(false))
+                                },
+                                onFailure = {
+                                    // Do nothing to allow user to try again
+                                },
+                            ),
+                        )
+                    }
+                    if (authenticateResultSuccess) {
+                        result =
+                            RetrievalEvent.Success(handleResults(*key))
+                    }
                 } catch (e: SecureStorageError) {
-                    continuation.resume(RetrievalEvent.Failed(e.type, e.message))
+                    result = RetrievalEvent.Failed(e.type, e.message)
                 } catch (e: Exception) {
                     Log.e(tag, e.message, e)
-                    continuation.resume(
-                        RetrievalEvent.Failed(
-                            SecureStoreErrorType.GENERAL,
-                            e.message,
-                        ),
+                    result = RetrievalEvent.Failed(
+                        SecureStoreErrorType.GENERAL,
+                        e.message,
                     )
                 } finally {
                     authenticator.close()
                 }
             }
-        } ?: RetrievalEvent.Failed(
-            SecureStoreErrorType.GENERAL,
-            "Must call init on SecureStore first!",
-        )
+        }
+        return result
     }
 
     override fun exists(key: String): Boolean {
@@ -178,7 +167,7 @@ class SharedPrefsStore(
         } ?: throw SecureStorageError(Exception("You must call init first!"))
     }
 
-    private fun cryptoDecryptText(
+    private suspend fun cryptoDecryptText(
         alias: String,
         onTextReady: (String?) -> Unit,
     ) {
@@ -189,9 +178,7 @@ class SharedPrefsStore(
                 if (encryptedData.isNullOrEmpty() || encryptedKey.isNullOrEmpty()) {
                     onTextReady(null)
                 } else {
-                    hybridCryptoManager.decrypt(encryptedData, encryptedKey) { result ->
-                        onTextReady(result)
-                    }
+                    onTextReady(hybridCryptoManagerAsync.decrypt(encryptedData, encryptedKey))
                 }
             } catch (e: Exception) {
                 throw SecureStorageError(e)
@@ -210,7 +197,7 @@ class SharedPrefsStore(
         }
     }
 
-    private fun handleResults(vararg key: String): MutableMap<String, String> {
+    private suspend fun handleResults(vararg key: String): MutableMap<String, String> {
         val results = mutableMapOf<String, String>()
         key.forEach { alias ->
             cryptoDecryptText(alias) { data ->
