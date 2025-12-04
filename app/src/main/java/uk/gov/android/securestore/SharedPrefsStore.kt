@@ -98,7 +98,7 @@ class SharedPrefsStore(
             "Must call init on SecureStore first!",
         )
     }
-
+    @Suppress("LongMethod")
     override suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
