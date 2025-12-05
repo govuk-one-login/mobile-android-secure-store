@@ -308,7 +308,8 @@ class SharedPrefsStoreTest {
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.NOT_FOUND,
-                    "java.lang.Exception: test not found",
+                    "authenticate call onSuccess callback throws SecureStorageError " +
+                        "java.lang.Exception: test not found",
                 ),
                 result,
             )
@@ -342,7 +343,8 @@ class SharedPrefsStoreTest {
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
-                    "java.security.InvalidKeyException: error",
+                    "authenticate call throws SecureStorageError " +
+                        "java.security.InvalidKeyException: error",
                 ),
                 result,
             )
@@ -376,7 +378,8 @@ class SharedPrefsStoreTest {
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.NOT_FOUND,
-                    "java.lang.Exception: test not found",
+                    "authenticate call onSuccess callback throws SecureStorageError " +
+                        "java.lang.Exception: test not found",
                 ),
                 result,
             )
@@ -584,7 +587,7 @@ class SharedPrefsStoreTest {
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.GENERAL,
-                    "Error",
+                    "authenticate call throws Exception Error",
                 ),
                 result,
             )

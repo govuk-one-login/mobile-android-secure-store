@@ -128,7 +128,8 @@ class SharedPrefsStore(
                                 } catch (e: SecureStorageError) {
                                     RetrievalEvent.Failed(
                                         ErrorTypeHandler.getErrorType(e),
-                                        e.message,
+                                        "authenticate call onSuccess callback throws " +
+                                            "SecureStorageError ${e.message}",
                                     )
                                 }
                                 continuation.resume(results)
@@ -150,7 +151,7 @@ class SharedPrefsStore(
                     continuation.resume(
                         RetrievalEvent.Failed(
                             ErrorTypeHandler.getErrorType(e),
-                            e.message,
+                            "authenticate call throws SecureStorageError ${e.message}",
                         ),
                     )
                 } catch (e: Exception) {
@@ -158,7 +159,7 @@ class SharedPrefsStore(
                     continuation.resume(
                         RetrievalEvent.Failed(
                             SecureStoreErrorType.GENERAL,
-                            e.message,
+                            "authenticate call throws Exception ${e.message}",
                         ),
                     )
                 } finally {
