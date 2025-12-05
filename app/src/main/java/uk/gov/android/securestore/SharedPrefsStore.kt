@@ -214,6 +214,8 @@ class SharedPrefsStore(
             BiometricPrompt.ERROR_NO_BIOMETRICS,
             BiometricPrompt.ERROR_HW_UNAVAILABLE,
             BiometricPrompt.ERROR_CANCELED,
+            BiometricPrompt.ERROR_LOCKOUT,
+            BiometricPrompt.ERROR_LOCKOUT_PERMANENT,
             -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
 
             else -> SecureStoreErrorType.GENERAL

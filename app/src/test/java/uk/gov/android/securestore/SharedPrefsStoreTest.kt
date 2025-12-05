@@ -2,6 +2,7 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.security.keystore.UserNotAuthenticatedException
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.runBlocking
@@ -331,7 +332,7 @@ class SharedPrefsStoreTest {
                     any(),
                 ),
             ).thenAnswer {
-                throw SecureStorageError(InvalidKeyException("error"))
+                throw SecureStorageError(UserNotAuthenticatedException())
             }
 
             val result = sharedPrefsStore.retrieveWithAuthentication(
@@ -343,8 +344,8 @@ class SharedPrefsStoreTest {
             assertEquals(
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
-                    "authenticate call throws SecureStorageError " +
-                        "java.security.InvalidKeyException: error",
+                    "authenticate call throws SecureStorageError android.security." +
+                        "keystore.UserNotAuthenticatedException",
                 ),
                 result,
             )
@@ -430,6 +431,56 @@ class SharedPrefsStoreTest {
                 RetrievalEvent.Failed(
                     SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
                     "biometric error code 1 error",
+                ),
+                result,
+            )
+            verify(mockAuthenticator).init(activityFragment)
+            verify(mockAuthenticator).close()
+        }
+    }
+
+    @Test
+    fun testRetrieveWithAuthenticationAuthErrorsUserCancelledErrorLockout() {
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
+
+        runBlocking {
+            setBiometricError(BiometricPrompt.ERROR_LOCKOUT)
+
+            val result = sharedPrefsStore.retrieveWithAuthentication(
+                alias,
+                authPromptConfig = authConfig,
+                context = activityFragment,
+            )
+
+            assertEquals(
+                RetrievalEvent.Failed(
+                    SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
+                    "biometric error code 7 error",
+                ),
+                result,
+            )
+            verify(mockAuthenticator).init(activityFragment)
+            verify(mockAuthenticator).close()
+        }
+    }
+
+    @Test
+    fun testRetrieveWithAuthenticationAuthErrorsUserCancelledErrorLockoutPermanent() {
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
+
+        runBlocking {
+            setBiometricError(BiometricPrompt.ERROR_LOCKOUT_PERMANENT)
+
+            val result = sharedPrefsStore.retrieveWithAuthentication(
+                alias,
+                authPromptConfig = authConfig,
+                context = activityFragment,
+            )
+
+            assertEquals(
+                RetrievalEvent.Failed(
+                    SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
+                    "biometric error code 9 error",
                 ),
                 result,
             )

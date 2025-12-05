@@ -4,7 +4,6 @@ import android.security.keystore.UserNotAuthenticatedException
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
-import java.security.InvalidKeyException
 import kotlin.UnsupportedOperationException
 import kotlin.test.assertEquals
 
@@ -20,10 +19,6 @@ class ErrorTypeHandlerTest {
         @JvmStatic
         fun getData(): List<Arguments> {
             return listOf(
-                Arguments.of(
-                    SecureStorageError(InvalidKeyException()),
-                    SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
-                ),
                 Arguments.of(
                     SecureStorageError(UserNotAuthenticatedException()),
                     SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
