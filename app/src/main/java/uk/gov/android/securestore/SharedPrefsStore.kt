@@ -235,7 +235,9 @@ class SharedPrefsStore(
     }
 
     companion object {
+        // DO NOT CHANGE THIS
         private const val KEY_SUFFIX = "Key"
+
         private const val BIOMETRIC_PREFIX = "biometric error code "
         private fun sseNotFound(alias: String) = SecureStorageError(
             Exception("$alias not found"),

@@ -80,6 +80,7 @@ class AesCryptoManager : SymmetricCryptoManager {
     }
 
     companion object {
+        // DO NOT CHANGE ANY OF THESE WITHOUT PROPER MIGRATION
         private const val KEY_SIZE = 256
         private const val IV_BYTES_SIZE = 12
         private const val TAG_LENGTH = 128

@@ -48,11 +48,11 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
 
     override fun decrypt(
         encryptedData: String,
-        encryptedKey: String,
+        key: String,
         callback: (data: String?) -> Unit,
     ) {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        val encryptedKeyBytes = Base64.decode(encryptedKey)
+        val encryptedKeyBytes = Base64.decode(key)
         val decryptedKey = initCipherAndDecryptKey(
             cipher,
             encryptedKeyBytes,
@@ -125,13 +125,15 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
         }
 
     companion object {
+        // DO NOT CHANGE ANY OF THESE WITHOUT PROPER MIGRATION
         private const val PROVIDER = "AndroidKeyStore"
         private const val ALGORITHM = KeyProperties.KEY_ALGORITHM_RSA
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_ECB
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
         private const val KEY_SIZE = 2048
-        private const val KEY_TIMEOUT = 15
         private const val AUTH_TYPE_OPEN = -1
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
+
+        private const val KEY_TIMEOUT = 15
     }
 }
