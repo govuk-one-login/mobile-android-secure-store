@@ -19,6 +19,11 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @Suppress("TooGenericExceptionCaught", "TooManyFunctions")
+@Deprecated(
+    message = "This has been replaced by a more coroutine-friendly implementation of Secure Store.",
+    replaceWith = ReplaceWith("uk.gov.android.securestore.SharedPrefsStoreAsync"),
+    level = DeprecationLevel.WARNING,
+)
 class SharedPrefsStore(
     private val authenticator: Authenticator = UserAuthenticator(),
     private val hybridCryptoManager: HybridCryptoManager = HybridCryptoManagerImpl(),

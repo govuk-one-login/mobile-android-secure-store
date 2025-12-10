@@ -49,7 +49,7 @@ class AesCryptoManagerTest {
     @Test
     fun testDecryptDataSuccess() {
         var result: String? = null
-        sut.decrypt(encryptedValue, aesKey) { result = it }
+        result = sut.decrypt(encryptedValue, aesKey)
 
         assertEquals(expected, result)
     }
@@ -57,7 +57,7 @@ class AesCryptoManagerTest {
     @Test
     fun testDecryptDataFailureInvalidKey() {
         assertThrows(GeneralSecurityException::class.java) {
-            sut.decrypt(encryptedValue, invalidKey) {}
+            sut.decrypt(encryptedValue, invalidKey)
         }
     }
 

@@ -49,8 +49,7 @@ class AesCryptoManager : SymmetricCryptoManager {
     override fun decrypt(
         encryptedData: String,
         key: String,
-        callback: (data: String?) -> Unit,
-    ) {
+    ): String {
         val decodedKey = Base64.decode(key)
         // Extract the IV and encrypted data
         val encryptedDataBytes = Base64.decode(encryptedData)
@@ -67,7 +66,7 @@ class AesCryptoManager : SymmetricCryptoManager {
         )
 
         // Decrypt the data
-        callback(cipher.doFinal(ciphertext).decodeToString())
+        return cipher.doFinal(ciphertext).decodeToString()
     }
 
     private fun createKey(): SecretKey {

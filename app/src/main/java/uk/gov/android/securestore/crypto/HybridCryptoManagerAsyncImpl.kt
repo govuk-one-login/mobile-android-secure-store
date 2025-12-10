@@ -4,6 +4,8 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import uk.gov.android.securestore.AccessControlLevel
 import uk.gov.android.securestore.crypto.limitedmanager.AesCryptoManager
 import java.security.KeyPairGenerator
@@ -14,27 +16,29 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
- * Implementation of [HybridCryptoManager] using RSA encryption algorithm to create Public/Private key pair.
+ * Implementation of [HybridCryptoManagerAsync] using RSA encryption algorithm to create Public/Private key pair.
  * It allows for creation of RSA key-pair which would be used to encrypt/ decrypt an AES key that will
  * be used to encrypt/ decrypt the data provided.
  */
 @OptIn(ExperimentalEncodingApi::class)
-internal class HybridCryptoManagerImpl : HybridCryptoManager {
+internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
     private lateinit var alias: String
     private lateinit var accessControlLevel: AccessControlLevel
+    private lateinit var dispatcher: CoroutineDispatcher
     private val aesCryptoManager = AesCryptoManager()
     private val keyStore: KeyStore = KeyStore.getInstance(PROVIDER).apply {
         load(null)
     }
 
-    override fun init(alias: String, acl: AccessControlLevel) {
+    override fun init(alias: String, acl: AccessControlLevel, dispatcher: CoroutineDispatcher) {
         accessControlLevel = acl
         this.alias = alias
+        this.dispatcher = dispatcher
     }
 
-    override fun encrypt(
+    override suspend fun encrypt(
         input: String,
-    ): EncryptedData {
+    ): EncryptedData = withContext(dispatcher) {
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
         }
@@ -43,21 +47,20 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
             val result = Base64.encode(encryptedKey)
             result
         }
-        return encryptedData
+        encryptedData
     }
 
-    override fun decrypt(
+    override suspend fun decrypt(
         encryptedData: String,
         key: String,
-        callback: (data: String?) -> Unit,
-    ) {
+    ): String = withContext(dispatcher) {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val encryptedKeyBytes = Base64.decode(key)
         val decryptedKey = initCipherAndDecryptKey(
             cipher,
             encryptedKeyBytes,
         )
-        callback(aesCryptoManager.decrypt(encryptedData, decryptedKey))
+        aesCryptoManager.decrypt(encryptedData, decryptedKey)
     }
 
     private fun initCipherAndDecryptKey(
@@ -69,9 +72,11 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
         return encodedKey
     }
 
-    override fun deleteKey() {
+    override suspend fun deleteKey() {
         if (this::alias.isInitialized) {
-            keyStore.deleteEntry(alias)
+            withContext(dispatcher) {
+                keyStore.deleteEntry(alias)
+            }
         }
     }
 
@@ -125,15 +130,13 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
         }
 
     companion object {
-        // DO NOT CHANGE ANY OF THESE WITHOUT PROPER MIGRATION
         private const val PROVIDER = "AndroidKeyStore"
         private const val ALGORITHM = KeyProperties.KEY_ALGORITHM_RSA
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_ECB
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
         private const val KEY_SIZE = 2048
+        private const val KEY_TIMEOUT = 2
         private const val AUTH_TYPE_OPEN = -1
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
-
-        private const val KEY_TIMEOUT = 15
     }
 }
