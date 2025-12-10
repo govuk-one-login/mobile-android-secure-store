@@ -35,7 +35,7 @@ interface HybridCryptoManagerAsync {
      */
     suspend fun decrypt(
         encryptedData: String,
-        key: String,
+        encryptedKey: String,
     ): String
 
     /**

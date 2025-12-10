@@ -52,10 +52,10 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
 
     override suspend fun decrypt(
         encryptedData: String,
-        key: String,
+        encryptedKey: String,
     ): String = withContext(dispatcher) {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        val encryptedKeyBytes = Base64.decode(key)
+        val encryptedKeyBytes = Base64.decode(encryptedKey)
         val decryptedKey = initCipherAndDecryptKey(
             cipher,
             encryptedKeyBytes,
@@ -135,7 +135,7 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
         private const val BLOCK_MODE = KeyProperties.BLOCK_MODE_ECB
         private const val PADDING = KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
         private const val KEY_SIZE = 2048
-        private const val KEY_TIMEOUT = 2
+        private const val KEY_TIMEOUT = 15
         private const val AUTH_TYPE_OPEN = -1
         private const val TRANSFORMATION = "$ALGORITHM/$BLOCK_MODE/$PADDING"
     }

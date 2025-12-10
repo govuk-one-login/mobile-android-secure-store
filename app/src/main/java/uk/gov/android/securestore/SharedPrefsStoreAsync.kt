@@ -12,6 +12,7 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
 import uk.gov.android.securestore.authentication.UserAuthenticator
 import uk.gov.android.securestore.crypto.HybridCryptoManagerAsync
 import uk.gov.android.securestore.crypto.HybridCryptoManagerAsyncImpl
+import uk.gov.android.securestore.error.ErrorTypeHandler
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
 import kotlin.coroutines.suspendCoroutine
@@ -125,27 +126,30 @@ class SharedPrefsStoreAsync(
                                 onError = { errorCode, errorString ->
                                     result = RetrievalEvent.Failed(
                                         getErrorType(errorCode),
-                                        errorString.toString(),
+                                        "$BIOMETRIC_PREFIX$errorCode $errorString",
                                     )
                                     continuation.resumeWith(Result.success(false))
                                 },
                                 onFailure = {
                                     // Do nothing to allow user to try again
+                                    Log.e(tag, "Bio Prompt Failed")
                                 },
                             ),
                         )
                     }
                     if (authenticateResultSuccess) {
-                        result =
-                            RetrievalEvent.Success(handleResults(*key))
+                        result = RetrievalEvent.Success(handleResults(*key))
                     }
                 } catch (e: SecureStorageError) {
-                    result = RetrievalEvent.Failed(e.type, e.message)
+                    result = RetrievalEvent.Failed(
+                        ErrorTypeHandler.getErrorType(e),
+                        "authenticate call throws SecureStorageError ${e.message}",
+                    )
                 } catch (e: Exception) {
                     Log.e(tag, e.message, e)
                     result = RetrievalEvent.Failed(
                         SecureStoreErrorType.GENERAL,
-                        e.message,
+                        "authenticate call throws Exception ${e.message}",
                     )
                 } finally {
                     authenticator.close()
@@ -187,13 +191,19 @@ class SharedPrefsStoreAsync(
     }
 
     private fun getErrorType(errorCode: Int): SecureStoreErrorType {
-        return if (
-            errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
-            errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON
-        ) {
-            SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
-        } else {
-            SecureStoreErrorType.GENERAL
+        return when (errorCode) {
+            BiometricPrompt.ERROR_USER_CANCELED,
+            BiometricPrompt.ERROR_NEGATIVE_BUTTON,
+            BiometricPrompt.ERROR_TIMEOUT,
+            BiometricPrompt.ERROR_UNABLE_TO_PROCESS,
+            BiometricPrompt.ERROR_NO_BIOMETRICS,
+            BiometricPrompt.ERROR_HW_UNAVAILABLE,
+            BiometricPrompt.ERROR_CANCELED,
+            BiometricPrompt.ERROR_LOCKOUT,
+            BiometricPrompt.ERROR_LOCKOUT_PERMANENT,
+            -> SecureStoreErrorType.USER_CANCELED_BIO_PROMPT
+
+            else -> SecureStoreErrorType.GENERAL
         }
     }
 
@@ -210,7 +220,10 @@ class SharedPrefsStoreAsync(
     }
 
     companion object {
+        // DO NOT CHANGE THIS
         private const val KEY_SUFFIX = "Key"
+
+        private const val BIOMETRIC_PREFIX = "biometric error code "
         private fun sseNotFound(alias: String) = SecureStorageError(
             Exception("$alias not found"),
             SecureStoreErrorType.NOT_FOUND,
