@@ -6,6 +6,9 @@ import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.given
@@ -22,6 +25,7 @@ import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStoreErrorType
 import java.security.GeneralSecurityException
 import java.security.KeyStoreException
+import java.util.stream.Stream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -271,7 +275,7 @@ class SharedPrefsStoreAsyncTest {
         assertEquals(
             RetrievalEvent.Failed(
                 SecureStoreErrorType.NOT_FOUND,
-                "java.lang.Exception: test not found",
+                "authenticate call throws SecureStorageError java.lang.Exception: test not found",
             ),
             result,
         )
@@ -291,7 +295,7 @@ class SharedPrefsStoreAsyncTest {
             ),
         ).thenAnswer {
             (it.arguments[2] as AuthenticatorCallbackHandler)
-                .onError(1, "error")
+                .onError(0, "error")
         }
 
         val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
@@ -303,7 +307,7 @@ class SharedPrefsStoreAsyncTest {
         assertEquals(
             RetrievalEvent.Failed(
                 SecureStoreErrorType.GENERAL,
-                "error",
+                "biometric error code 0 error",
             ),
             result,
         )
@@ -312,39 +316,7 @@ class SharedPrefsStoreAsyncTest {
     }
 
     @Test
-    fun testRetrieveWithAuthenticationAuthErrorsUserCancelled() = runTest {
-        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
-
-        whenever(
-            mockAuthenticator.authenticate(
-                eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
-                eq(authConfig),
-                any(),
-            ),
-        ).thenAnswer {
-            (it.arguments[2] as AuthenticatorCallbackHandler)
-                .onError(BiometricPrompt.ERROR_USER_CANCELED, "error")
-        }
-
-        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
-            alias,
-            authPromptConfig = authConfig,
-            context = activityFragment,
-        )
-
-        assertEquals(
-            RetrievalEvent.Failed(
-                SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
-                "error",
-            ),
-            result,
-        )
-        verify(mockAuthenticator).init(activityFragment)
-        verify(mockAuthenticator).close()
-    }
-
-    @Test
-    fun testRetrieveWithAuthenticationAuthThrows() = runTest {
+    fun testRetrieveWithAuthenticationThrowsException() = runTest {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
@@ -366,7 +338,7 @@ class SharedPrefsStoreAsyncTest {
         assertEquals(
             RetrievalEvent.Failed(
                 SecureStoreErrorType.GENERAL,
-                "Error",
+                "authenticate call throws Exception Error",
             ),
             result,
         )
@@ -658,6 +630,42 @@ class SharedPrefsStoreAsyncTest {
         assertEquals(expectedText, actualText)
     }
 
+    @ParameterizedTest
+    @MethodSource("errorTypes")
+    fun testRetrieveWithAuthenticationAuthErrorsNonGeneric(
+        errorType: Int,
+        codeString: String,
+    ) = runTest {
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
+
+        whenever(
+            mockAuthenticator.authenticate(
+                eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
+                eq(authConfig),
+                any(),
+            ),
+        ).thenAnswer {
+            (it.arguments[2] as AuthenticatorCallbackHandler)
+                .onError(errorType, "error")
+        }
+
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
+            alias,
+            authPromptConfig = authConfig,
+            context = activityFragment,
+        )
+
+        assertEquals(
+            RetrievalEvent.Failed(
+                SecureStoreErrorType.USER_CANCELED_BIO_PROMPT,
+                "biometric error code $codeString error",
+            ),
+            result,
+        )
+        verify(mockAuthenticator).init(activityFragment)
+        verify(mockAuthenticator).close()
+    }
+
     private fun initSecureStore(acl: AccessControlLevel) {
         val config = SecureStorageConfigurationAsync(
             storeId,
@@ -668,5 +676,21 @@ class SharedPrefsStoreAsyncTest {
             mockContext,
             config,
         )
+    }
+
+    companion object {
+        @JvmStatic
+        fun errorTypes(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of(BiometricPrompt.ERROR_USER_CANCELED, "10"),
+                Arguments.of(BiometricPrompt.ERROR_NEGATIVE_BUTTON, "13"),
+                Arguments.of(BiometricPrompt.ERROR_TIMEOUT, "3"),
+                Arguments.of(BiometricPrompt.ERROR_UNABLE_TO_PROCESS, "2"),
+                Arguments.of(BiometricPrompt.ERROR_NO_BIOMETRICS, "11"),
+                Arguments.of(BiometricPrompt.ERROR_HW_UNAVAILABLE, "1"),
+                Arguments.of(BiometricPrompt.ERROR_CANCELED, "5"),
+                Arguments.of(BiometricPrompt.ERROR_LOCKOUT, "7"),
+                Arguments.of(BiometricPrompt.ERROR_LOCKOUT_PERMANENT, "9"),
+            )
     }
 }

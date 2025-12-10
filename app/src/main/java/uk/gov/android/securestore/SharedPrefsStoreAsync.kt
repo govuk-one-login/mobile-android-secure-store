@@ -21,7 +21,6 @@ class SharedPrefsStoreAsync(
     private val authenticator: Authenticator = UserAuthenticator(),
     private val hybridCryptoManagerAsync: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl(),
 ) : SecureStoreAsync {
-    private val tag = this::class.java.simpleName
     private var configurationAsync: SecureStorageConfigurationAsync? = null
     private var sharedPrefs: SharedPreferences? = null
 
