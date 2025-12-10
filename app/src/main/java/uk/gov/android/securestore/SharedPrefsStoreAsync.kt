@@ -2,7 +2,6 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
@@ -132,7 +131,6 @@ class SharedPrefsStoreAsync(
                                 },
                                 onFailure = {
                                     // Do nothing to allow user to try again
-                                    Log.e(tag, "Bio Prompt Failed")
                                 },
                             ),
                         )
@@ -146,7 +144,6 @@ class SharedPrefsStoreAsync(
                         "authenticate call throws SecureStorageError ${e.message}",
                     )
                 } catch (e: Exception) {
-                    Log.e(tag, e.message, e)
                     result = RetrievalEvent.Failed(
                         SecureStoreErrorType.GENERAL,
                         "authenticate call throws Exception ${e.message}",
