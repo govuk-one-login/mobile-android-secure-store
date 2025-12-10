@@ -48,11 +48,11 @@ internal class HybridCryptoManagerImpl : HybridCryptoManager {
 
     override fun decrypt(
         encryptedData: String,
-        key: String,
+        encryptedKey: String,
         callback: (data: String?) -> Unit,
     ) {
         val cipher = Cipher.getInstance(TRANSFORMATION)
-        val encryptedKeyBytes = Base64.decode(key)
+        val encryptedKeyBytes = Base64.decode(encryptedKey)
         val decryptedKey = initCipherAndDecryptKey(
             cipher,
             encryptedKeyBytes,

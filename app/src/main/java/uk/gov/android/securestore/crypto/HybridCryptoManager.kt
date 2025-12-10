@@ -34,7 +34,7 @@ interface HybridCryptoManager {
      */
     fun decrypt(
         encryptedData: String,
-        key: String,
+        encryptedKey: String,
         callback: (data: String?) -> Unit,
     )
 
