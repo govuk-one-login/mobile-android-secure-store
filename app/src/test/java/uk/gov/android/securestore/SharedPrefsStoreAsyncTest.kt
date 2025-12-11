@@ -275,7 +275,38 @@ class SharedPrefsStoreAsyncTest {
         assertEquals(
             RetrievalEvent.Failed(
                 SecureStoreErrorType.NOT_FOUND,
-                "authenticate call throws SecureStorageError java.lang.Exception: test not found",
+                "authenticate call onSuccess callback throws SecureStorageError " +
+                    "java.lang.Exception: test not found",
+            ),
+            result,
+        )
+        verify(mockAuthenticator).init(activityFragment)
+        verify(mockAuthenticator).close()
+    }
+
+    @Test
+    fun testRetrieveWithAuthenticationThrowsSecureStorageError() = runTest {
+        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
+
+        whenever(
+            mockAuthenticator.authenticate(
+                eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
+                eq(authConfig),
+                any(),
+            ),
+        ).thenThrow(SecureStorageError(Exception("test exception")))
+
+        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
+            alias,
+            authPromptConfig = authConfig,
+            context = activityFragment,
+        )
+
+        assertEquals(
+            RetrievalEvent.Failed(
+                SecureStoreErrorType.GENERAL,
+                "authenticate call throws SecureStorageError " +
+                    "java.lang.Exception: test exception",
             ),
             result,
         )

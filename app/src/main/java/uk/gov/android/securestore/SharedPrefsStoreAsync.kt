@@ -135,7 +135,15 @@ class SharedPrefsStoreAsync(
                         )
                     }
                     if (authenticateResultSuccess) {
-                        result = RetrievalEvent.Success(handleResults(*key))
+                        result = try {
+                            RetrievalEvent.Success(handleResults(*key))
+                        } catch (e: SecureStorageError) {
+                            RetrievalEvent.Failed(
+                                ErrorTypeHandler.getErrorType(e),
+                                "authenticate call onSuccess callback throws " +
+                                    "SecureStorageError ${e.message}",
+                            )
+                        }
                     }
                 } catch (e: SecureStorageError) {
                     result = RetrievalEvent.Failed(
