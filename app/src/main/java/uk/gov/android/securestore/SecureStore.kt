@@ -8,6 +8,11 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
 /**
  * Create an instance of [SecureStore] to save, query and delete data. Data stored as a key value pair, with the value being a [String]
  */
+@Deprecated(
+    message = "This has been replaced by a Secure Store with async methods.",
+    replaceWith = ReplaceWith("uk.gov.android.securestore.SecureStoreAsync"),
+    level = DeprecationLevel.WARNING,
+)
 interface SecureStore {
     /**
      *This must be called before using an instance of secure store, it sets the [AccessControlLevel] for the [SecureStore]
