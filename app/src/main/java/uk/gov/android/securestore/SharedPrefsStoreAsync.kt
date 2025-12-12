@@ -135,15 +135,7 @@ class SharedPrefsStoreAsync(
                         )
                     }
                     if (authenticateResultSuccess) {
-                        result = try {
-                            RetrievalEvent.Success(handleResults(*key))
-                        } catch (e: SecureStorageError) {
-                            RetrievalEvent.Failed(
-                                ErrorTypeHandler.getErrorType(e),
-                                "authenticate call onSuccess callback throws " +
-                                    "SecureStorageError ${e.message}",
-                            )
-                        }
+                        result = processSafeHandleResultsOnAuthenticateSuccess(*key)
                     }
                 } catch (e: SecureStorageError) {
                     result = RetrievalEvent.Failed(
@@ -222,6 +214,19 @@ class SharedPrefsStoreAsync(
         }
         return results
     }
+
+    private suspend fun processSafeHandleResultsOnAuthenticateSuccess(
+        vararg key: String,
+    ): RetrievalEvent =
+        try {
+            RetrievalEvent.Success(handleResults(*key))
+        } catch (e: SecureStorageError) {
+            RetrievalEvent.Failed(
+                ErrorTypeHandler.getErrorType(e),
+                "authenticate call onSuccess callback throws " +
+                    "SecureStorageError ${e.message}",
+            )
+        }
 
     companion object {
         // DO NOT CHANGE THIS
