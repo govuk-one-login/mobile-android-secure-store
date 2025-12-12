@@ -34,8 +34,7 @@ interface SymmetricCryptoManager {
     fun decrypt(
         encryptedData: String,
         key: String,
-        callback: (data: String?) -> Unit,
-    )
+    ): String
 
     sealed class CryptoManagerError(private val error: String) : Exception(error) {
         data object NullEncryptedKey : CryptoManagerError(NULL_ENCRYPTED_KEY_ERROR)
