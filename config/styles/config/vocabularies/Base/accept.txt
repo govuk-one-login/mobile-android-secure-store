@@ -56,3 +56,5 @@ i.e.
 ciphertext
 secureRandom
 [Aa]ndroid
+(?i)Hotfix
+gradlew
