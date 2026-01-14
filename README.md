@@ -1,13 +1,12 @@
 # mobile-android-secure-storage
 
+[![On Branch Push (main)](https://github.com/govuk-one-login/mobile-android-secure-store/actions/workflows/on_push-main.yml/badge.svg)](https://github.com/govuk-one-login/mobile-android-secure-store/actions/workflows/on_push-main.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mobile-android-secure-store&metric=alert_status&token=83ba0683800aaef95a5e945919d235f1abd8ac6d)](https://sonarcloud.io/summary/new_code?id=mobile-android-secure-store)
+
 Implementation of a secure storage solution for Android.
 
 This will allow consumers to `save` `query` and `delete` key value data saved in shared preferences.
 The data will be encrypted before storage and decrypted on retrieval, when an instance is created the consumer can choose the access level of the data (are biometrics required to access)
-
-# Status
-[![On Branch Push (main)](https://github.com/govuk-one-login/mobile-android-secure-store/actions/workflows/on_push-main.yml/badge.svg)](https://github.com/govuk-one-login/mobile-android-secure-store/actions/workflows/on_push-main.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mobile-android-secure-store&metric=alert_status&token=83ba0683800aaef95a5e945919d235f1abd8ac6d)](https://sonarcloud.io/summary/new_code?id=mobile-android-secure-store)
 
 ## Updating gradle-wrapper
 
