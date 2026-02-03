@@ -26,7 +26,7 @@ interface SecureStoreAsyncV2 {
      * @param [key] The unique key to save the data against
      * @param [value] The data to save as a [String]
      *
-     * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to save
+     * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to save
      */
     suspend fun upsert(key: String, value: String): String
 
@@ -41,7 +41,7 @@ interface SecureStoreAsyncV2 {
     /**
      * Delete everything in the SecureStore
      *
-     * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to delete
+     * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to delete
      */
     suspend fun deleteAll()
 
@@ -49,7 +49,7 @@ interface SecureStoreAsyncV2 {
      * Access the data for a given key when authentication is not required; access control level is set to OPEN
      *
      * @param [key] The unique key to identify data to retrieve
-     * @return [RetrievalEvent] to cover success or failure
+     * @return [RetrievalEventV2] to cover success or failure
      *
      */
     suspend fun retrieve(
@@ -62,7 +62,7 @@ interface SecureStoreAsyncV2 {
      * @param [key] The unique key to identify data to retrieve
      * @param [authPromptConfig] Configuration for the Biometric prompt
      * @param [context] The [FragmentActivity] where the method is called, used for auth prompt
-     * @return A [Flow] of [RetrievalEvent]s, allowing for multiple failed attempts for auth
+     * @return A [Flow] of [RetrievalEventV2], allowing for multiple failed attempts for auth
      *
      */
     suspend fun retrieveWithAuthentication(
@@ -77,7 +77,7 @@ interface SecureStoreAsyncV2 {
      * @param [key] Key to select
      * @return True or false if the key exists in the store
      *
-     * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to check for existence
+     * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to check for existence
      */
     fun exists(key: String): Boolean
 }
