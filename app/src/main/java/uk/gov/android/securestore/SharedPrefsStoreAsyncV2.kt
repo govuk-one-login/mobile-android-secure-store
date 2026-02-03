@@ -14,7 +14,6 @@ import uk.gov.android.securestore.crypto.HybridCryptoManagerAsyncImpl
 import uk.gov.android.securestore.error.ErrorTypeHandlerV2
 import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStorageErrorV2
-import uk.gov.android.securestore.error.SecureStoreErrorType
 import uk.gov.android.securestore.error.SecureStoreErrorTypeV2
 import kotlin.coroutines.suspendCoroutine
 
