@@ -5,14 +5,14 @@ import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.flow.Flow
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
-@Deprecated(
-    "Replace with SecureStoreAsyncV2 to allow handling errors correctly - aim to be removed by 20th of April 2026",
-    replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-    level = DeprecationLevel.WARNING
-)
 /**
  * Create an instance of [SecureStoreAsync] to save, query and delete data. Data stored as a key value pair, with the value being a [String]
  */
+@Deprecated(
+    "Replace with SecureStoreAsyncV2 to allow handling errors correctly - aim to be removed by 20th of April 2026",
+    replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
+    level = DeprecationLevel.WARNING,
+)
 interface SecureStoreAsync {
     /**
      *This must be called before using an instance of secure store, it sets the [AccessControlLevel] for the [SecureStoreAsync]
@@ -23,7 +23,7 @@ interface SecureStoreAsync {
     @Deprecated(
         "Replace with SecureStoreAsyncV2.init() to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     fun init(
         context: Context,
@@ -41,7 +41,7 @@ interface SecureStoreAsync {
     @Deprecated(
         "Replace with SecureStoreAsyncV2.upsert() to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     suspend fun upsert(key: String, value: String): String
 
@@ -54,7 +54,7 @@ interface SecureStoreAsync {
     @Deprecated(
         "Replace with SecureStoreAsyncV2.delete(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     fun delete(key: String)
 
@@ -66,7 +66,7 @@ interface SecureStoreAsync {
     @Deprecated(
         "Replace with SecureStoreAsyncV2.deleteAll(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     suspend fun deleteAll()
 
@@ -80,7 +80,7 @@ interface SecureStoreAsync {
     @Deprecated(
         "Replace with SecureStoreAsyncV2.retrieve() to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     suspend fun retrieve(
         vararg key: String,
@@ -98,7 +98,7 @@ interface SecureStoreAsync {
     @Deprecated(
         "Replace with SecureStoreAsyncV2.retrieveWithAuthentication(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     suspend fun retrieveWithAuthentication(
         vararg key: String,
@@ -117,7 +117,7 @@ interface SecureStoreAsync {
     @Deprecated(
         "Replace with SecureStoreAsyncV2.exists(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     fun exists(key: String): Boolean
 }

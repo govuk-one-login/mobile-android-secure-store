@@ -20,7 +20,7 @@ import kotlin.coroutines.suspendCoroutine
 @Deprecated(
     "Replace with SecureStoreAsyncV2 to allow handling errors correctly - aim to be removed by 20th of April 2026",
     replaceWith = ReplaceWith("java/uk/gov/android/securestore/SharedPrefsStoreAsyncV2.kt"),
-    level = DeprecationLevel.WARNING
+    level = DeprecationLevel.WARNING,
 )
 class SharedPrefsStoreAsync(
     private val authenticator: Authenticator = UserAuthenticator(),
@@ -32,7 +32,7 @@ class SharedPrefsStoreAsync(
     @Deprecated(
         "Replace with SecureStoreAsyncV2.init() to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     override fun init(
         context: Context,
@@ -50,7 +50,7 @@ class SharedPrefsStoreAsync(
     @Deprecated(
         "Replace with SecureStoreAsyncV2.upsert() to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     override suspend fun upsert(key: String, value: String): String {
         return try {
@@ -68,7 +68,7 @@ class SharedPrefsStoreAsync(
     @Deprecated(
         "Replace with SecureStoreAsyncV2.delete(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     override fun delete(key: String) {
         sharedPrefs?.edit {
@@ -79,7 +79,7 @@ class SharedPrefsStoreAsync(
     @Deprecated(
         "Replace with SecureStoreAsyncV2.deleteAll(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     override suspend fun deleteAll() {
         sharedPrefs?.edit {
@@ -95,7 +95,7 @@ class SharedPrefsStoreAsync(
     @Deprecated(
         "Replace with SecureStoreAsyncV2.retrieve() to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     override suspend fun retrieve(
         vararg key: String,
@@ -126,7 +126,7 @@ class SharedPrefsStoreAsync(
     @Deprecated(
         "Replace with SecureStoreAsyncV2.retrieveWithAuthentication(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     @Suppress("NestedBlockDepth", "LongMethod")
     override suspend fun retrieveWithAuthentication(
@@ -193,7 +193,7 @@ class SharedPrefsStoreAsync(
     @Deprecated(
         "Replace with SecureStoreAsyncV2.exists(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
-        level = DeprecationLevel.WARNING
+        level = DeprecationLevel.WARNING,
     )
     override fun exists(key: String): Boolean {
         return sharedPrefs?.contains(key) == true
