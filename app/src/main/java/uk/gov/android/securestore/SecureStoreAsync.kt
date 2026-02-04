@@ -21,7 +21,8 @@ interface SecureStoreAsync {
      * @param configurationAsync [SecureStorageConfigurationAsync] to allow setting of [AccessControlLevel] and store ID
      */
     @Deprecated(
-        "Replace with SecureStoreAsyncV2.init() to allow handling errors correctly - aim to be removed by 20th of April 2026",
+        "Replace with SecureStoreAsyncV2.init() to allow handling errors correctly" +
+            " - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
         level = DeprecationLevel.WARNING,
     )
@@ -39,7 +40,8 @@ interface SecureStoreAsync {
      * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to save
      */
     @Deprecated(
-        "Replace with SecureStoreAsyncV2.upsert() to allow handling errors correctly - aim to be removed by 20th of April 2026",
+        "Replace with SecureStoreAsyncV2.upsert() to allow handling errors correctly" +
+            " - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
         level = DeprecationLevel.WARNING,
     )
@@ -52,7 +54,8 @@ interface SecureStoreAsync {
      *
      */
     @Deprecated(
-        "Replace with SecureStoreAsyncV2.delete(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
+        "Replace with SecureStoreAsyncV2.delete(...) to allow handling errors correctly" +
+            " - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
         level = DeprecationLevel.WARNING,
     )
@@ -64,7 +67,8 @@ interface SecureStoreAsync {
      * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to delete
      */
     @Deprecated(
-        "Replace with SecureStoreAsyncV2.deleteAll(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
+        "Replace with SecureStoreAsyncV2.deleteAll(...) to allow handling errors correctly" +
+            " - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
         level = DeprecationLevel.WARNING,
     )
@@ -78,7 +82,8 @@ interface SecureStoreAsync {
      *
      */
     @Deprecated(
-        "Replace with SecureStoreAsyncV2.retrieve() to allow handling errors correctly - aim to be removed by 20th of April 2026",
+        "Replace with SecureStoreAsyncV2.retrieve() to allow handling errors correctly" +
+            " - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
         level = DeprecationLevel.WARNING,
     )
@@ -96,7 +101,8 @@ interface SecureStoreAsync {
      *
      */
     @Deprecated(
-        "Replace with SecureStoreAsyncV2.retrieveWithAuthentication(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
+        "Replace with SecureStoreAsyncV2.retrieveWithAuthentication(...) to allow" +
+            " handling errors correctly - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
         level = DeprecationLevel.WARNING,
     )
@@ -115,7 +121,8 @@ interface SecureStoreAsync {
      * @throws [uk.gov.android.securestore.error.SecureStorageError] if unable to check for existence
      */
     @Deprecated(
-        "Replace with SecureStoreAsyncV2.exists(...) to allow handling errors correctly - aim to be removed by 20th of April 2026",
+        "Replace with SecureStoreAsyncV2.exists(...) to allow handling errors correctly" +
+            " - aim to be removed by 20th of April 2026",
         replaceWith = ReplaceWith("java/uk/gov/android/securestore/SecureStoreAsyncV2.kt"),
         level = DeprecationLevel.WARNING,
     )
