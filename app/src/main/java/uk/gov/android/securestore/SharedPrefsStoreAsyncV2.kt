@@ -12,7 +12,6 @@ import uk.gov.android.securestore.authentication.UserAuthenticator
 import uk.gov.android.securestore.crypto.HybridCryptoManagerAsync
 import uk.gov.android.securestore.crypto.HybridCryptoManagerAsyncImpl
 import uk.gov.android.securestore.error.ErrorTypeHandlerV2
-import uk.gov.android.securestore.error.SecureStorageError
 import uk.gov.android.securestore.error.SecureStorageErrorV2
 import uk.gov.android.securestore.error.SecureStoreErrorTypeV2
 import kotlin.coroutines.suspendCoroutine
@@ -165,7 +164,7 @@ class SharedPrefsStoreAsyncV2(
             it.edit {
                 putString(key, value)
             }
-        } ?: throw SecureStorageError(Exception("You must call init first!"))
+        } ?: throw SecureStorageErrorV2(Exception("You must call init first!"))
     }
 
     private suspend fun cryptoDecryptText(

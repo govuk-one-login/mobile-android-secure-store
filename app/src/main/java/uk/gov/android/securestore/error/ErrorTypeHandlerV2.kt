@@ -33,8 +33,7 @@ object ErrorTypeHandlerV2 {
             is IndexOutOfBoundsException,
             is GeneralSecurityException,
             -> SecureStoreErrorTypeV2.UNRECOVERABLE
-            // This will always be RECOVERABLE because the SecureStorageErrorV2 type default to RECOVERABLE
-            else -> error.type
+            else -> SecureStoreErrorTypeV2.RECOVERABLE
         }
     }
 }

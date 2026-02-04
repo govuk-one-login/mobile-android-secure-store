@@ -1,6 +1,5 @@
 package uk.gov.android.securestore
 
-import uk.gov.android.securestore.error.SecureStoreErrorType
 import uk.gov.android.securestore.error.SecureStoreErrorTypeV2
 
 /**
@@ -15,7 +14,7 @@ sealed class RetrievalEventV2 {
     ) : RetrievalEventV2()
 
     /**
-     * Failure event, holds the type of failure as [SecureStoreErrorType] and an optional reason
+     * Failure event, holds the type of failure as [SecureStoreErrorTypeV2] and an optional reason
      */
     data class Failed(
         val type: SecureStoreErrorTypeV2,
