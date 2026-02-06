@@ -13,10 +13,24 @@ class UserAuthenticator : Authenticator {
         fragmentContext = context
     }
 
+    @Deprecated(
+        "Replace with authenticate() with crypto parameter - aim to be removed by 6th of May 2026",
+        replaceWith = ReplaceWith("authenticate(accessControlLevel, configuration, handler, null)"),
+        level = DeprecationLevel.WARNING,
+    )
     override fun authenticate(
         accessControlLevel: AccessControlLevel,
         configuration: AuthenticatorPromptConfiguration,
         handler: AuthenticatorCallbackHandler,
+    ) {
+        authenticate(accessControlLevel, configuration, handler, null)
+    }
+
+    override fun authenticate(
+        accessControlLevel: AccessControlLevel,
+        configuration: AuthenticatorPromptConfiguration,
+        handler: AuthenticatorCallbackHandler,
+        crypto: BiometricPrompt.CryptoObject?,
     ) {
         require(accessControlLevel != AccessControlLevel.OPEN)
 
@@ -36,16 +50,12 @@ class UserAuthenticator : Authenticator {
                 .setAllowedAuthenticators(getRequireAuthenticators(accessControlLevel))
         }
 
-        val biometricPrompt = fragmentContext?.let {
-            BiometricPrompt(
-                it,
-                handler,
-            )
+        val biometricPrompt = fragmentContext?.let { BiometricPrompt(it, handler) }
+        if (crypto != null) {
+            biometricPrompt?.authenticate(promptInfoBuilder.build(), crypto)
+        } else {
+            biometricPrompt?.authenticate(promptInfoBuilder.build())
         }
-
-        biometricPrompt?.authenticate(
-            promptInfoBuilder.build(),
-        )
     }
 
     private fun getRequireAuthenticators(accessControl: AccessControlLevel) =
