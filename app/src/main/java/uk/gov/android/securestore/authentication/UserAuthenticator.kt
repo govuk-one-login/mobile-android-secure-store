@@ -7,7 +7,7 @@ import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.AccessControlLevel
 
-class UserAuthenticator : Authenticator {
+internal class UserAuthenticator : Authenticator {
     private var fragmentContext: FragmentActivity? = null
     override fun init(context: FragmentActivity) {
         fragmentContext = context
