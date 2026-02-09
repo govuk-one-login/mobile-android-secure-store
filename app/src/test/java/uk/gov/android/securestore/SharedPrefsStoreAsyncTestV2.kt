@@ -2,7 +2,6 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.security.keystore.UserNotAuthenticatedException
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import kotlinx.coroutines.test.runTest
@@ -383,40 +382,6 @@ class SharedPrefsStoreAsyncTestV2 {
                 SecureStoreErrorTypeV2.UNRECOVERABLE,
                 "authenticate call throws SecureStorageError " +
                     "javax.crypto.BadPaddingException: BadPaddingException",
-            ),
-            result,
-        )
-        verify(mockAuthenticator).init(activityFragment)
-        verify(mockAuthenticator).close()
-    }
-
-    @Test
-    fun `test retrieve with auth throws UserNotAuthenticatedException`() = runTest {
-        initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
-
-        whenever(
-            mockAuthenticator.authenticate(
-                eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
-                eq(authConfig),
-                any(),
-            ),
-        ).thenThrow(
-            SecureStorageErrorV2(
-                UserNotAuthenticatedException("UserNotAuthenticatedException"),
-            ),
-        )
-
-        val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
-            alias,
-            authPromptConfig = authConfig,
-            context = activityFragment,
-        )
-
-        assertEquals(
-            RetrievalEventV2.Failed(
-                SecureStoreErrorTypeV2.UNRECOVERABLE,
-                "authenticate call throws SecureStorageError " +
-                    "android.security.keystore.UserNotAuthenticatedException",
             ),
             result,
         )

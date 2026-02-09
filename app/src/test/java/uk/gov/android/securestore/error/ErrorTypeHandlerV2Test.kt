@@ -1,6 +1,5 @@
 package uk.gov.android.securestore.error
 
-import android.security.keystore.UserNotAuthenticatedException
 import androidx.biometric.BiometricPrompt
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -51,10 +50,6 @@ class ErrorTypeHandlerV2Test {
                 ),
                 Arguments.of(
                     SecureStorageErrorV2(BadPaddingException()),
-                    SecureStoreErrorTypeV2.UNRECOVERABLE,
-                ),
-                Arguments.of(
-                    SecureStorageErrorV2(UserNotAuthenticatedException()),
                     SecureStoreErrorTypeV2.UNRECOVERABLE,
                 ),
                 Arguments.of(

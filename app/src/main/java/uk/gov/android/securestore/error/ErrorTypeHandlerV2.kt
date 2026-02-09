@@ -1,6 +1,5 @@
 package uk.gov.android.securestore.error
 
-import android.security.keystore.UserNotAuthenticatedException
 import androidx.biometric.BiometricPrompt
 import java.lang.IllegalStateException
 import java.lang.IndexOutOfBoundsException
@@ -22,7 +21,6 @@ internal object ErrorTypeHandlerV2 {
             is AEADBadTagException,
             is UnrecoverableKeyException,
             is BadPaddingException,
-            is UserNotAuthenticatedException,
             is NoSuchAlgorithmException,
             is NoSuchPaddingException,
             is UnsupportedOperationException,
