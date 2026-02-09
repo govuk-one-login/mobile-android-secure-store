@@ -1,6 +1,7 @@
 package uk.gov.android.securestore.error
 
 import android.security.keystore.UserNotAuthenticatedException
+import androidx.biometric.BiometricPrompt
 import java.lang.IllegalStateException
 import java.lang.IndexOutOfBoundsException
 import java.lang.UnsupportedOperationException
@@ -15,7 +16,7 @@ import javax.crypto.AEADBadTagException
 import javax.crypto.BadPaddingException
 import javax.crypto.NoSuchPaddingException
 
-object ErrorTypeHandlerV2 {
+internal object ErrorTypeHandlerV2 {
     fun getErrorType(error: SecureStorageErrorV2): SecureStoreErrorTypeV2 {
         return when (error.cause) {
             is AEADBadTagException,
@@ -33,6 +34,17 @@ object ErrorTypeHandlerV2 {
             is IndexOutOfBoundsException,
             is GeneralSecurityException,
             -> SecureStoreErrorTypeV2.UNRECOVERABLE
+            else -> SecureStoreErrorTypeV2.RECOVERABLE
+        }
+    }
+
+    fun getErrorType(errorCode: Int): SecureStoreErrorTypeV2 {
+        return when (errorCode) {
+            BiometricPrompt.ERROR_USER_CANCELED -> SecureStoreErrorTypeV2.USER_CANCELLED
+            BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
+            BiometricPrompt.ERROR_NO_BIOMETRICS,
+            ->
+                SecureStoreErrorTypeV2.ERROR_NO_DEVICE_CREDENTIAL
             else -> SecureStoreErrorTypeV2.RECOVERABLE
         }
     }

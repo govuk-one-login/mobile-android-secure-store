@@ -2,7 +2,6 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.biometric.BiometricPrompt
 import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.authentication.Authenticator
@@ -23,6 +22,7 @@ class SharedPrefsStoreAsyncV2(
 ) : SecureStoreAsyncV2 {
     private var configurationAsync: SecureStorageConfigurationAsync? = null
     private var sharedPrefs: SharedPreferences? = null
+    private val errorHandler = ErrorTypeHandlerV2
 
     override fun init(
         context: Context,
@@ -82,7 +82,7 @@ class SharedPrefsStoreAsyncV2(
                     RetrievalEventV2.Success(results)
                 } catch (e: SecureStorageErrorV2) {
                     RetrievalEventV2.Failed(
-                        e.type,
+                        errorHandler.getErrorType(e),
                         e.message,
                     )
                 }
@@ -123,7 +123,7 @@ class SharedPrefsStoreAsyncV2(
                                 },
                                 onError = { errorCode, errorString ->
                                     result = RetrievalEventV2.Failed(
-                                        getErrorType(errorCode),
+                                        errorHandler.getErrorType(errorCode),
                                         "$BIOMETRIC_PREFIX$errorCode $errorString",
                                     )
                                     continuation.resumeWith(Result.success(false))
@@ -139,7 +139,7 @@ class SharedPrefsStoreAsyncV2(
                     }
                 } catch (e: SecureStorageErrorV2) {
                     result = RetrievalEventV2.Failed(
-                        ErrorTypeHandlerV2.getErrorType(e),
+                        errorHandler.getErrorType(e),
                         "authenticate call throws SecureStorageError ${e.message}",
                     )
                 } catch (e: Exception) {
@@ -186,15 +186,6 @@ class SharedPrefsStoreAsyncV2(
         } ?: throw SecureStorageErrorV2(Exception("You must call init first!"))
     }
 
-    private fun getErrorType(errorCode: Int): SecureStoreErrorTypeV2 {
-        return when (errorCode) {
-            BiometricPrompt.ERROR_USER_CANCELED -> SecureStoreErrorTypeV2.USER_CANCELLED
-            BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL ->
-                SecureStoreErrorTypeV2.ERROR_NO_DEVICE_CREDENTIAL
-            else -> SecureStoreErrorTypeV2.RECOVERABLE
-        }
-    }
-
     private suspend fun handleResults(vararg key: String): MutableMap<String, String?> {
         val results = mutableMapOf<String, String?>()
         key.forEach { alias ->
@@ -212,7 +203,7 @@ class SharedPrefsStoreAsyncV2(
             RetrievalEventV2.Success(handleResults(*key))
         } catch (e: SecureStorageErrorV2) {
             RetrievalEventV2.Failed(
-                ErrorTypeHandlerV2.getErrorType(e),
+                errorHandler.getErrorType(e),
                 "authenticate call onSuccess callback throws " +
                     "SecureStorageError ${e.message}",
             )
