@@ -787,7 +787,7 @@ class SharedPrefsStoreAsyncTestV2 {
 
         assertEquals(
             RetrievalEventV2.Failed(
-                SecureStoreErrorTypeV2.RECOVERABLE,
+                SecureStoreErrorTypeV2.ERROR_NO_DEVICE_CREDENTIAL,
                 "biometric error code 11 No device passcode",
             ),
             result,
@@ -1091,6 +1091,7 @@ class SharedPrefsStoreAsyncTestV2 {
     fun testRetrieveWithAuthenticationAuthErrorsNonGeneric(
         errorType: Int,
         codeString: String,
+        expectedErrorType: SecureStoreErrorTypeV2,
     ) = runTest {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS)
 
@@ -1113,7 +1114,7 @@ class SharedPrefsStoreAsyncTestV2 {
 
         assertEquals(
             RetrievalEventV2.Failed(
-                SecureStoreErrorTypeV2.RECOVERABLE,
+                expectedErrorType,
                 "biometric error code $codeString error",
             ),
             result,
@@ -1138,14 +1139,56 @@ class SharedPrefsStoreAsyncTestV2 {
         @JvmStatic
         fun errorTypes(): Stream<Arguments> =
             Stream.of(
-                Arguments.of(BiometricPrompt.ERROR_NEGATIVE_BUTTON, "13"),
-                Arguments.of(BiometricPrompt.ERROR_TIMEOUT, "3"),
-                Arguments.of(BiometricPrompt.ERROR_UNABLE_TO_PROCESS, "2"),
-                Arguments.of(BiometricPrompt.ERROR_NO_BIOMETRICS, "11"),
-                Arguments.of(BiometricPrompt.ERROR_HW_UNAVAILABLE, "1"),
-                Arguments.of(BiometricPrompt.ERROR_CANCELED, "5"),
-                Arguments.of(BiometricPrompt.ERROR_LOCKOUT, "7"),
-                Arguments.of(BiometricPrompt.ERROR_LOCKOUT_PERMANENT, "9"),
+                Arguments.of(
+                    BiometricPrompt.ERROR_NEGATIVE_BUTTON,
+                    "13",
+                    SecureStoreErrorTypeV2.RECOVERABLE,
+                ),
+                Arguments.of(
+                    BiometricPrompt.ERROR_TIMEOUT,
+                    "3",
+                    SecureStoreErrorTypeV2.RECOVERABLE,
+                ),
+                Arguments.of(
+                    BiometricPrompt.ERROR_UNABLE_TO_PROCESS,
+                    "2",
+                    SecureStoreErrorTypeV2.RECOVERABLE,
+                ),
+                Arguments.of(
+                    BiometricPrompt.ERROR_HW_UNAVAILABLE,
+                    "1",
+                    SecureStoreErrorTypeV2.RECOVERABLE,
+                ),
+                Arguments.of(
+                    BiometricPrompt.ERROR_CANCELED,
+                    "5",
+                    SecureStoreErrorTypeV2.RECOVERABLE,
+                ),
+                Arguments.of(
+                    BiometricPrompt.ERROR_LOCKOUT,
+                    "7",
+                    SecureStoreErrorTypeV2.RECOVERABLE,
+                ),
+                Arguments.of(
+                    BiometricPrompt.ERROR_LOCKOUT_PERMANENT,
+                    "9",
+                    SecureStoreErrorTypeV2.RECOVERABLE,
+                ),
+                Arguments.of(
+                    BiometricPrompt.ERROR_NO_BIOMETRICS,
+                    "11",
+                    SecureStoreErrorTypeV2.ERROR_NO_DEVICE_CREDENTIAL,
+                ),
+                Arguments.of(
+                    BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
+                    "14",
+                    SecureStoreErrorTypeV2.ERROR_NO_DEVICE_CREDENTIAL,
+                ),
+                Arguments.of(
+                    BiometricPrompt.ERROR_USER_CANCELED,
+                    "10",
+                    SecureStoreErrorTypeV2.USER_CANCELLED,
+                ),
             )
     }
 }
