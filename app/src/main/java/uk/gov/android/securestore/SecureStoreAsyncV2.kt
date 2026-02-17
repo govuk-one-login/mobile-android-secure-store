@@ -2,7 +2,6 @@ package uk.gov.android.securestore
 
 import android.content.Context
 import androidx.fragment.app.FragmentActivity
-import kotlinx.coroutines.flow.Flow
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 
 /**
@@ -49,8 +48,9 @@ interface SecureStoreAsyncV2 {
      * Access the data for a given key when authentication is not required; access control level is set to OPEN
      *
      * @param [key] The unique key to identify data to retrieve
-     * @return [RetrievalEventV2] to cover success or failure
+     * @return A [Map] of [String] to [String?] to cover success or failure
      *
+     * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to retrieve
      */
     suspend fun retrieve(
         vararg key: String,
@@ -62,8 +62,9 @@ interface SecureStoreAsyncV2 {
      * @param [key] The unique key to identify data to retrieve
      * @param [authPromptConfig] Configuration for the Biometric prompt
      * @param [context] The [FragmentActivity] where the method is called, used for auth prompt
-     * @return A [Flow] of [RetrievalEventV2], allowing for multiple failed attempts for auth
+     * @return A [Map] of [String] to [String?], allowing for multiple failed attempts for auth
      *
+     * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to retrieve
      */
     suspend fun retrieveWithAuthentication(
         vararg key: String,

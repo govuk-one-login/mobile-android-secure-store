@@ -75,14 +75,13 @@ class SharedPrefsStoreAsyncV2(
             } else {
                 try {
                     handleResults(*key)
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     throw e.mapToSecureStorageError()
                 }
             }
         } ?: throw SecureStorageErrorV2(INIT_ERROR)
     }
 
-    @Suppress("NestedBlockDepth")
     override suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
@@ -96,6 +95,7 @@ class SharedPrefsStoreAsyncV2(
                 // Attempt to surface the Biometrics prompt and handle the result of that
                 try {
                     authenticator.init(context)
+                    // Can throw secure storage error that doesn't need to be mapped
                     handleBiometricPrompt(configuration, authPromptConfig)
                     handleResults(*key)
                     // Catches errors thrown from the BiometricPrompt onError(...)
@@ -123,6 +123,12 @@ class SharedPrefsStoreAsyncV2(
         } ?: throw INIT_ERROR
     }
 
+    /**
+     * Handles data decryption given a certain alias.
+     *
+     * @param alias - [String] representing a key for a value stored in Shared Prefs
+     * @throws [java.security.GeneralSecurityException] and it's subclasses and  [Exception]
+     */
     private suspend fun cryptoDecryptText(
         alias: String,
         onTextReady: (String?) -> Unit,
@@ -138,6 +144,12 @@ class SharedPrefsStoreAsyncV2(
         } ?: throw INIT_ERROR
     }
 
+    /**
+     * Handles decryption of data provided a EC key.
+     *
+     * @param key - [String] representing a key for a value stored in Shared Prefs
+     * @throws [java.security.GeneralSecurityException] and it's subclasses and  [Exception]
+     */
     private suspend fun handleResults(vararg key: String): MutableMap<String, String?> {
         val results = mutableMapOf<String, String?>()
         key.forEach { alias ->
@@ -148,6 +160,11 @@ class SharedPrefsStoreAsyncV2(
         return results
     }
 
+    /**
+     * Manages displaying the biometric prompt and it's behaviour.
+     *
+     * @throws [SecureStorageErrorV2] when onError is called. See [SecureStorageErrorV2.getErrorFromBiometricsError] for more info
+     */
     private suspend fun handleBiometricPrompt(
         config: SecureStorageConfigurationAsync,
         authPromptConfig: AuthenticatorPromptConfiguration,
