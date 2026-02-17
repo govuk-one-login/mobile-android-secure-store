@@ -10,9 +10,9 @@ import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguratio
 import uk.gov.android.securestore.authentication.UserAuthenticator
 import uk.gov.android.securestore.crypto.HybridCryptoManagerAsync
 import uk.gov.android.securestore.crypto.HybridCryptoManagerAsyncImpl
-import uk.gov.android.securestore.error.ErrorTypeHandlerV2
 import uk.gov.android.securestore.error.SecureStorageErrorV2
-import uk.gov.android.securestore.error.SecureStoreErrorTypeV2
+import uk.gov.android.securestore.error.SecureStorageErrorV2.Companion.mapToSecureStorageError
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @Suppress("TooGenericExceptionCaught", "TooManyFunctions")
@@ -22,7 +22,6 @@ class SharedPrefsStoreAsyncV2(
 ) : SecureStoreAsyncV2 {
     private var configurationAsync: SecureStorageConfigurationAsync? = null
     private var sharedPrefs: SharedPreferences? = null
-    private val errorHandler = ErrorTypeHandlerV2
 
     override fun init(
         context: Context,
@@ -46,7 +45,7 @@ class SharedPrefsStoreAsyncV2(
                 }
             result.data
         } catch (e: Exception) {
-            throw SecureStorageErrorV2(e)
+            throw e.mapToSecureStorageError()
         }
     }
 
@@ -63,96 +62,53 @@ class SharedPrefsStoreAsyncV2(
         try {
             hybridCryptoManagerAsync.deleteKey()
         } catch (e: Exception) {
-            throw SecureStorageErrorV2(e)
+            throw e.mapToSecureStorageError()
         }
     }
 
     override suspend fun retrieve(
         vararg key: String,
-    ): RetrievalEventV2 {
+    ): Map<String, String?> {
         return configurationAsync?.let { configuration ->
             if (configuration.accessControlLevel != AccessControlLevel.OPEN) {
-                RetrievalEventV2.Failed(
-                    SecureStoreErrorTypeV2.RECOVERABLE,
-                    "Access control level must be OPEN to use this retrieve method",
-                )
+                throw SecureStorageErrorV2(Exception(REQUIRE_OPEN_ACCESS_LEVEL))
             } else {
                 try {
-                    val results = handleResults(*key)
-                    RetrievalEventV2.Success(results)
-                } catch (e: SecureStorageErrorV2) {
-                    RetrievalEventV2.Failed(
-                        errorHandler.getErrorType(e),
-                        e.message,
-                    )
+                    handleResults(*key)
+                } catch (e: Exception) {
+                    throw e.mapToSecureStorageError()
                 }
             }
-        } ?: RetrievalEventV2.Failed(
-            SecureStoreErrorTypeV2.RECOVERABLE,
-            "Must call init on SecureStore first!",
-        )
+        } ?: throw SecureStorageErrorV2(INIT_ERROR)
     }
 
-    @Suppress("NestedBlockDepth", "LongMethod")
+    @Suppress("NestedBlockDepth")
     override suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
         context: FragmentActivity,
-    ): RetrievalEventV2 {
-        var result: RetrievalEventV2 = RetrievalEventV2.Failed(
-            SecureStoreErrorTypeV2.RECOVERABLE,
-            "Must call init on SecureStore first!",
-        )
-        configurationAsync?.let { configuration ->
+    ): Map<String, String?> {
+        return configurationAsync?.let { configuration ->
+            // When access control is set to open on the secureStore instance, then redirect consumer to use the retrieve method
             if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
-                result = RetrievalEventV2.Failed(
-                    SecureStoreErrorTypeV2.RECOVERABLE,
-                    "Use retrieve method, access control is set to OPEN, " +
-                        "no need for auth",
-                )
+                throw SecureStorageErrorV2(Exception(AUTH_ON_OPEN_STORE_ERROR_MSG))
             } else {
+                // Attempt to surface the Biometrics prompt and handle the result of that
                 try {
                     authenticator.init(context)
-                    val authenticateResultSuccess: Boolean = suspendCoroutine { continuation ->
-                        authenticator.authenticate(
-                            configuration.accessControlLevel,
-                            authPromptConfig,
-                            AuthenticatorCallbackHandler(
-                                onSuccess = {
-                                    continuation.resumeWith(Result.success(true))
-                                },
-                                onError = { errorCode, errorString ->
-                                    result = RetrievalEventV2.Failed(
-                                        errorHandler.getErrorType(errorCode),
-                                        "$BIOMETRIC_PREFIX$errorCode $errorString",
-                                    )
-                                    continuation.resumeWith(Result.success(false))
-                                },
-                                onFailure = {
-                                    // Do nothing to allow user to try again
-                                },
-                            ),
-                        )
-                    }
-                    if (authenticateResultSuccess) {
-                        result = processSafeHandleResultsOnAuthenticateSuccess(*key)
-                    }
-                } catch (e: SecureStorageErrorV2) {
-                    result = RetrievalEventV2.Failed(
-                        errorHandler.getErrorType(e),
-                        "authenticate call throws SecureStorageError ${e.message}",
-                    )
-                } catch (e: Exception) {
-                    result = RetrievalEventV2.Failed(
-                        SecureStoreErrorTypeV2.RECOVERABLE,
-                        "authenticate call throws Exception ${e.message}",
-                    )
+                    handleBiometricPrompt(configuration, authPromptConfig)
+                    handleResults(*key)
+                    // Catches errors thrown from the BiometricPrompt onError(...)
+                } catch (sse: SecureStorageErrorV2) {
+                    throw sse
+                    // Catches any other errors (mainly the java.security and java.crypto fron the KeyStore)
+                } catch (e: Throwable) {
+                    throw e.mapToSecureStorageError()
                 } finally {
                     authenticator.close()
                 }
             }
-        }
-        return result
+        } ?: throw SecureStorageErrorV2(INIT_ERROR)
     }
 
     override fun exists(key: String): Boolean {
@@ -164,7 +120,7 @@ class SharedPrefsStoreAsyncV2(
             it.edit {
                 putString(key, value)
             }
-        } ?: throw SecureStorageErrorV2(Exception("You must call init first!"))
+        } ?: throw INIT_ERROR
     }
 
     private suspend fun cryptoDecryptText(
@@ -172,18 +128,14 @@ class SharedPrefsStoreAsyncV2(
         onTextReady: (String?) -> Unit,
     ) {
         sharedPrefs?.let {
-            try {
-                val encryptedData = it.getString(alias, null)
-                val encryptedKey = it.getString(alias + KEY_SUFFIX, null)
-                if (encryptedData.isNullOrEmpty() || encryptedKey.isNullOrEmpty()) {
-                    onTextReady(null)
-                } else {
-                    onTextReady(hybridCryptoManagerAsync.decrypt(encryptedData, encryptedKey))
-                }
-            } catch (e: Exception) {
-                throw SecureStorageErrorV2(e)
+            val encryptedData = it.getString(alias, null)
+            val encryptedKey = it.getString(alias + KEY_SUFFIX, null)
+            if (encryptedData.isNullOrEmpty() || encryptedKey.isNullOrEmpty()) {
+                onTextReady(null)
+            } else {
+                onTextReady(hybridCryptoManagerAsync.decrypt(encryptedData, encryptedKey))
             }
-        } ?: throw SecureStorageErrorV2(Exception("You must call init first!"))
+        } ?: throw INIT_ERROR
     }
 
     private suspend fun handleResults(vararg key: String): MutableMap<String, String?> {
@@ -196,23 +148,42 @@ class SharedPrefsStoreAsyncV2(
         return results
     }
 
-    private suspend fun processSafeHandleResultsOnAuthenticateSuccess(
-        vararg key: String,
-    ): RetrievalEventV2 =
-        try {
-            RetrievalEventV2.Success(handleResults(*key))
-        } catch (e: SecureStorageErrorV2) {
-            RetrievalEventV2.Failed(
-                errorHandler.getErrorType(e),
-                "authenticate call onSuccess callback throws " +
-                    "SecureStorageError ${e.message}",
+    private suspend fun handleBiometricPrompt(
+        config: SecureStorageConfigurationAsync,
+        authPromptConfig: AuthenticatorPromptConfiguration,
+    ) {
+        suspendCoroutine { continuation ->
+            authenticator.authenticate(
+                config.accessControlLevel,
+                authPromptConfig,
+                AuthenticatorCallbackHandler(
+                    onSuccess = {
+                        // This just allows for continuation
+                        continuation.resumeWith(Result.success(true))
+                    },
+                    onError = { errorCode, errorString ->
+                        // Continues the coroutine with the error
+                        continuation.resumeWithException(
+                            SecureStorageErrorV2
+                                .getErrorFromBiometricsError(errorCode, errorString),
+                        )
+                    },
+                    onFailure = {
+                        // Do nothing to allow user to try again
+                    },
+                ),
             )
         }
+    }
 
     companion object {
         // DO NOT CHANGE THIS
-        private const val KEY_SUFFIX = "Key"
+        internal const val KEY_SUFFIX = "Key"
 
-        private const val BIOMETRIC_PREFIX = "biometric error code "
+        private val INIT_ERROR = Exception("Must call init on SecureStore first!")
+        private const val AUTH_ON_OPEN_STORE_ERROR_MSG = "Use retrieve method, access control is" +
+            " set to OPEN, no need for auth"
+        private const val REQUIRE_OPEN_ACCESS_LEVEL = "Access control level must be OPEN to use" +
+            " this retrieve method"
     }
 }

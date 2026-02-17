@@ -54,13 +54,16 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
         encryptedData: String,
         encryptedKey: String,
     ): String = withContext(dispatcher) {
+        println("Decrypting results")
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val encryptedKeyBytes = Base64.decode(encryptedKey)
         val decryptedKey = initCipherAndDecryptKey(
             cipher,
             encryptedKeyBytes,
         )
-        aesCryptoManager.decrypt(encryptedData, decryptedKey)
+        val result = aesCryptoManager.decrypt(encryptedData, decryptedKey)
+        println("Decrypting results: $result")
+        result
     }
 
     private fun initCipherAndDecryptKey(

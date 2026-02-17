@@ -54,7 +54,7 @@ interface SecureStoreAsyncV2 {
      */
     suspend fun retrieve(
         vararg key: String,
-    ): RetrievalEventV2
+    ): Map<String, String?>
 
     /**
      * Access the data for a given key when authentication is required; access control level is not OPEN
@@ -69,7 +69,7 @@ interface SecureStoreAsyncV2 {
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
         context: FragmentActivity,
-    ): RetrievalEventV2
+    ): Map<String, String?>
 
     /**
      * Check if a certain key exists in the store
