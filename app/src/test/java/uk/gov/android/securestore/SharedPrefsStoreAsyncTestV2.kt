@@ -33,6 +33,7 @@ import uk.gov.android.securestore.crypto.HybridCryptoManagerAsync
 import uk.gov.android.securestore.error.SecureStorageErrorV2
 import uk.gov.android.securestore.error.SecureStoreErrorTypeV2
 import java.lang.IllegalStateException
+import java.lang.NullPointerException
 import java.security.GeneralSecurityException
 import java.security.InvalidAlgorithmParameterException
 import java.security.InvalidKeyException
@@ -50,7 +51,6 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-// @ExtendWith(MainDispatcherRule::class)
 @Suppress("UNCHECKED_CAST", "LargeClass")
 class SharedPrefsStoreAsyncTestV2 {
     private val mockContext: FragmentActivity = mock()
@@ -149,9 +149,17 @@ class SharedPrefsStoreAsyncTestV2 {
             ),
         ).thenAnswer { throw expectedExp }
 
-        assertFailsWith<SecureStorageErrorV2> {
+        val actual = assertFailsWith<SecureStorageErrorV2> {
             sharedPrefsStoreAsync.retrieve(alias)
         }
+
+        assertTrue(
+            actual.exception.message!!.contains(expectedExp.message!!),
+        )
+        assertEquals(
+            SecureStoreErrorTypeV2.RECOVERABLE,
+            actual.type,
+        )
     }
 
     @Test
@@ -167,9 +175,17 @@ class SharedPrefsStoreAsyncTestV2 {
                 eq(encryptedKey),
             ),
         ).thenThrow(expectedExp)
-        assertFailsWith<SecureStorageErrorV2> {
+
+        val actual = assertFailsWith<SecureStorageErrorV2> {
             sharedPrefsStoreAsync.retrieve(alias)
         }
+        assertTrue(
+            actual.exception.message!!.contains(expectedExp.message!!),
+        )
+        assertEquals(
+            SecureStoreErrorTypeV2.RECOVERABLE,
+            actual.type,
+        )
     }
 
     @Test
@@ -331,70 +347,114 @@ class SharedPrefsStoreAsyncTestV2 {
     }
 
     @Test
-    fun `test upsert throws secure store error`() = runTest {
-        initSecureStore(AccessControlLevel.OPEN, testScheduler)
-        given(
-            mockHybridCryptoManagerAsync.encrypt(
-                value,
-            ),
-        ).willAnswer { throw GeneralSecurityException() }
-
-        assertFailsWith<SecureStorageErrorV2> {
-            sharedPrefsStoreAsync.upsert(alias, value)
-        }
-    }
-
-    @Test
     fun `test retrieve throws error from wrong ACL`() = runTest {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS, testScheduler)
 
-        assertFailsWith<SecureStorageErrorV2> { sharedPrefsStoreAsync.retrieve(alias) }
+        val actual = assertFailsWith<SecureStorageErrorV2> {
+            sharedPrefsStoreAsync.retrieve(alias)
+        }
+
+        assertTrue(
+            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.REQUIRE_OPEN_ACCESS_LEVEL),
+        )
+        assertEquals(
+            SecureStoreErrorTypeV2.RECOVERABLE,
+            actual.type,
+        )
     }
 
     @Test
     fun `test retrieve with auth throws error from wrong ACL`() = runTest {
         initSecureStore(AccessControlLevel.OPEN, testScheduler)
-        val authConfig = AuthenticatorPromptConfiguration(
-            "title",
-        )
+
         whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
         whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
 
-        sharedPrefsStoreAsync.retrieve(alias)
-    }
-
-    @Test
-    fun `test delete all throws error`() = runTest {
-        initSecureStore(AccessControlLevel.OPEN, testScheduler)
-        given(
-            mockHybridCryptoManagerAsync.deleteKey(),
-        ).willAnswer { throw KeyStoreException() }
-        assertFailsWith<SecureStorageErrorV2> {
-            sharedPrefsStoreAsync.deleteAll()
-        }
-    }
-
-    @Test
-    fun `test upsert throws error when missing initialisation`() = runTest {
-        assertFailsWith<SecureStorageErrorV2> {
-            sharedPrefsStoreAsync.upsert(alias, value)
-        }
-    }
-
-    @Test
-    fun `test retrieve with auth throws error when missing initialisation`() = runTest {
-        assertFailsWith<SecureStorageErrorV2> {
+        val actual = assertFailsWith<SecureStorageErrorV2> {
             sharedPrefsStoreAsync.retrieveWithAuthentication(
                 alias,
                 authPromptConfig = authConfig,
                 context = activityFragment,
             )
         }
+
+        assertTrue(
+            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.AUTH_ON_OPEN_STORE_ERROR_MSG),
+        )
+        assertEquals(SecureStoreErrorTypeV2.RECOVERABLE, actual.type)
+    }
+
+    @Test
+    fun `test delete all throws error`() = runTest {
+        val expectedExp = KeyStoreException("error")
+        initSecureStore(AccessControlLevel.OPEN, testScheduler)
+        given(
+            mockHybridCryptoManagerAsync.deleteKey(),
+        ).willAnswer { throw expectedExp }
+
+        val actual = assertFailsWith<SecureStorageErrorV2> {
+            sharedPrefsStoreAsync.deleteAll()
+        }
+
+        assertTrue(
+            actual.exception.message!!.contains(expectedExp.message!!),
+        )
+        assertEquals(
+            SecureStoreErrorTypeV2.UNRECOVERABLE,
+            actual.type,
+        )
+    }
+
+    @Test
+    fun `test upsert throws error when missing initialisation`() = runTest {
+        whenever(mockSharedPreferences.getString(alias, null)).thenReturn(encryptedValue)
+        whenever(mockSharedPreferences.getString(alias + "Key", null)).thenReturn(encryptedKey)
+
+        val actual = assertFailsWith<SecureStorageErrorV2> {
+            sharedPrefsStoreAsync.upsert(alias, value)
+        }
+
+        assertTrue(
+            actual.exception is NullPointerException,
+        )
+        assertEquals(
+            SecureStoreErrorTypeV2.RECOVERABLE,
+            actual.type,
+        )
+    }
+
+    @Test
+    fun `test retrieve with auth throws error when missing initialisation`() = runTest {
+        val actual = assertFailsWith<SecureStorageErrorV2> {
+            sharedPrefsStoreAsync.retrieveWithAuthentication(
+                alias,
+                authPromptConfig = authConfig,
+                context = activityFragment,
+            )
+        }
+
+        assertTrue(
+            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.INIT_ERROR.message!!),
+        )
+        assertEquals(
+            SecureStoreErrorTypeV2.RECOVERABLE,
+            actual.type,
+        )
     }
 
     @Test
     fun `test retrieve throws error when missing initialisation`() = runTest {
-        assertFailsWith<SecureStorageErrorV2> { sharedPrefsStoreAsync.retrieve(alias) }
+        val actual = assertFailsWith<SecureStorageErrorV2> {
+            sharedPrefsStoreAsync.retrieve(alias)
+        }
+
+        assertTrue(
+            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.INIT_ERROR.message!!),
+        )
+        assertEquals(
+            SecureStoreErrorTypeV2.RECOVERABLE,
+            actual.type,
+        )
     }
 
     @Test
@@ -403,6 +463,33 @@ class SharedPrefsStoreAsyncTestV2 {
         sharedPrefsStoreAsync.delete(encryptedKey)
 
         assertFalse(sharedPrefsStoreAsync.exists(encryptedKey))
+    }
+
+    @ParameterizedTest
+    @MethodSource("getErrorArgs")
+    fun `test upsert throws secure store error`(
+        exception: Exception,
+        type: SecureStoreErrorTypeV2,
+    ) = runTest {
+        initSecureStore(AccessControlLevel.OPEN, testScheduler)
+        given(
+            mockHybridCryptoManagerAsync.encrypt(
+                value,
+            ),
+        ).willAnswer { throw exception }
+
+        val actual = assertFailsWith<SecureStorageErrorV2> {
+            sharedPrefsStoreAsync.upsert(alias, value)
+        }
+
+        println(actual)
+        assertTrue(
+            actual.exception.message!!.contains(exception.message!!),
+        )
+        assertEquals(
+            type,
+            actual.type,
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

@@ -117,10 +117,13 @@ class SharedPrefsStoreAsyncV2(
 
     private fun writeToPrefs(key: String, value: String?) {
         sharedPrefs?.let {
+            println("Shared prefs: " + it)
             it.edit {
                 putString(key, value)
             }
-        } ?: throw INIT_ERROR
+        } ?: run {
+            throw INIT_ERROR
+        }
     }
 
     /**
@@ -197,10 +200,10 @@ class SharedPrefsStoreAsyncV2(
         // DO NOT CHANGE THIS
         internal const val KEY_SUFFIX = "Key"
 
-        private val INIT_ERROR = Exception("Must call init on SecureStore first!")
-        private const val AUTH_ON_OPEN_STORE_ERROR_MSG = "Use retrieve method, access control is" +
+        internal val INIT_ERROR = Exception("Must call init on SecureStore first!")
+        internal const val AUTH_ON_OPEN_STORE_ERROR_MSG = "Use retrieve method, access control is" +
             " set to OPEN, no need for auth"
-        private const val REQUIRE_OPEN_ACCESS_LEVEL = "Access control level must be OPEN to use" +
+        internal const val REQUIRE_OPEN_ACCESS_LEVEL = "Access control level must be OPEN to use" +
             " this retrieve method"
     }
 }
