@@ -8,7 +8,6 @@ import uk.gov.android.securestore.error.SecureStoreErrorType
 @Deprecated(
     "This will not be used starting SecureStoreAsyncV2 as it will return a" +
             " Map<String, String?> - aim to be removed by 20th of April 2026",
-    replaceWith = ReplaceWith("java/uk/gov/android/securestore/RetrievalEventV2.kt"),
     level = DeprecationLevel.WARNING,
 )
 sealed class RetrievalEvent {
