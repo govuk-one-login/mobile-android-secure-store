@@ -482,7 +482,6 @@ class SharedPrefsStoreAsyncTestV2 {
             sharedPrefsStoreAsync.upsert(alias, value)
         }
 
-        println(actual)
         assertTrue(
             actual.exception.message!!.contains(exception.message!!),
         )
@@ -526,7 +525,6 @@ class SharedPrefsStoreAsyncTestV2 {
             advanceUntilIdle()
         }
 
-        println(actual)
         assertEquals(
             exception,
             actual.exception,

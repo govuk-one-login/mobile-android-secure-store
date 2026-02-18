@@ -45,11 +45,14 @@ class SecureStorageErrorV2(
                 -> SecureStoreErrorTypeV2.UNRECOVERABLE
                 else -> SecureStoreErrorTypeV2.RECOVERABLE
             }
+            val exception = when (this) {
+                is Exception -> this
+                else -> Exception(this)
+            }
             val result = SecureStorageErrorV2(
-                this as Exception,
+                exception,
                 errorType,
             )
-            println(result.type)
             return result
         }
 

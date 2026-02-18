@@ -117,13 +117,10 @@ class SharedPrefsStoreAsyncV2(
 
     private fun writeToPrefs(key: String, value: String?) {
         sharedPrefs?.let {
-            println("Shared prefs: " + it)
             it.edit {
                 putString(key, value)
             }
-        } ?: run {
-            throw INIT_ERROR
-        }
+        } ?: throw INIT_ERROR
     }
 
     /**
@@ -153,7 +150,7 @@ class SharedPrefsStoreAsyncV2(
      * @param key - [String] representing a key for a value stored in Shared Prefs
      * @throws [java.security.GeneralSecurityException] and it's subclasses and  [Exception]
      */
-    private suspend fun handleResults(vararg key: String): MutableMap<String, String?> {
+    private suspend fun handleResults(vararg key: String): Map<String, String?> {
         val results = mutableMapOf<String, String?>()
         key.forEach { alias ->
             cryptoDecryptText(alias) { data ->

@@ -6,7 +6,8 @@ import uk.gov.android.securestore.error.SecureStoreErrorType
  * Class to handle the return events when getting data from a [SecureStore]
  */
 @Deprecated(
-    "Replace with RetrievalEventV2 to allow handling errors correctly - aim to be removed by 20th of April 2026",
+    "This will not be used starting SecureStoreAsyncV2 as it will return a" +
+            " Map<String, String?> - aim to be removed by 20th of April 2026",
     replaceWith = ReplaceWith("java/uk/gov/android/securestore/RetrievalEventV2.kt"),
     level = DeprecationLevel.WARNING,
 )
