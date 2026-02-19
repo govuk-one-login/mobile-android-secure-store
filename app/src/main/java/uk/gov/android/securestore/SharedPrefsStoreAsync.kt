@@ -17,6 +17,11 @@ import uk.gov.android.securestore.error.SecureStoreErrorType
 import kotlin.coroutines.suspendCoroutine
 
 @Suppress("TooGenericExceptionCaught", "TooManyFunctions")
+@Deprecated(
+    "Replace with SharedPrefsStoreAsyncV2 to allow handling errors correctly - aim to be removed by 20th of April 2026",
+    replaceWith = ReplaceWith("SharedPrefsStoreAsyncV2", "uk.gov.android.securestore.SharedPrefsStoreAsyncV2"),
+    level = DeprecationLevel.WARNING,
+)
 class SharedPrefsStoreAsync(
     private val authenticator: Authenticator = UserAuthenticator(),
     private val hybridCryptoManagerAsync: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl(),
@@ -24,6 +29,11 @@ class SharedPrefsStoreAsync(
     private var configurationAsync: SecureStorageConfigurationAsync? = null
     private var sharedPrefs: SharedPreferences? = null
 
+    @Deprecated(
+        "Replace with SharedPrefsStoreAsyncV2.init(...) to allow handling errors correctly " +
+            "- aim to be removed by 20th of April 2026",
+        level = DeprecationLevel.WARNING,
+    )
     override fun init(
         context: Context,
         configurationAsync: SecureStorageConfigurationAsync,
@@ -37,6 +47,11 @@ class SharedPrefsStoreAsync(
         sharedPrefs = context.getSharedPreferences(configurationAsync.id, Context.MODE_PRIVATE)
     }
 
+    @Deprecated(
+        "Replace with SharedPrefsStoreAsyncV2.upsert(...) to allow handling errors correctly " +
+            "- aim to be removed by 20th of April 2026",
+        level = DeprecationLevel.WARNING,
+    )
     override suspend fun upsert(key: String, value: String): String {
         return try {
             val result = hybridCryptoManagerAsync.encrypt(value)
@@ -50,12 +65,22 @@ class SharedPrefsStoreAsync(
         }
     }
 
+    @Deprecated(
+        "Replace with SharedPrefsStoreAsyncV2.delete(...) to allow handling errors correctly " +
+            "- aim to be removed by 20th of April 2026",
+        level = DeprecationLevel.WARNING,
+    )
     override fun delete(key: String) {
         sharedPrefs?.edit {
             remove(key)
         }
     }
 
+    @Deprecated(
+        "Replace with SharedPrefsStoreAsyncV2.deleteAll(...) to allow handling errors correctly" +
+            " - aim to be removed by 20th of April 2026",
+        level = DeprecationLevel.WARNING,
+    )
     override suspend fun deleteAll() {
         sharedPrefs?.edit {
             clear()
@@ -67,6 +92,11 @@ class SharedPrefsStoreAsync(
         }
     }
 
+    @Deprecated(
+        "Replace with SharedPrefsStoreAsyncV2.retrieve(...) to allow handling errors correctly" +
+            " - aim to be removed by 20th of April 2026",
+        level = DeprecationLevel.WARNING,
+    )
     override suspend fun retrieve(
         vararg key: String,
     ): RetrievalEvent {
@@ -93,6 +123,11 @@ class SharedPrefsStoreAsync(
         )
     }
 
+    @Deprecated(
+        "Replace with SharedPrefsStoreAsyncV2.retrieveWithAuthentication(...) to allow" +
+            " handling errors correctly - aim to be removed by 20th of April 2026",
+        level = DeprecationLevel.WARNING,
+    )
     @Suppress("NestedBlockDepth", "LongMethod")
     override suspend fun retrieveWithAuthentication(
         vararg key: String,
@@ -155,6 +190,11 @@ class SharedPrefsStoreAsync(
         return result
     }
 
+    @Deprecated(
+        "Replace with SharedPrefsStoreAsyncV2.exists(...) to allow handling errors correctly" +
+            " - aim to be removed by 20th of April 2026",
+        level = DeprecationLevel.WARNING,
+    )
     override fun exists(key: String): Boolean {
         return sharedPrefs?.contains(key) == true
     }

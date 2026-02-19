@@ -2,6 +2,9 @@ package uk.gov.android.securestore.crypto
 
 import kotlinx.coroutines.CoroutineDispatcher
 import uk.gov.android.securestore.AccessControlLevel
+import java.lang.Exception
+import java.security.GeneralSecurityException
+import kotlin.jvm.Throws
 
 /**
  * Interface to handle encryption and decryption of [String] data
@@ -21,6 +24,10 @@ interface HybridCryptoManagerAsync {
      *
      * @throws [java.security.GeneralSecurityException] if encryption fails
      */
+    @Throws(
+        GeneralSecurityException::class,
+        Exception::class,
+    )
     suspend fun encrypt(
         input: String,
     ): EncryptedData
@@ -33,6 +40,10 @@ interface HybridCryptoManagerAsync {
      *
      * @throws [java.security.GeneralSecurityException] if decryption fails
      */
+    @Throws(
+        GeneralSecurityException::class,
+        Exception::class,
+    )
     suspend fun decrypt(
         encryptedData: String,
         encryptedKey: String,
@@ -43,5 +54,9 @@ interface HybridCryptoManagerAsync {
      *
      * @throws [java.security.KeyStoreException] If Keystore is not initialized or entry not removed
      */
+    @Throws(
+        GeneralSecurityException::class,
+        Exception::class,
+    )
     suspend fun deleteKey()
 }

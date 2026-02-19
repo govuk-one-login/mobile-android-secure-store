@@ -60,7 +60,8 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
             cipher,
             encryptedKeyBytes,
         )
-        aesCryptoManager.decrypt(encryptedData, decryptedKey)
+        val result = aesCryptoManager.decrypt(encryptedData, decryptedKey)
+        result
     }
 
     private fun initCipherAndDecryptKey(
