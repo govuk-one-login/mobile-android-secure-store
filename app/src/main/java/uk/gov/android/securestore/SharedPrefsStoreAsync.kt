@@ -30,7 +30,7 @@ class SharedPrefsStoreAsync(
     private var sharedPrefs: SharedPreferences? = null
 
     @Deprecated(
-        "Replace with SharedPrefsStoreAsyncV2.init() to allow handling errors correctly " +
+        "Replace with SharedPrefsStoreAsyncV2.init(...) to allow handling errors correctly " +
             "- aim to be removed by 20th of April 2026",
         level = DeprecationLevel.WARNING,
     )
@@ -48,7 +48,7 @@ class SharedPrefsStoreAsync(
     }
 
     @Deprecated(
-        "Replace with SharedPrefsStoreAsyncV2.upsert() to allow handling errors correctly " +
+        "Replace with SharedPrefsStoreAsyncV2.upsert(...) to allow handling errors correctly " +
             "- aim to be removed by 20th of April 2026",
         level = DeprecationLevel.WARNING,
     )
