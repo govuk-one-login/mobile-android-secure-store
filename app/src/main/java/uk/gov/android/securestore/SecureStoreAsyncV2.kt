@@ -3,6 +3,7 @@ package uk.gov.android.securestore
 import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
+import uk.gov.android.securestore.error.SecureStorageErrorV2
 
 /**
  * Create an instance of [SecureStoreAsyncV2] to save, query and delete data. Data stored as a key value pair, with the value being a [String]
@@ -27,6 +28,7 @@ interface SecureStoreAsyncV2 {
      *
      * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to save
      */
+    @Throws(SecureStorageErrorV2::class)
     suspend fun upsert(key: String, value: String): String
 
     /**
@@ -35,6 +37,7 @@ interface SecureStoreAsyncV2 {
      * @param [key] The unique identifier for the value to delete
      *
      */
+    @Throws(SecureStorageErrorV2::class)
     fun delete(key: String)
 
     /**
@@ -42,6 +45,7 @@ interface SecureStoreAsyncV2 {
      *
      * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to delete
      */
+    @Throws(SecureStorageErrorV2::class)
     suspend fun deleteAll()
 
     /**
@@ -52,6 +56,7 @@ interface SecureStoreAsyncV2 {
      *
      * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to retrieve
      */
+    @Throws(SecureStorageErrorV2::class)
     suspend fun retrieve(
         vararg key: String,
     ): Map<String, String?>
@@ -66,6 +71,7 @@ interface SecureStoreAsyncV2 {
      *
      * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to retrieve
      */
+    @Throws(SecureStorageErrorV2::class)
     suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
@@ -77,8 +83,6 @@ interface SecureStoreAsyncV2 {
      *
      * @param [key] Key to select
      * @return True or false if the key exists in the store
-     *
-     * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to check for existence
      */
     fun exists(key: String): Boolean
 }
