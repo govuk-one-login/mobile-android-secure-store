@@ -67,7 +67,7 @@ class SecureStorageErrorV2(
                 BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
                 BiometricPrompt.ERROR_NO_BIOMETRICS,
                 ->
-                    SecureStoreErrorTypeV2.ERROR_NO_DEVICE_CREDENTIAL
+                    SecureStoreErrorTypeV2.NO_LOCAL_AUTH_ENABLED
                 else -> SecureStoreErrorTypeV2.RECOVERABLE
             }
             val exp = SecureStorageErrorV2(
@@ -85,5 +85,5 @@ enum class SecureStoreErrorTypeV2 {
     RECOVERABLE,
     UNRECOVERABLE,
     USER_CANCELLED,
-    ERROR_NO_DEVICE_CREDENTIAL,
+    NO_LOCAL_AUTH_ENABLED,
 }
