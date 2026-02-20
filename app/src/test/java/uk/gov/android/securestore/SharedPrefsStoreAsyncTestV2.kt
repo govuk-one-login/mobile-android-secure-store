@@ -620,12 +620,12 @@ class SharedPrefsStoreAsyncTestV2 {
                 Arguments.of(
                     BiometricPrompt.ERROR_NO_BIOMETRICS,
                     NO_PASSCODE,
-                    SecureStoreErrorTypeV2.ERROR_NO_DEVICE_CREDENTIAL,
+                    SecureStoreErrorTypeV2.NO_LOCAL_AUTH_ENABLED,
                 ),
                 Arguments.of(
                     BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
                     NO_PASSCODE,
-                    SecureStoreErrorTypeV2.ERROR_NO_DEVICE_CREDENTIAL,
+                    SecureStoreErrorTypeV2.NO_LOCAL_AUTH_ENABLED,
                 ),
                 Arguments.of(
                     BiometricPrompt.ERROR_USER_CANCELED,
