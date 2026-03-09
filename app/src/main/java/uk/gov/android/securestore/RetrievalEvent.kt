@@ -3,7 +3,7 @@ package uk.gov.android.securestore
 import uk.gov.android.securestore.error.SecureStoreErrorType
 
 /**
- * Class to handle the return events when getting data from a [SecureStore]
+ * Class to handle the return events when getting data from a secure store
  */
 @Deprecated(
     "This will not be used starting SecureStoreAsyncV2 as it will return a" +
