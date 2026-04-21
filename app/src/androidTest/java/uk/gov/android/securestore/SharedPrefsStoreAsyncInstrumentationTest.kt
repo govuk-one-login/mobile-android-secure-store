@@ -1,5 +1,6 @@
 package uk.gov.android.securestore
 
+import android.security.keystore.UserNotAuthenticatedException
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -16,7 +17,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
-import uk.gov.android.securestore.error.SecureStoreErrorType
 import java.security.KeyStore
 
 class SharedPrefsStoreAsyncInstrumentationTest {
@@ -26,7 +26,7 @@ class SharedPrefsStoreAsyncInstrumentationTest {
 
     private val mockAuthenticator: Authenticator = mock()
 
-    private val sharedPrefsStoreAsync = SharedPrefsStoreAsync(
+    private val sharedPrefsStoreAsync = SharedPrefsStoreAsyncV2(
         authenticator = mockAuthenticator,
     )
 
@@ -50,7 +50,7 @@ class SharedPrefsStoreAsyncInstrumentationTest {
                 val result = sharedPrefsStoreAsync.retrieve(
                     key,
                 )
-                assertEquals(RetrievalEvent.Success(mapOf(key to value)), result)
+                assertEquals(mapOf(key to value), result)
             }
         }
     }
@@ -79,10 +79,7 @@ class SharedPrefsStoreAsyncInstrumentationTest {
                 )
 
                 assertEquals(
-                    RetrievalEvent.Failed(
-                        SecureStoreErrorType.GENERAL,
-                        "android.security.keystore.UserNotAuthenticatedException: User not authenticated",
-                    ),
+                    UserNotAuthenticatedException(),
                     result,
                 )
             }
@@ -101,17 +98,14 @@ class SharedPrefsStoreAsyncInstrumentationTest {
                 val result1 = sharedPrefsStoreAsync.retrieve(
                     key,
                 )
-                assertEquals(RetrievalEvent.Success(mapOf(key to value)), result1)
+                assertEquals(mapOf(key to value), result1)
 
                 sharedPrefsStoreAsync.delete(key)
                 val result2 = sharedPrefsStoreAsync.retrieve(
                     key,
                 )
                 assertEquals(
-                    RetrievalEvent.Failed(
-                        SecureStoreErrorType.NOT_FOUND,
-                        "java.lang.Exception: testKey not found",
-                    ),
+                    mapOf(key to null),
                     result2,
                 )
             }
@@ -132,11 +126,9 @@ class SharedPrefsStoreAsyncInstrumentationTest {
                     anotherKey,
                 )
                 assertEquals(
-                    RetrievalEvent.Success(
-                        mapOf(
-                            key to value,
-                            anotherKey to anotherValue,
-                        ),
+                    mapOf(
+                        key to value,
+                        anotherKey to anotherValue,
                     ),
                     result1,
                 )
