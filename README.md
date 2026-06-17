@@ -5,7 +5,7 @@
 
 Implementation of a secure storage solution for Android.
 
-This will allow consumers to `save` `query` and `delete` key value data saved in shared preferences.
+This will let consumers `save` `query` and `delete` key value data saved in shared preferences.
 The data will be encrypted before storage and decrypted on retrieval, when an instance is created the consumer can choose the access level of the data (are biometrics required to access)
 The secure store has been optimised to work asynchronously so it can be used within coroutines.
 
@@ -61,5 +61,5 @@ desired please edit the value under "branches:" in `.github/workflows/on_push_ho
 The hotfix branch name should be in the format "hotfix/M.m.p".
 
 Once the hotfix PR has been approved and the "Squash and merge" button pressed, the merge title
-must be in the format "Merge pull request #xxx from govuk-one-login/release/M.m.p" to allow for the
-correct version to be extracted and used as a tag.
+must be in the format "Merge pull request #xxx from govuk-one-login/release/M.m.p" to let the
+correct version be extracted and used as a tag.
