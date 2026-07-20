@@ -39,6 +39,7 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
     override suspend fun encrypt(
         input: String,
     ): EncryptedData = withContext(dispatcher) {
+        @Suppress("UnsafeCryptoAlgorithmUsage") // DCMAW-20999
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
         }
@@ -54,6 +55,7 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
         encryptedData: String,
         encryptedKey: String,
     ): String = withContext(dispatcher) {
+        @Suppress("UnsafeCryptoAlgorithmUsage") // DCMAW-20999
         val cipher = Cipher.getInstance(TRANSFORMATION)
         val encryptedKeyBytes = Base64.decode(encryptedKey)
         val decryptedKey = initCipherAndDecryptKey(
