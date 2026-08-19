@@ -1,6 +1,7 @@
 package uk.gov.android.securestore.error
 
 import androidx.biometric.BiometricPrompt
+import kotlinx.coroutines.CancellationException
 import java.security.GeneralSecurityException
 import java.security.InvalidAlgorithmParameterException
 import java.security.InvalidKeyException
@@ -21,6 +22,14 @@ class SecureStorageErrorV2(
 ) : Exception(exception) {
 
     companion object {
+        fun <T> Result<T>.getOrThrowSecureStorageError(): T =
+            getOrElse { e ->
+                // Never wrap or consume cancellation exceptions
+                if (e is CancellationException) throw e
+
+                throw e.mapToSecureStorageError()
+            }
+
         /**
          * Maps any exceptions thrown within the implementation of [uk.gov.android.securestore.SecureStoreAsyncV2] and it is
          * an extension function on [Exception]
@@ -28,6 +37,11 @@ class SecureStorageErrorV2(
          * @return [uk.gov.android.securestore.error.SecureStorageErrorV2]
          */
         fun Throwable.mapToSecureStorageError(): SecureStorageErrorV2 {
+            require(this !is CancellationException) {
+                "Tried to map a CancellationException when it should be re-thrown. " +
+                        "Did you mean to use runCatchingCancellable?"
+            }
+
             val errorType = when (this) {
                 is AEADBadTagException,
                 is UnrecoverableKeyException,
