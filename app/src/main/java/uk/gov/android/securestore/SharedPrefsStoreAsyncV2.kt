@@ -4,13 +4,16 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
+import kotlinx.coroutines.CancellationException
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 import uk.gov.android.securestore.authentication.UserAuthenticator
+import uk.gov.android.securestore.coroutines.runCatchingCancellable
 import uk.gov.android.securestore.crypto.HybridCryptoManagerAsync
 import uk.gov.android.securestore.crypto.HybridCryptoManagerAsyncImpl
 import uk.gov.android.securestore.error.SecureStorageErrorV2
+import uk.gov.android.securestore.error.SecureStorageErrorV2.Companion.getOrThrowSecureStorageError
 import uk.gov.android.securestore.error.SecureStorageErrorV2.Companion.mapToSecureStorageError
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -37,16 +40,14 @@ class SharedPrefsStoreAsyncV2(
     }
 
     override suspend fun upsert(key: String, value: String): String {
-        return try {
+        return runCatchingCancellable {
             val result = hybridCryptoManagerAsync.encrypt(value)
                 .also {
                     writeToPrefs(key, it.data)
                     writeToPrefs(key + KEY_SUFFIX, it.key)
                 }
             result.data
-        } catch (e: Exception) {
-            throw e.mapToSecureStorageError()
-        }
+        }.getOrThrowSecureStorageError()
     }
 
     override fun delete(key: String) {
@@ -59,11 +60,9 @@ class SharedPrefsStoreAsyncV2(
         sharedPrefs?.edit {
             clear()
         }
-        try {
+        runCatchingCancellable {
             hybridCryptoManagerAsync.deleteKey()
-        } catch (e: Exception) {
-            throw e.mapToSecureStorageError()
-        }
+        }.getOrThrowSecureStorageError()
     }
 
     override suspend fun retrieve(
@@ -73,11 +72,9 @@ class SharedPrefsStoreAsyncV2(
             if (configuration.accessControlLevel != AccessControlLevel.OPEN) {
                 throw SecureStorageErrorV2(Exception(REQUIRE_OPEN_ACCESS_LEVEL))
             } else {
-                try {
+                runCatchingCancellable {
                     handleResults(*key)
-                } catch (e: Throwable) {
-                    throw e.mapToSecureStorageError()
-                }
+                }.getOrThrowSecureStorageError()
             }
         } ?: throw SecureStorageErrorV2(INIT_ERROR)
     }
@@ -93,20 +90,19 @@ class SharedPrefsStoreAsyncV2(
                 throw SecureStorageErrorV2(Exception(AUTH_ON_OPEN_STORE_ERROR_MSG))
             } else {
                 // Attempt to surface the Biometrics prompt and handle the result of that
-                try {
-                    authenticator.init(context)
-                    // Can throw secure storage error that doesn't need to be mapped
-                    handleBiometricPrompt(configuration, authPromptConfig)
-                    handleResults(*key)
+                runCatchingCancellable {
+                    try {
+                        authenticator.init(context)
+                        // Can throw secure storage error that doesn't need to be mapped
+                        handleBiometricPrompt(configuration, authPromptConfig)
+                        handleResults(*key)
+                    } finally {
+                        authenticator.close()
+                    }
+                }.onFailure { e ->
                     // Catches errors thrown from the BiometricPrompt onError(...)
-                } catch (sse: SecureStorageErrorV2) {
-                    throw sse
-                    // Catches any other errors (mainly the java.security and java.crypto fron the KeyStore)
-                } catch (e: Throwable) {
-                    throw e.mapToSecureStorageError()
-                } finally {
-                    authenticator.close()
-                }
+                    if (e is SecureStorageErrorV2) throw e
+                }.getOrThrowSecureStorageError()
             }
         } ?: throw SecureStorageErrorV2(INIT_ERROR)
     }
