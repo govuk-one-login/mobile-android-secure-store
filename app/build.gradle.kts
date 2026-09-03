@@ -53,9 +53,6 @@ android {
             jvmTarget = JvmTarget.JVM_17
         }
     }
-    ktlint {
-        version = libs.versions.ktlint.cli.get()
-    }
 }
 
 dependencies {
@@ -100,7 +97,7 @@ mavenPublishingConfig {
         )
         description.set(
             """
-                Gradle configured Android library for secure storage of data, optionally protected by the user’s biometrics & passcode
+            Gradle configured Android library for secure storage of data, optionally protected by the user’s biometrics & passcode
             """.trimIndent(),
         )
     }

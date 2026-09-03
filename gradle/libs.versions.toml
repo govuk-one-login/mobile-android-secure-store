@@ -10,7 +10,6 @@ mockito-kotlin = "6.3.0"
 androidx-test-orchestrator = "1.6.1"
 junit = "6.1.2"
 kotlinxCoroutines = "1.11.0"
-ktlint-cli = "0.49.1"
 
 [libraries]
 
