@@ -19,7 +19,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
+                "proguard-rules.pro"
             )
         }
     }
@@ -34,7 +34,7 @@ android {
                     setOf(
                         TestLogEvent.FAILED,
                         TestLogEvent.PASSED,
-                        TestLogEvent.SKIPPED,
+                        TestLogEvent.SKIPPED
                     )
             }
         }
@@ -63,13 +63,13 @@ dependencies {
         libs.espresso.core,
         libs.mockito,
         libs.mockito.kotlin,
-        libs.mockito.android,
+        libs.mockito.android
     ).forEach(::androidTestImplementation)
 
     listOf(
         libs.core.ktx,
         libs.androidx.biometric,
-        libs.appcompat,
+        libs.appcompat
     ).forEach(::implementation)
 
     listOf(
@@ -80,11 +80,11 @@ dependencies {
         libs.androidx.test,
         libs.mockito,
         libs.mockito.kotlin,
-        libs.kotlinx.coroutines.test,
+        libs.kotlinx.coroutines.test
     ).forEach(::testImplementation)
 
     listOf(
-        libs.androidx.test.orchestrator,
+        libs.androidx.test.orchestrator
     ).forEach {
         androidTestUtil(it)
     }
@@ -93,12 +93,12 @@ dependencies {
 mavenPublishingConfig {
     mavenConfigBlock {
         name.set(
-            "secure storage of key-value data",
+            "secure storage of key-value data"
         )
         description.set(
             """
             Gradle configured Android library for secure storage of data, optionally protected by the user’s biometrics & passcode
-            """.trimIndent(),
+            """.trimIndent()
         )
     }
 }

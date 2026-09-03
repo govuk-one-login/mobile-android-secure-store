@@ -1,12 +1,12 @@
 package uk.gov.android.securestore.crypto.limitedmanager
 
-import org.junit.jupiter.api.Assertions.assertThrows
 import java.security.GeneralSecurityException
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import org.junit.jupiter.api.Assertions.assertThrows
 
 @OptIn(ExperimentalEncodingApi::class)
 class AesCryptoManagerTest {
@@ -34,8 +34,8 @@ class AesCryptoManagerTest {
         byteArrayOf(
             -10, 111, -120, 94, -43, -122, -40, 61, 23,
             12, -83, 34, 4, -96, 50, 15, 86, -35, -43, 65, -39, 116, -128, 119, 124, -3, 103, -5, -87,
-            -58, 39, -124,
-        ),
+            -58, 39, -124
+        )
     )
 
     @Test
@@ -62,12 +62,10 @@ class AesCryptoManagerTest {
     }
 
     @Suppress("SwallowedException")
-    private fun checkInputIsBase64(input: String): Boolean {
-        return try {
-            Base64.decode(input.toByteArray())
-            true
-        } catch (e: IllegalArgumentException) {
-            false
-        }
+    private fun checkInputIsBase64(input: String): Boolean = try {
+        Base64.decode(input.toByteArray())
+        true
+    } catch (e: IllegalArgumentException) {
+        false
     }
 }

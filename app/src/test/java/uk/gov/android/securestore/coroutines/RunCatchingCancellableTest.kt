@@ -1,10 +1,10 @@
 package uk.gov.android.securestore.coroutines
 
-import kotlinx.coroutines.CancellationException
-import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
+import kotlinx.coroutines.CancellationException
+import org.junit.jupiter.api.Test
 
 class RunCatchingCancellableTest {
 

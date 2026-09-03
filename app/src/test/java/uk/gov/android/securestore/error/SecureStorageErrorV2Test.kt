@@ -1,11 +1,11 @@
 package uk.gov.android.securestore.error
 
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.CancellationException
 import org.junit.jupiter.api.Test
 import uk.gov.android.securestore.error.SecureStorageErrorV2.Companion.getOrThrowSecureStorageError
 import uk.gov.android.securestore.error.SecureStorageErrorV2.Companion.mapToSecureStorageError
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 
 class SecureStorageErrorV2Test {
 

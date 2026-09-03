@@ -18,10 +18,7 @@ interface SymmetricCryptoManager {
      * @throws [SymmetricCryptoManager.CryptoManagerError.NullEncryptedKey] if the returned encrypted key from
      * the callback is null or empty
      */
-    fun encrypt(
-        input: String,
-        encryptAesKey: (key: ByteArray) -> String?,
-    ): EncryptedData
+    fun encrypt(input: String, encryptAesKey: (key: ByteArray) -> String?): EncryptedData
 
     /**
      * Decrypt a [String]
@@ -31,10 +28,7 @@ interface SymmetricCryptoManager {
      *
      * @throws [java.security.GeneralSecurityException] if decryption fails
      */
-    fun decrypt(
-        encryptedData: String,
-        key: String,
-    ): String
+    fun decrypt(encryptedData: String, key: String): String
 
     sealed class CryptoManagerError(private val error: String) : Exception(error) {
         data object NullEncryptedKey : CryptoManagerError(NULL_ENCRYPTED_KEY_ERROR)

@@ -2,6 +2,7 @@ package uk.gov.android.securestore
 
 import android.security.keystore.UserNotAuthenticatedException
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import java.security.KeyStore
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -17,7 +18,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
-import java.security.KeyStore
 
 class SharedPrefsStoreAsyncInstrumentationTest {
     private val key = "testKey"
@@ -27,7 +27,7 @@ class SharedPrefsStoreAsyncInstrumentationTest {
     private val mockAuthenticator: Authenticator = mock()
 
     private val sharedPrefsStoreAsync = SharedPrefsStoreAsyncV2(
-        authenticator = mockAuthenticator,
+        authenticator = mockAuthenticator
     )
 
     @JvmField
@@ -48,7 +48,7 @@ class SharedPrefsStoreAsyncInstrumentationTest {
             runBlocking {
                 sharedPrefsStoreAsync.upsert(key, value)
                 val result = sharedPrefsStoreAsync.retrieve(
-                    key,
+                    key
                 )
                 assertEquals(mapOf(key to value), result)
             }
@@ -63,8 +63,8 @@ class SharedPrefsStoreAsyncInstrumentationTest {
             mockAuthenticator.authenticate(
                 any(),
                 any(),
-                any(),
-            ),
+                any()
+            )
         ).thenAnswer {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
@@ -75,12 +75,12 @@ class SharedPrefsStoreAsyncInstrumentationTest {
                 val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
                     key,
                     authPromptConfig = AuthenticatorPromptConfiguration("title"),
-                    context = it,
+                    context = it
                 )
 
                 assertEquals(
                     UserNotAuthenticatedException(),
-                    result,
+                    result
                 )
             }
 
@@ -96,17 +96,17 @@ class SharedPrefsStoreAsyncInstrumentationTest {
             runBlocking {
                 sharedPrefsStoreAsync.upsert(key, value)
                 val result1 = sharedPrefsStoreAsync.retrieve(
-                    key,
+                    key
                 )
                 assertEquals(mapOf(key to value), result1)
 
                 sharedPrefsStoreAsync.delete(key)
                 val result2 = sharedPrefsStoreAsync.retrieve(
-                    key,
+                    key
                 )
                 assertEquals(
                     mapOf(key to null),
-                    result2,
+                    result2
                 )
             }
         }
@@ -123,14 +123,14 @@ class SharedPrefsStoreAsyncInstrumentationTest {
                 sharedPrefsStoreAsync.upsert(anotherKey, anotherValue)
                 val result1 = sharedPrefsStoreAsync.retrieve(
                     key,
-                    anotherKey,
+                    anotherKey
                 )
                 assertEquals(
                     mapOf(
                         key to value,
-                        anotherKey to anotherValue,
+                        anotherKey to anotherValue
                     ),
-                    result1,
+                    result1
                 )
 
                 sharedPrefsStoreAsync.deleteAll()
@@ -187,8 +187,8 @@ class SharedPrefsStoreAsyncInstrumentationTest {
                 context = it,
                 configurationAsync = SecureStorageConfigurationAsync(
                     storeId,
-                    acl,
-                ),
+                    acl
+                )
             )
         }
     }

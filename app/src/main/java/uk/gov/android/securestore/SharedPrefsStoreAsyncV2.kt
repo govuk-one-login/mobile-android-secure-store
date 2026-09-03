@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.fragment.app.FragmentActivity
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CancellationException
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
@@ -15,40 +17,33 @@ import uk.gov.android.securestore.crypto.HybridCryptoManagerAsyncImpl
 import uk.gov.android.securestore.error.SecureStorageErrorV2
 import uk.gov.android.securestore.error.SecureStorageErrorV2.Companion.getOrThrowSecureStorageError
 import uk.gov.android.securestore.error.SecureStorageErrorV2.Companion.mapToSecureStorageError
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 @Suppress("TooGenericExceptionCaught", "TooManyFunctions")
 class SharedPrefsStoreAsyncV2(
     private val authenticator: Authenticator = UserAuthenticator(),
-    private val hybridCryptoManagerAsync: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl(),
+    private val hybridCryptoManagerAsync: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl()
 ) : SecureStoreAsyncV2 {
     private var configurationAsync: SecureStorageConfigurationAsync? = null
     private var sharedPrefs: SharedPreferences? = null
 
-    override fun init(
-        context: Context,
-        configurationAsync: SecureStorageConfigurationAsync,
-    ) {
+    override fun init(context: Context, configurationAsync: SecureStorageConfigurationAsync) {
         this.configurationAsync = configurationAsync
         hybridCryptoManagerAsync.init(
             configurationAsync.id,
             configurationAsync.accessControlLevel,
-            configurationAsync.dispatcher,
+            configurationAsync.dispatcher
         )
         sharedPrefs = context.getSharedPreferences(configurationAsync.id, Context.MODE_PRIVATE)
     }
 
-    override suspend fun upsert(key: String, value: String): String {
-        return runCatchingCancellable {
-            val result = hybridCryptoManagerAsync.encrypt(value)
-                .also {
-                    writeToPrefs(key, it.data)
-                    writeToPrefs(key + KEY_SUFFIX, it.key)
-                }
-            result.data
-        }.getOrThrowSecureStorageError()
-    }
+    override suspend fun upsert(key: String, value: String): String = runCatchingCancellable {
+        val result = hybridCryptoManagerAsync.encrypt(value)
+            .also {
+                writeToPrefs(key, it.data)
+                writeToPrefs(key + KEY_SUFFIX, it.key)
+            }
+        result.data
+    }.getOrThrowSecureStorageError()
 
     override fun delete(key: String) {
         sharedPrefs?.edit {
@@ -65,10 +60,8 @@ class SharedPrefsStoreAsyncV2(
         }.getOrThrowSecureStorageError()
     }
 
-    override suspend fun retrieve(
-        vararg key: String,
-    ): Map<String, String?> {
-        return configurationAsync?.let { configuration ->
+    override suspend fun retrieve(vararg key: String): Map<String, String?> =
+        configurationAsync?.let { configuration ->
             if (configuration.accessControlLevel != AccessControlLevel.OPEN) {
                 throw SecureStorageErrorV2(Exception(REQUIRE_OPEN_ACCESS_LEVEL))
             } else {
@@ -77,39 +70,34 @@ class SharedPrefsStoreAsyncV2(
                 }.getOrThrowSecureStorageError()
             }
         } ?: throw SecureStorageErrorV2(INIT_ERROR)
-    }
 
     override suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
-        context: FragmentActivity,
-    ): Map<String, String?> {
-        return configurationAsync?.let { configuration ->
-            // When access control is set to open on the secureStore instance, then redirect consumer to use the retrieve method
-            if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
-                throw SecureStorageErrorV2(Exception(AUTH_ON_OPEN_STORE_ERROR_MSG))
-            } else {
-                // Attempt to surface the Biometrics prompt and handle the result of that
-                runCatchingCancellable {
-                    try {
-                        authenticator.init(context)
-                        // Can throw secure storage error that doesn't need to be mapped
-                        handleBiometricPrompt(configuration, authPromptConfig)
-                        handleResults(*key)
-                    } finally {
-                        authenticator.close()
-                    }
-                }.onFailure { e ->
-                    // Catches errors thrown from the BiometricPrompt onError(...)
-                    if (e is SecureStorageErrorV2) throw e
-                }.getOrThrowSecureStorageError()
-            }
-        } ?: throw SecureStorageErrorV2(INIT_ERROR)
-    }
+        context: FragmentActivity
+    ): Map<String, String?> = configurationAsync?.let { configuration ->
+        // When access control is set to open on the secureStore instance, then redirect consumer to use the retrieve method
+        if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
+            throw SecureStorageErrorV2(Exception(AUTH_ON_OPEN_STORE_ERROR_MSG))
+        } else {
+            // Attempt to surface the Biometrics prompt and handle the result of that
+            runCatchingCancellable {
+                try {
+                    authenticator.init(context)
+                    // Can throw secure storage error that doesn't need to be mapped
+                    handleBiometricPrompt(configuration, authPromptConfig)
+                    handleResults(*key)
+                } finally {
+                    authenticator.close()
+                }
+            }.onFailure { e ->
+                // Catches errors thrown from the BiometricPrompt onError(...)
+                if (e is SecureStorageErrorV2) throw e
+            }.getOrThrowSecureStorageError()
+        }
+    } ?: throw SecureStorageErrorV2(INIT_ERROR)
 
-    override fun exists(key: String): Boolean {
-        return sharedPrefs?.contains(key) == true
-    }
+    override fun exists(key: String): Boolean = sharedPrefs?.contains(key) == true
 
     private fun writeToPrefs(key: String, value: String?) {
         sharedPrefs?.let {
@@ -125,10 +113,7 @@ class SharedPrefsStoreAsyncV2(
      * @param alias - [String] representing a key for a value stored in Shared Prefs
      * @throws [java.security.GeneralSecurityException] and it's subclasses and  [Exception]
      */
-    private suspend fun cryptoDecryptText(
-        alias: String,
-        onTextReady: (String?) -> Unit,
-    ) {
+    private suspend fun cryptoDecryptText(alias: String, onTextReady: (String?) -> Unit) {
         sharedPrefs?.let {
             val encryptedData = it.getString(alias, null)
             val encryptedKey = it.getString(alias + KEY_SUFFIX, null)
@@ -163,7 +148,7 @@ class SharedPrefsStoreAsyncV2(
      */
     private suspend fun handleBiometricPrompt(
         config: SecureStorageConfigurationAsync,
-        authPromptConfig: AuthenticatorPromptConfiguration,
+        authPromptConfig: AuthenticatorPromptConfiguration
     ) {
         suspendCoroutine { continuation ->
             authenticator.authenticate(
@@ -178,13 +163,13 @@ class SharedPrefsStoreAsyncV2(
                         // Continues the coroutine with the error
                         continuation.resumeWithException(
                             SecureStorageErrorV2
-                                .getErrorFromBiometricsError(errorCode, errorString),
+                                .getErrorFromBiometricsError(errorCode, errorString)
                         )
                     },
                     onFailure = {
                         // Do nothing to allow user to try again
-                    },
-                ),
+                    }
+                )
             )
         }
     }

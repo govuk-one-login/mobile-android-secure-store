@@ -4,16 +4,16 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.withContext
-import uk.gov.android.securestore.AccessControlLevel
-import uk.gov.android.securestore.crypto.limitedmanager.AesCryptoManager
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.KeyStore.PrivateKeyEntry
 import javax.crypto.Cipher
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import uk.gov.android.securestore.AccessControlLevel
+import uk.gov.android.securestore.crypto.limitedmanager.AesCryptoManager
 
 /**
  * Implementation of [HybridCryptoManagerAsync] using RSA encryption algorithm to create Public/Private key pair.
@@ -36,9 +36,7 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
         this.dispatcher = dispatcher
     }
 
-    override suspend fun encrypt(
-        input: String,
-    ): EncryptedData = withContext(dispatcher) {
+    override suspend fun encrypt(input: String): EncryptedData = withContext(dispatcher) {
         @Suppress("UnsafeCryptoAlgorithmUsage") // DCMAW-20999
         val encryptCipher = Cipher.getInstance(TRANSFORMATION).apply {
             init(Cipher.ENCRYPT_MODE, getKeyEntry(alias).certificate.publicKey)
@@ -51,25 +49,20 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
         encryptedData
     }
 
-    override suspend fun decrypt(
-        encryptedData: String,
-        encryptedKey: String,
-    ): String = withContext(dispatcher) {
-        @Suppress("UnsafeCryptoAlgorithmUsage") // DCMAW-20999
-        val cipher = Cipher.getInstance(TRANSFORMATION)
-        val encryptedKeyBytes = Base64.decode(encryptedKey)
-        val decryptedKey = initCipherAndDecryptKey(
-            cipher,
-            encryptedKeyBytes,
-        )
-        val result = aesCryptoManager.decrypt(encryptedData, decryptedKey)
-        result
-    }
+    override suspend fun decrypt(encryptedData: String, encryptedKey: String): String =
+        withContext(dispatcher) {
+            @Suppress("UnsafeCryptoAlgorithmUsage") // DCMAW-20999
+            val cipher = Cipher.getInstance(TRANSFORMATION)
+            val encryptedKeyBytes = Base64.decode(encryptedKey)
+            val decryptedKey = initCipherAndDecryptKey(
+                cipher,
+                encryptedKeyBytes
+            )
+            val result = aesCryptoManager.decrypt(encryptedData, decryptedKey)
+            result
+        }
 
-    private fun initCipherAndDecryptKey(
-        cipher: Cipher,
-        encryptedKey: ByteArray,
-    ): String {
+    private fun initCipherAndDecryptKey(cipher: Cipher, encryptedKey: ByteArray): String {
         cipher.init(Cipher.DECRYPT_MODE, getKeyEntry(alias).privateKey)
         val encodedKey = Base64.encode(cipher.doFinal(encryptedKey))
         return encodedKey
@@ -96,7 +89,7 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
     private fun createKeyEntry(alias: String) {
         val kpgSpec = KeyGenParameterSpec.Builder(
             alias,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
         )
             .setKeySize(KEY_SIZE)
             .setBlockModes(BLOCK_MODE)
@@ -111,26 +104,26 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
             kpgSpec
                 .setUserAuthenticationParameters(
                     KEY_TIMEOUT,
-                    getAuthType(accessControlLevel),
+                    getAuthType(accessControlLevel)
                 )
         }
 
         KeyPairGenerator.getInstance(ALGORITHM, PROVIDER).apply {
             initialize(
-                kpgSpec.build(),
+                kpgSpec.build()
             )
         }.generateKeyPair()
     }
 
     @RequiresApi(Build.VERSION_CODES.R)
-    private fun getAuthType(accessLevel: AccessControlLevel): Int =
-        when (accessLevel) {
-            AccessControlLevel.OPEN -> AUTH_TYPE_OPEN
-            AccessControlLevel.PASSCODE,
-            AccessControlLevel.PASSCODE_AND_BIOMETRICS,
-            ->
-                KeyProperties.AUTH_DEVICE_CREDENTIAL or KeyProperties.AUTH_BIOMETRIC_STRONG
-        }
+    private fun getAuthType(accessLevel: AccessControlLevel): Int = when (accessLevel) {
+        AccessControlLevel.OPEN -> AUTH_TYPE_OPEN
+
+        AccessControlLevel.PASSCODE,
+        AccessControlLevel.PASSCODE_AND_BIOMETRICS
+        ->
+            KeyProperties.AUTH_DEVICE_CREDENTIAL or KeyProperties.AUTH_BIOMETRIC_STRONG
+    }
 
     companion object {
         private const val PROVIDER = "AndroidKeyStore"

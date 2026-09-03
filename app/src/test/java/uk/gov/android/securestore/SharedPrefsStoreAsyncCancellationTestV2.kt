@@ -3,6 +3,7 @@ package uk.gov.android.securestore
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.fragment.app.FragmentActivity
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,7 +23,6 @@ import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
 import uk.gov.android.securestore.crypto.HybridCryptoManagerAsync
-import kotlin.test.assertFailsWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SharedPrefsStoreAsyncCancellationTestV2 {
@@ -43,7 +43,7 @@ class SharedPrefsStoreAsyncCancellationTestV2 {
 
         sharedPrefsStoreAsync = SharedPrefsStoreAsyncV2(
             mockAuthenticator,
-            mockHybridCryptoManagerAsync,
+            mockHybridCryptoManagerAsync
         )
 
         givenSecureStoreIsInitialised()
@@ -81,7 +81,7 @@ class SharedPrefsStoreAsyncCancellationTestV2 {
             sharedPrefsStoreAsync.retrieveWithAuthentication(
                 "key",
                 authPromptConfig = AuthenticatorPromptConfiguration("title"),
-                context = mock(),
+                context = mock()
             )
         }
     }
@@ -101,16 +101,14 @@ class SharedPrefsStoreAsyncCancellationTestV2 {
         whenever(mockSharedPreferences.edit()).thenReturn(mockEditor)
     }
 
-    private fun givenSecureStoreIsInitialised(
-        acl: AccessControlLevel = AccessControlLevel.OPEN,
-    ) {
+    private fun givenSecureStoreIsInitialised(acl: AccessControlLevel = AccessControlLevel.OPEN) {
         sharedPrefsStoreAsync.init(
             mockContext,
             SecureStorageConfigurationAsync(
                 "id",
                 acl,
-                UnconfinedTestDispatcher(),
-            ),
+                UnconfinedTestDispatcher()
+            )
         )
     }
 

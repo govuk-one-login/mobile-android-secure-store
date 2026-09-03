@@ -16,7 +16,7 @@ internal class UserAuthenticator : Authenticator {
     override fun authenticate(
         accessControlLevel: AccessControlLevel,
         configuration: AuthenticatorPromptConfiguration,
-        handler: AuthenticatorCallbackHandler,
+        handler: AuthenticatorCallbackHandler
     ) {
         require(accessControlLevel != AccessControlLevel.OPEN)
 
@@ -39,22 +39,23 @@ internal class UserAuthenticator : Authenticator {
         val biometricPrompt = fragmentContext?.let {
             BiometricPrompt(
                 it,
-                handler,
+                handler
             )
         }
 
         biometricPrompt?.authenticate(
-            promptInfoBuilder.build(),
+            promptInfoBuilder.build()
         )
     }
 
-    private fun getRequireAuthenticators(accessControl: AccessControlLevel) =
-        when (accessControl) {
-            AccessControlLevel.OPEN -> -1
-            AccessControlLevel.PASSCODE -> DEVICE_CREDENTIAL
-            AccessControlLevel.PASSCODE_AND_BIOMETRICS ->
-                BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-        }
+    private fun getRequireAuthenticators(accessControl: AccessControlLevel) = when (accessControl) {
+        AccessControlLevel.OPEN -> -1
+
+        AccessControlLevel.PASSCODE -> DEVICE_CREDENTIAL
+
+        AccessControlLevel.PASSCODE_AND_BIOMETRICS ->
+            BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+    }
 
     override fun close() {
         fragmentContext = null

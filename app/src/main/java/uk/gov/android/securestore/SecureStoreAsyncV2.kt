@@ -15,10 +15,7 @@ interface SecureStoreAsyncV2 {
      * @param context Just a basic context to allow initialisation of storage
      * @param configurationAsync [SecureStorageConfigurationAsync] to allow setting of [AccessControlLevel] and store ID
      */
-    fun init(
-        context: Context,
-        configurationAsync: SecureStorageConfigurationAsync,
-    )
+    fun init(context: Context, configurationAsync: SecureStorageConfigurationAsync)
 
     /**
      * Save a value, if the key exists it is overwritten, if it doesn't exist it's added
@@ -57,9 +54,7 @@ interface SecureStoreAsyncV2 {
      * @throws [uk.gov.android.securestore.error.SecureStorageErrorV2] if unable to retrieve
      */
     @Throws(SecureStorageErrorV2::class)
-    suspend fun retrieve(
-        vararg key: String,
-    ): Map<String, String?>
+    suspend fun retrieve(vararg key: String): Map<String, String?>
 
     /**
      * Access the data for a given key when authentication is required; access control level is not OPEN
@@ -75,7 +70,7 @@ interface SecureStoreAsyncV2 {
     suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
-        context: FragmentActivity,
+        context: FragmentActivity
     ): Map<String, String?>
 
     /**

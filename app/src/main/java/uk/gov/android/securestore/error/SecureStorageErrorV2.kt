@@ -1,7 +1,6 @@
 package uk.gov.android.securestore.error
 
 import androidx.biometric.BiometricPrompt
-import kotlinx.coroutines.CancellationException
 import java.security.GeneralSecurityException
 import java.security.InvalidAlgorithmParameterException
 import java.security.InvalidKeyException
@@ -12,23 +11,23 @@ import java.security.UnrecoverableKeyException
 import javax.crypto.AEADBadTagException
 import javax.crypto.BadPaddingException
 import javax.crypto.NoSuchPaddingException
+import kotlinx.coroutines.CancellationException
 
 /**
  * Error returned from any methods within [uk.gov.android.securestore.SharedPrefsStoreAsyncV2]
  */
 class SecureStorageErrorV2(
     val exception: Exception,
-    val type: SecureStoreErrorTypeV2 = SecureStoreErrorTypeV2.RECOVERABLE,
+    val type: SecureStoreErrorTypeV2 = SecureStoreErrorTypeV2.RECOVERABLE
 ) : Exception(exception) {
 
     companion object {
-        fun <T> Result<T>.getOrThrowSecureStorageError(): T =
-            getOrElse { e ->
-                // Never wrap or consume cancellation exceptions
-                if (e is CancellationException) throw e
+        fun <T> Result<T>.getOrThrowSecureStorageError(): T = getOrElse { e ->
+            // Never wrap or consume cancellation exceptions
+            if (e is CancellationException) throw e
 
-                throw e.mapToSecureStorageError()
-            }
+            throw e.mapToSecureStorageError()
+        }
 
         /**
          * Maps any exceptions thrown within the implementation of [uk.gov.android.securestore.SecureStoreAsyncV2] and it is
@@ -39,7 +38,7 @@ class SecureStorageErrorV2(
         fun Throwable.mapToSecureStorageError(): SecureStorageErrorV2 {
             require(this !is CancellationException) {
                 "Tried to map a CancellationException when it should be re-thrown. " +
-                        "Did you mean to use runCatchingCancellable?"
+                    "Did you mean to use runCatchingCancellable?"
             }
 
             val errorType = when (this) {
@@ -55,8 +54,9 @@ class SecureStorageErrorV2(
                 is IllegalStateException,
                 is InvalidAlgorithmParameterException,
                 is IndexOutOfBoundsException,
-                is GeneralSecurityException,
+                is GeneralSecurityException
                 -> SecureStoreErrorTypeV2.UNRECOVERABLE
+
                 else -> SecureStoreErrorTypeV2.RECOVERABLE
             }
             val exception = when (this) {
@@ -65,7 +65,7 @@ class SecureStorageErrorV2(
             }
             val result = SecureStorageErrorV2(
                 exception,
-                errorType,
+                errorType
             )
             return result
         }
@@ -75,18 +75,23 @@ class SecureStorageErrorV2(
          *
          * @return [uk.gov.android.securestore.error.SecureStorageErrorV2]
          */
-        fun getErrorFromBiometricsError(errorCode: Int, errorMsg: CharSequence): SecureStorageErrorV2 {
+        fun getErrorFromBiometricsError(
+            errorCode: Int,
+            errorMsg: CharSequence
+        ): SecureStorageErrorV2 {
             val errorType = when (errorCode) {
                 BiometricPrompt.ERROR_USER_CANCELED -> SecureStoreErrorTypeV2.USER_CANCELLED
+
                 BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
-                BiometricPrompt.ERROR_NO_BIOMETRICS,
+                BiometricPrompt.ERROR_NO_BIOMETRICS
                 ->
                     SecureStoreErrorTypeV2.NO_LOCAL_AUTH_ENABLED
+
                 else -> SecureStoreErrorTypeV2.RECOVERABLE
             }
             val exp = SecureStorageErrorV2(
                 Exception("$BIOMETRIC_PREFIX $errorCode $errorMsg"),
-                errorType,
+                errorType
             )
             return exp
         }
@@ -99,5 +104,5 @@ enum class SecureStoreErrorTypeV2 {
     RECOVERABLE,
     UNRECOVERABLE,
     USER_CANCELLED,
-    NO_LOCAL_AUTH_ENABLED,
+    NO_LOCAL_AUTH_ENABLED
 }

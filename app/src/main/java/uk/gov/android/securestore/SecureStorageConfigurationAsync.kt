@@ -6,5 +6,5 @@ import kotlinx.coroutines.Dispatchers
 data class SecureStorageConfigurationAsync(
     val id: String,
     val accessControlLevel: AccessControlLevel,
-    val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    val dispatcher: CoroutineDispatcher = Dispatchers.IO
 )
