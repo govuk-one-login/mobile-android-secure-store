@@ -18,7 +18,7 @@ import kotlinx.coroutines.CancellationException
  */
 class SecureStorageErrorV2(
     val exception: Exception,
-    val type: SecureStoreErrorTypeV2 = SecureStoreErrorTypeV2.RECOVERABLE
+    val type: SecureStoreErrorTypeV2 = SecureStoreErrorTypeV2.RECOVERABLE,
 ) : Exception(exception) {
 
     companion object {
@@ -54,7 +54,7 @@ class SecureStorageErrorV2(
                 is IllegalStateException,
                 is InvalidAlgorithmParameterException,
                 is IndexOutOfBoundsException,
-                is GeneralSecurityException
+                is GeneralSecurityException,
                 -> SecureStoreErrorTypeV2.UNRECOVERABLE
 
                 else -> SecureStoreErrorTypeV2.RECOVERABLE
@@ -65,7 +65,7 @@ class SecureStorageErrorV2(
             }
             val result = SecureStorageErrorV2(
                 exception,
-                errorType
+                errorType,
             )
             return result
         }
@@ -77,13 +77,13 @@ class SecureStorageErrorV2(
          */
         fun getErrorFromBiometricsError(
             errorCode: Int,
-            errorMsg: CharSequence
+            errorMsg: CharSequence,
         ): SecureStorageErrorV2 {
             val errorType = when (errorCode) {
                 BiometricPrompt.ERROR_USER_CANCELED -> SecureStoreErrorTypeV2.USER_CANCELLED
 
                 BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
-                BiometricPrompt.ERROR_NO_BIOMETRICS
+                BiometricPrompt.ERROR_NO_BIOMETRICS,
                 ->
                     SecureStoreErrorTypeV2.NO_LOCAL_AUTH_ENABLED
 
@@ -91,7 +91,7 @@ class SecureStorageErrorV2(
             }
             val exp = SecureStorageErrorV2(
                 Exception("$BIOMETRIC_PREFIX $errorCode $errorMsg"),
-                errorType
+                errorType,
             )
             return exp
         }
@@ -104,5 +104,5 @@ enum class SecureStoreErrorTypeV2 {
     RECOVERABLE,
     UNRECOVERABLE,
     USER_CANCELLED,
-    NO_LOCAL_AUTH_ENABLED
+    NO_LOCAL_AUTH_ENABLED,
 }

@@ -16,7 +16,7 @@ class UserAuthenticatorTest {
     private val authConfig = AuthenticatorPromptConfiguration(
         "title",
         "sub title",
-        "description"
+        "description",
     )
 
     @Test
@@ -28,7 +28,7 @@ class UserAuthenticatorTest {
                 authenticator.authenticate(
                     AccessControlLevel.OPEN,
                     authConfig,
-                    AuthenticatorCallbackHandler()
+                    AuthenticatorCallbackHandler(),
                 )
             }
         }
@@ -42,7 +42,7 @@ class UserAuthenticatorTest {
             authenticator.authenticate(
                 AccessControlLevel.PASSCODE,
                 authConfig,
-                AuthenticatorCallbackHandler()
+                AuthenticatorCallbackHandler(),
             )
         }
     }

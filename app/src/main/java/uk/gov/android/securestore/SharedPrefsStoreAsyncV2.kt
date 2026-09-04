@@ -21,7 +21,7 @@ import uk.gov.android.securestore.error.SecureStorageErrorV2.Companion.mapToSecu
 @Suppress("TooGenericExceptionCaught", "TooManyFunctions")
 class SharedPrefsStoreAsyncV2(
     private val authenticator: Authenticator = UserAuthenticator(),
-    private val hybridCryptoManagerAsync: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl()
+    private val hybridCryptoManagerAsync: HybridCryptoManagerAsync = HybridCryptoManagerAsyncImpl(),
 ) : SecureStoreAsyncV2 {
     private var configurationAsync: SecureStorageConfigurationAsync? = null
     private var sharedPrefs: SharedPreferences? = null
@@ -31,7 +31,7 @@ class SharedPrefsStoreAsyncV2(
         hybridCryptoManagerAsync.init(
             configurationAsync.id,
             configurationAsync.accessControlLevel,
-            configurationAsync.dispatcher
+            configurationAsync.dispatcher,
         )
         sharedPrefs = context.getSharedPreferences(configurationAsync.id, Context.MODE_PRIVATE)
     }
@@ -74,7 +74,7 @@ class SharedPrefsStoreAsyncV2(
     override suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
-        context: FragmentActivity
+        context: FragmentActivity,
     ): Map<String, String?> = configurationAsync?.let { configuration ->
         // When access control is set to open on the secureStore instance, then redirect consumer to use the retrieve method
         if (configuration.accessControlLevel == AccessControlLevel.OPEN) {
@@ -148,7 +148,7 @@ class SharedPrefsStoreAsyncV2(
      */
     private suspend fun handleBiometricPrompt(
         config: SecureStorageConfigurationAsync,
-        authPromptConfig: AuthenticatorPromptConfiguration
+        authPromptConfig: AuthenticatorPromptConfiguration,
     ) {
         suspendCoroutine { continuation ->
             authenticator.authenticate(
@@ -163,13 +163,13 @@ class SharedPrefsStoreAsyncV2(
                         // Continues the coroutine with the error
                         continuation.resumeWithException(
                             SecureStorageErrorV2
-                                .getErrorFromBiometricsError(errorCode, errorString)
+                                .getErrorFromBiometricsError(errorCode, errorString),
                         )
                     },
                     onFailure = {
                         // Do nothing to allow user to try again
-                    }
-                )
+                    },
+                ),
             )
         }
     }

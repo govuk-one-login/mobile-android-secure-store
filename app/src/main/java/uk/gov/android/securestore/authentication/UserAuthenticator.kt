@@ -16,7 +16,7 @@ internal class UserAuthenticator : Authenticator {
     override fun authenticate(
         accessControlLevel: AccessControlLevel,
         configuration: AuthenticatorPromptConfiguration,
-        handler: AuthenticatorCallbackHandler
+        handler: AuthenticatorCallbackHandler,
     ) {
         require(accessControlLevel != AccessControlLevel.OPEN)
 
@@ -39,12 +39,12 @@ internal class UserAuthenticator : Authenticator {
         val biometricPrompt = fragmentContext?.let {
             BiometricPrompt(
                 it,
-                handler
+                handler,
             )
         }
 
         biometricPrompt?.authenticate(
-            promptInfoBuilder.build()
+            promptInfoBuilder.build(),
         )
     }
 

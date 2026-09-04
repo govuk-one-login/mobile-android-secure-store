@@ -26,7 +26,7 @@ interface HybridCryptoManagerAsync {
      */
     @Throws(
         GeneralSecurityException::class,
-        Exception::class
+        Exception::class,
     )
     suspend fun encrypt(input: String): EncryptedData
 
@@ -40,7 +40,7 @@ interface HybridCryptoManagerAsync {
      */
     @Throws(
         GeneralSecurityException::class,
-        Exception::class
+        Exception::class,
     )
     suspend fun decrypt(encryptedData: String, encryptedKey: String): String
 
@@ -51,7 +51,7 @@ interface HybridCryptoManagerAsync {
      */
     @Throws(
         GeneralSecurityException::class,
-        Exception::class
+        Exception::class,
     )
     suspend fun deleteKey()
 }

@@ -71,7 +71,7 @@ class SharedPrefsStoreAsyncTestV2 {
     private val encryptedValue2 = "testEncrypted"
     private val encryptedData = EncryptedData(encryptedValue, encryptedKey)
     private val authConfig = AuthenticatorPromptConfiguration(
-        "title"
+        "title",
     )
 
     private lateinit var sharedPrefsStoreAsync: SecureStoreAsyncV2
@@ -82,7 +82,7 @@ class SharedPrefsStoreAsyncTestV2 {
         mockSharedPreferences = mock()
         sharedPrefsStoreAsync = SharedPrefsStoreAsyncV2(
             mockAuthenticator,
-            mockHybridCryptoManagerAsync
+            mockHybridCryptoManagerAsync,
         )
         whenever(mockContext.getSharedPreferences(eq(storeId), eq(Context.MODE_PRIVATE)))
             .thenReturn(mockSharedPreferences)
@@ -99,7 +99,7 @@ class SharedPrefsStoreAsyncTestV2 {
     fun `test upsert`() = runTest {
         initSecureStore(AccessControlLevel.OPEN, testScheduler)
         whenever(
-            mockHybridCryptoManagerAsync.encrypt(eq(value))
+            mockHybridCryptoManagerAsync.encrypt(eq(value)),
         ).thenReturn(encryptedData)
 
         sharedPrefsStoreAsync.upsert(alias, value)
@@ -128,8 +128,8 @@ class SharedPrefsStoreAsyncTestV2 {
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
-                eq(encryptedKey)
-            )
+                eq(encryptedKey),
+            ),
         ).thenReturn(value)
         val result = sharedPrefsStoreAsync.retrieve(alias)
         assertEquals(mapOf(alias to value), result)
@@ -145,8 +145,8 @@ class SharedPrefsStoreAsyncTestV2 {
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
-                eq(encryptedKey)
-            )
+                eq(encryptedKey),
+            ),
         ).thenAnswer { throw expectedExp }
 
         val actual = assertFailsWith<SecureStorageErrorV2> {
@@ -154,11 +154,11 @@ class SharedPrefsStoreAsyncTestV2 {
         }
 
         assertTrue(
-            actual.exception.message!!.contains(expectedExp.message!!)
+            actual.exception.message!!.contains(expectedExp.message!!),
         )
         assertEquals(
             SecureStoreErrorTypeV2.RECOVERABLE,
-            actual.type
+            actual.type,
         )
     }
 
@@ -172,19 +172,19 @@ class SharedPrefsStoreAsyncTestV2 {
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
-                eq(encryptedKey)
-            )
+                eq(encryptedKey),
+            ),
         ).thenThrow(expectedExp)
 
         val actual = assertFailsWith<SecureStorageErrorV2> {
             sharedPrefsStoreAsync.retrieve(alias)
         }
         assertTrue(
-            actual.exception.message!!.contains(expectedExp.message!!)
+            actual.exception.message!!.contains(expectedExp.message!!),
         )
         assertEquals(
             SecureStoreErrorTypeV2.RECOVERABLE,
-            actual.type
+            actual.type,
         )
     }
 
@@ -199,15 +199,15 @@ class SharedPrefsStoreAsyncTestV2 {
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
-                eq(encryptedKey)
-            )
+                eq(encryptedKey),
+            ),
         ).thenReturn(value)
 
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue2),
-                eq(encryptedKey2)
-            )
+                eq(encryptedKey2),
+            ),
         ).thenReturn(value2)
 
         val result = sharedPrefsStoreAsync.retrieve(alias, alias2)
@@ -224,22 +224,22 @@ class SharedPrefsStoreAsyncTestV2 {
             mockAuthenticator.authenticate(
                 eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
                 eq(authConfig),
-                any()
-            )
+                any(),
+            ),
         ).thenAnswer {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
-                eq(encryptedKey)
-            )
+                eq(encryptedKey),
+            ),
         ).thenReturn(value)
 
         val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
-            context = activityFragment
+            context = activityFragment,
         )
 
         assertEquals(mapOf(alias to value), result)
@@ -259,28 +259,28 @@ class SharedPrefsStoreAsyncTestV2 {
             mockAuthenticator.authenticate(
                 eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
                 eq(authConfig),
-                any()
-            )
+                any(),
+            ),
         ).thenAnswer {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue),
-                eq(encryptedKey)
-            )
+                eq(encryptedKey),
+            ),
         ).thenReturn(value)
         whenever(
             mockHybridCryptoManagerAsync.decrypt(
                 eq(encryptedValue2),
-                eq(encryptedKey2)
-            )
+                eq(encryptedKey2),
+            ),
         ).thenReturn(value2)
 
         val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
-            context = activityFragment
+            context = activityFragment,
         )
 
         assertEquals(mapOf(alias to value, alias2 to value2), result)
@@ -297,8 +297,8 @@ class SharedPrefsStoreAsyncTestV2 {
             mockAuthenticator.authenticate(
                 eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
                 eq(authConfig),
-                any()
-            )
+                any(),
+            ),
         ).thenAnswer {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
@@ -306,7 +306,7 @@ class SharedPrefsStoreAsyncTestV2 {
         val result = sharedPrefsStoreAsync.retrieveWithAuthentication(
             alias,
             authPromptConfig = authConfig,
-            context = activityFragment
+            context = activityFragment,
         )
 
         assertEquals(mapOf(alias to null), result)
@@ -322,7 +322,7 @@ class SharedPrefsStoreAsyncTestV2 {
 
         assertEquals(
             mapOf(alias to null),
-            result
+            result,
         )
     }
 
@@ -355,11 +355,11 @@ class SharedPrefsStoreAsyncTestV2 {
         }
 
         assertTrue(
-            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.REQUIRE_OPEN_ACCESS_LEVEL)
+            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.REQUIRE_OPEN_ACCESS_LEVEL),
         )
         assertEquals(
             SecureStoreErrorTypeV2.RECOVERABLE,
-            actual.type
+            actual.type,
         )
     }
 
@@ -374,14 +374,14 @@ class SharedPrefsStoreAsyncTestV2 {
             sharedPrefsStoreAsync.retrieveWithAuthentication(
                 alias,
                 authPromptConfig = authConfig,
-                context = activityFragment
+                context = activityFragment,
             )
         }
 
         assertTrue(
             actual.exception.message!!.contains(
-                SharedPrefsStoreAsyncV2.AUTH_ON_OPEN_STORE_ERROR_MSG
-            )
+                SharedPrefsStoreAsyncV2.AUTH_ON_OPEN_STORE_ERROR_MSG,
+            ),
         )
         assertEquals(SecureStoreErrorTypeV2.RECOVERABLE, actual.type)
     }
@@ -391,7 +391,7 @@ class SharedPrefsStoreAsyncTestV2 {
         val expectedExp = KeyStoreException("error")
         initSecureStore(AccessControlLevel.OPEN, testScheduler)
         given(
-            mockHybridCryptoManagerAsync.deleteKey()
+            mockHybridCryptoManagerAsync.deleteKey(),
         ).willAnswer { throw expectedExp }
 
         val actual = assertFailsWith<SecureStorageErrorV2> {
@@ -399,11 +399,11 @@ class SharedPrefsStoreAsyncTestV2 {
         }
 
         assertTrue(
-            actual.exception.message!!.contains(expectedExp.message!!)
+            actual.exception.message!!.contains(expectedExp.message!!),
         )
         assertEquals(
             SecureStoreErrorTypeV2.UNRECOVERABLE,
-            actual.type
+            actual.type,
         )
     }
 
@@ -417,11 +417,11 @@ class SharedPrefsStoreAsyncTestV2 {
         }
 
         assertTrue(
-            actual.exception is NullPointerException
+            actual.exception is NullPointerException,
         )
         assertEquals(
             SecureStoreErrorTypeV2.RECOVERABLE,
-            actual.type
+            actual.type,
         )
     }
 
@@ -431,16 +431,16 @@ class SharedPrefsStoreAsyncTestV2 {
             sharedPrefsStoreAsync.retrieveWithAuthentication(
                 alias,
                 authPromptConfig = authConfig,
-                context = activityFragment
+                context = activityFragment,
             )
         }
 
         assertTrue(
-            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.INIT_ERROR.message!!)
+            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.INIT_ERROR.message!!),
         )
         assertEquals(
             SecureStoreErrorTypeV2.RECOVERABLE,
-            actual.type
+            actual.type,
         )
     }
 
@@ -451,11 +451,11 @@ class SharedPrefsStoreAsyncTestV2 {
         }
 
         assertTrue(
-            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.INIT_ERROR.message!!)
+            actual.exception.message!!.contains(SharedPrefsStoreAsyncV2.INIT_ERROR.message!!),
         )
         assertEquals(
             SecureStoreErrorTypeV2.RECOVERABLE,
-            actual.type
+            actual.type,
         )
     }
 
@@ -471,13 +471,13 @@ class SharedPrefsStoreAsyncTestV2 {
     @MethodSource("getErrorArgs")
     fun `test upsert throws secure store error`(
         exception: Exception,
-        type: SecureStoreErrorTypeV2
+        type: SecureStoreErrorTypeV2,
     ) = runTest {
         initSecureStore(AccessControlLevel.OPEN, testScheduler)
         given(
             mockHybridCryptoManagerAsync.encrypt(
-                value
-            )
+                value,
+            ),
         ).willAnswer { throw exception }
 
         val actual = assertFailsWith<SecureStorageErrorV2> {
@@ -485,11 +485,11 @@ class SharedPrefsStoreAsyncTestV2 {
         }
 
         assertTrue(
-            actual.exception.message!!.contains(exception.message!!)
+            actual.exception.message!!.contains(exception.message!!),
         )
         assertEquals(
             type,
-            actual.type
+            actual.type,
         )
     }
 
@@ -498,7 +498,7 @@ class SharedPrefsStoreAsyncTestV2 {
     @MethodSource("getErrorArgs")
     fun `test retrieve with auth throws exp and mapping to secure store error`(
         exception: Exception,
-        type: SecureStoreErrorTypeV2
+        type: SecureStoreErrorTypeV2,
     ) = runTest {
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS, testScheduler)
 
@@ -509,8 +509,8 @@ class SharedPrefsStoreAsyncTestV2 {
             mockAuthenticator.authenticate(
                 eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
                 eq(authConfig),
-                any()
-            )
+                any(),
+            ),
         ).thenAnswer {
             (it.arguments[2] as AuthenticatorCallbackHandler).onSuccess()
         }
@@ -522,18 +522,18 @@ class SharedPrefsStoreAsyncTestV2 {
             sharedPrefsStoreAsync.retrieveWithAuthentication(
                 alias,
                 authPromptConfig = authConfig,
-                context = activityFragment
+                context = activityFragment,
             )
             advanceUntilIdle()
         }
 
         assertEquals(
             exception,
-            actual.exception
+            actual.exception,
         )
         assertEquals(
             type,
-            actual.type
+            actual.type,
         )
 
         verify(mockAuthenticator).init(activityFragment)
@@ -547,13 +547,13 @@ class SharedPrefsStoreAsyncTestV2 {
     fun `test biometric prompt failure`(
         errCode: Int,
         errString: String,
-        errType: SecureStoreErrorTypeV2
+        errType: SecureStoreErrorTypeV2,
     ) = runTest {
         val expected = SecureStorageErrorV2(
             Exception(
-                "${SecureStorageErrorV2.BIOMETRIC_PREFIX} $errCode $errString"
+                "${SecureStorageErrorV2.BIOMETRIC_PREFIX} $errCode $errString",
             ),
-            errType
+            errType,
         )
         initSecureStore(AccessControlLevel.PASSCODE_AND_BIOMETRICS, testScheduler)
 
@@ -564,8 +564,8 @@ class SharedPrefsStoreAsyncTestV2 {
             mockAuthenticator.authenticate(
                 eq(AccessControlLevel.PASSCODE_AND_BIOMETRICS),
                 eq(authConfig),
-                any()
-            )
+                any(),
+            ),
         ).thenAnswer {
             (it.arguments[2] as AuthenticatorCallbackHandler)
                 .onError(errCode, errString)
@@ -575,17 +575,17 @@ class SharedPrefsStoreAsyncTestV2 {
             sharedPrefsStoreAsync.retrieveWithAuthentication(
                 alias,
                 authPromptConfig = authConfig,
-                context = activityFragment
+                context = activityFragment,
             )
             advanceUntilIdle()
         }
 
         assertTrue(
-            actual.exception.message!!.contains(expected.exception.message!!)
+            actual.exception.message!!.contains(expected.exception.message!!),
         )
         assertEquals(
             expected.type,
-            actual.type
+            actual.type,
         )
 
         verify(mockAuthenticator).init(activityFragment)
@@ -600,12 +600,12 @@ class SharedPrefsStoreAsyncTestV2 {
         val config = SecureStorageConfigurationAsync(
             storeId,
             acl,
-            dispatcher
+            dispatcher,
         )
 
         sharedPrefsStoreAsync.init(
             mockContext,
-            config
+            config,
         )
     }
 
@@ -621,118 +621,118 @@ class SharedPrefsStoreAsyncTestV2 {
             Arguments.of(
                 BiometricPrompt.ERROR_NO_BIOMETRICS,
                 NO_PASSCODE,
-                SecureStoreErrorTypeV2.NO_LOCAL_AUTH_ENABLED
+                SecureStoreErrorTypeV2.NO_LOCAL_AUTH_ENABLED,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_NO_DEVICE_CREDENTIAL,
                 NO_PASSCODE,
-                SecureStoreErrorTypeV2.NO_LOCAL_AUTH_ENABLED
+                SecureStoreErrorTypeV2.NO_LOCAL_AUTH_ENABLED,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_USER_CANCELED,
                 USER_CANCELLED,
-                SecureStoreErrorTypeV2.USER_CANCELLED
+                SecureStoreErrorTypeV2.USER_CANCELLED,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_UNABLE_TO_PROCESS,
                 FACE_NOT_RECOGNISED,
-                SecureStoreErrorTypeV2.RECOVERABLE
+                SecureStoreErrorTypeV2.RECOVERABLE,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_TIMEOUT,
                 FACE_SCAN_TIMEOUT,
-                SecureStoreErrorTypeV2.RECOVERABLE
+                SecureStoreErrorTypeV2.RECOVERABLE,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_HW_UNAVAILABLE,
                 GENERIC_ERROR,
-                SecureStoreErrorTypeV2.RECOVERABLE
+                SecureStoreErrorTypeV2.RECOVERABLE,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_UNABLE_TO_PROCESS,
                 GENERIC_ERROR,
-                SecureStoreErrorTypeV2.RECOVERABLE
+                SecureStoreErrorTypeV2.RECOVERABLE,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_NO_SPACE,
                 GENERIC_ERROR,
-                SecureStoreErrorTypeV2.RECOVERABLE
+                SecureStoreErrorTypeV2.RECOVERABLE,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_LOCKOUT,
                 GENERIC_ERROR,
-                SecureStoreErrorTypeV2.RECOVERABLE
+                SecureStoreErrorTypeV2.RECOVERABLE,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_LOCKOUT_PERMANENT,
                 GENERIC_ERROR,
-                SecureStoreErrorTypeV2.RECOVERABLE
+                SecureStoreErrorTypeV2.RECOVERABLE,
             ),
             Arguments.of(
                 BiometricPrompt.ERROR_VENDOR,
                 GENERIC_ERROR,
-                SecureStoreErrorTypeV2.RECOVERABLE
-            )
+                SecureStoreErrorTypeV2.RECOVERABLE,
+            ),
         )
 
         @JvmStatic
         fun getErrorArgs(): Stream<Arguments> = Stream.of(
             Arguments.of(
                 AEADBadTagException("AEADBadTagException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 UnrecoverableKeyException("UnrecoverableKeyException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 BadPaddingException("BadPaddingException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 NoSuchAlgorithmException("NoSuchAlgorithmException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 NoSuchPaddingException("NoSuchPaddingException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 UnsupportedOperationException("UnsupportedOperationException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 InvalidKeyException("InvalidKeyException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 UnrecoverableEntryException("UnrecoverableEntryException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 KeyStoreException("KeyStoreException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 IllegalStateException("IllegalStateException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 InvalidAlgorithmParameterException("InvalidAlgorithmParameterException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 IndexOutOfBoundsException("IndexOutOfBoundsException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 GeneralSecurityException("GeneralSecurityException"),
-                SecureStoreErrorTypeV2.UNRECOVERABLE
+                SecureStoreErrorTypeV2.UNRECOVERABLE,
             ),
             Arguments.of(
                 Exception("Random exception"),
-                SecureStoreErrorTypeV2.RECOVERABLE
-            )
+                SecureStoreErrorTypeV2.RECOVERABLE,
+            ),
         )
     }
 }

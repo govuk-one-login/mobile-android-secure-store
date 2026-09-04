@@ -43,7 +43,7 @@ class SharedPrefsStoreAsyncCancellationTestV2 {
 
         sharedPrefsStoreAsync = SharedPrefsStoreAsyncV2(
             mockAuthenticator,
-            mockHybridCryptoManagerAsync
+            mockHybridCryptoManagerAsync,
         )
 
         givenSecureStoreIsInitialised()
@@ -81,7 +81,7 @@ class SharedPrefsStoreAsyncCancellationTestV2 {
             sharedPrefsStoreAsync.retrieveWithAuthentication(
                 "key",
                 authPromptConfig = AuthenticatorPromptConfiguration("title"),
-                context = mock()
+                context = mock(),
             )
         }
     }
@@ -107,8 +107,8 @@ class SharedPrefsStoreAsyncCancellationTestV2 {
             SecureStorageConfigurationAsync(
                 "id",
                 acl,
-                UnconfinedTestDispatcher()
-            )
+                UnconfinedTestDispatcher(),
+            ),
         )
     }
 

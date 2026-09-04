@@ -56,7 +56,7 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
             val encryptedKeyBytes = Base64.decode(encryptedKey)
             val decryptedKey = initCipherAndDecryptKey(
                 cipher,
-                encryptedKeyBytes
+                encryptedKeyBytes,
             )
             val result = aesCryptoManager.decrypt(encryptedData, decryptedKey)
             result
@@ -89,7 +89,7 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
     private fun createKeyEntry(alias: String) {
         val kpgSpec = KeyGenParameterSpec.Builder(
             alias,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
         )
             .setKeySize(KEY_SIZE)
             .setBlockModes(BLOCK_MODE)
@@ -104,13 +104,13 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
             kpgSpec
                 .setUserAuthenticationParameters(
                     KEY_TIMEOUT,
-                    getAuthType(accessControlLevel)
+                    getAuthType(accessControlLevel),
                 )
         }
 
         KeyPairGenerator.getInstance(ALGORITHM, PROVIDER).apply {
             initialize(
-                kpgSpec.build()
+                kpgSpec.build(),
             )
         }.generateKeyPair()
     }
@@ -120,7 +120,7 @@ internal class HybridCryptoManagerAsyncImpl : HybridCryptoManagerAsync {
         AccessControlLevel.OPEN -> AUTH_TYPE_OPEN
 
         AccessControlLevel.PASSCODE,
-        AccessControlLevel.PASSCODE_AND_BIOMETRICS
+        AccessControlLevel.PASSCODE_AND_BIOMETRICS,
         ->
             KeyProperties.AUTH_DEVICE_CREDENTIAL or KeyProperties.AUTH_BIOMETRIC_STRONG
     }

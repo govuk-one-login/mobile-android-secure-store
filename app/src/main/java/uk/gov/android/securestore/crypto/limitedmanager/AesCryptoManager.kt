@@ -24,9 +24,9 @@ class AesCryptoManager : SymmetricCryptoManager {
             Cipher.ENCRYPT_MODE,
             SecretKeySpec(
                 aesKey.encoded,
-                KeyProperties.KEY_ALGORITHM_AES
+                KeyProperties.KEY_ALGORITHM_AES,
             ),
-            gcmSpec
+            gcmSpec,
         )
 
         val encryptedKey = encryptAesKey(aesKey.encoded)
@@ -56,7 +56,7 @@ class AesCryptoManager : SymmetricCryptoManager {
         cipher.init(
             Cipher.DECRYPT_MODE,
             SecretKeySpec(decodedKey, KeyProperties.KEY_ALGORITHM_AES),
-            gcmSpec
+            gcmSpec,
         )
 
         // Decrypt the data

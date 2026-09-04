@@ -34,7 +34,7 @@ class AesCryptoManagerTest {
         byteArrayOf(-10, 111, -120, 94, -43, -122, -40, 61, 23) +
             byteArrayOf(12, -83, 34, 4, -96, 50, 15, 86, -35) +
             byteArrayOf(-43, 65, -39, 116, -128, 119, 124, -3, 103, -5) +
-            byteArrayOf(-87, -58, 39, -124)
+            byteArrayOf(-87, -58, 39, -124),
     )
 
     @Test

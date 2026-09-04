@@ -70,7 +70,7 @@ interface SecureStoreAsyncV2 {
     suspend fun retrieveWithAuthentication(
         vararg key: String,
         authPromptConfig: AuthenticatorPromptConfiguration,
-        context: FragmentActivity
+        context: FragmentActivity,
     ): Map<String, String?>
 
     /**
