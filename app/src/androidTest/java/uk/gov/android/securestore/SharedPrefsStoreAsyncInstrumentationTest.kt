@@ -2,6 +2,7 @@ package uk.gov.android.securestore
 
 import android.security.keystore.UserNotAuthenticatedException
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import java.security.KeyStore
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -17,7 +18,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.android.securestore.authentication.Authenticator
 import uk.gov.android.securestore.authentication.AuthenticatorCallbackHandler
 import uk.gov.android.securestore.authentication.AuthenticatorPromptConfiguration
-import java.security.KeyStore
 
 class SharedPrefsStoreAsyncInstrumentationTest {
     private val key = "testKey"

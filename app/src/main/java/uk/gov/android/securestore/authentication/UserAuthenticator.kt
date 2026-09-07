@@ -48,13 +48,14 @@ internal class UserAuthenticator : Authenticator {
         )
     }
 
-    private fun getRequireAuthenticators(accessControl: AccessControlLevel) =
-        when (accessControl) {
-            AccessControlLevel.OPEN -> -1
-            AccessControlLevel.PASSCODE -> DEVICE_CREDENTIAL
-            AccessControlLevel.PASSCODE_AND_BIOMETRICS ->
-                BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-        }
+    private fun getRequireAuthenticators(accessControl: AccessControlLevel) = when (accessControl) {
+        AccessControlLevel.OPEN -> -1
+
+        AccessControlLevel.PASSCODE -> DEVICE_CREDENTIAL
+
+        AccessControlLevel.PASSCODE_AND_BIOMETRICS ->
+            BIOMETRIC_STRONG or DEVICE_CREDENTIAL
+    }
 
     override fun close() {
         fragmentContext = null

@@ -1,7 +1,6 @@
 package uk.gov.android.securestore.crypto.limitedmanager
 
 import android.security.keystore.KeyProperties
-import uk.gov.android.securestore.crypto.EncryptedData
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -10,13 +9,11 @@ import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
+import uk.gov.android.securestore.crypto.EncryptedData
 
 @OptIn(ExperimentalEncodingApi::class)
 class AesCryptoManager : SymmetricCryptoManager {
-    override fun encrypt(
-        input: String,
-        encryptAesKey: (key: ByteArray) -> String?,
-    ): EncryptedData {
+    override fun encrypt(input: String, encryptAesKey: (key: ByteArray) -> String?): EncryptedData {
         // Create and initialize the Cipher
         val cipher = Cipher.getInstance(AES_ALG)
         val aesKey = createKey()
@@ -46,10 +43,7 @@ class AesCryptoManager : SymmetricCryptoManager {
         }
     }
 
-    override fun decrypt(
-        encryptedData: String,
-        key: String,
-    ): String {
+    override fun decrypt(encryptedData: String, key: String): String {
         val decodedKey = Base64.decode(key)
         // Extract the IV and encrypted data
         val encryptedDataBytes = Base64.decode(encryptedData)
