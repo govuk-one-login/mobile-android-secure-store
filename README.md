@@ -1,7 +1,7 @@
 # GOV.UK One Login secure store for Android
 
 [![On Branch Push (main)](https://github.com/govuk-one-login/mobile-android-secure-store/actions/workflows/on_push-main.yml/badge.svg)](https://github.com/govuk-one-login/mobile-android-secure-store/actions/workflows/on_push-main.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mobile-android-secure-store&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=mobile-android-secure-store)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mobile-android-secure-store&metric=alert_status&token=83ba0683800aaef95a5e945919d235f1abd8ac6d)](https://sonarcloud.io/summary/new_code?id=mobile-android-secure-store)
 [![Latest release](https://img.shields.io/github/v/release/govuk-one-login/mobile-android-secure-store)](https://github.com/govuk-one-login/mobile-android-secure-store/releases)
 
 An Android library for storing small pieces of sensitive data, such as tokens, encrypted on the device. You can choose whether reading the data needs the user's device passcode, strong biometrics, or neither.
