@@ -137,12 +137,10 @@ The library depends on:
 6. Save a value and read it back.
 
     ```kotlin
-    lifecycleScope.launch {
-        store.upsert("sessionId", "abc-123")
+    store.upsert("sessionId", "abc-123")
 
-        val values = store.retrieve("sessionId")
-        Log.d("SecureStore", "sessionId = ${values["sessionId"]}")
-    }
+    val values = store.retrieve("sessionId")
+    Log.d("SecureStore", "sessionId = ${values["sessionId"]}")
     ```
 
 `retrieve` returns a map with an entry for every key you asked for. The value is `null` if nothing is stored for that key.
