@@ -310,12 +310,12 @@ class FakeSecureStore(
 
 Every method throws `SecureStorageErrorV2` when something goes wrong. Its `type` tells you what to do next. Coroutine cancellation is never wrapped, so structured concurrency still works.
 
-| Error type | What it means | What to do |
-| --- | --- | --- |
-| `USER_CANCELLED` | The user closed the prompt | Let the user try again |
-| `NO_LOCAL_AUTH_ENABLED` | The device has no screen lock, or no biometrics enrolled | Ask the user to set one up in their device settings |
-| `RECOVERABLE` | A temporary problem with the prompt or storage | Try again |
-| `UNRECOVERABLE` | The Keystore key is missing or no longer valid, for example after a backup restore, a new biometric enrolment, or the screen lock being removed | Call `deleteAll()` and ask the user to sign in again. The stored data cannot be recovered. |
+| Error type | What it means |
+| --- | --- |
+| `USER_CANCELLED` | The user closed the prompt |
+| `NO_LOCAL_AUTH_ENABLED` | The device has no screen lock, or no biometrics enrolled |
+| `RECOVERABLE` | A temporary problem with the prompt or storage |
+| `UNRECOVERABLE` | The Keystore key is missing or no longer valid, for example after a backup restore, a new biometric enrolment, or the screen lock being removed |
 
 ```kotlin
 try {
