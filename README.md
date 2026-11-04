@@ -338,13 +338,6 @@ try {
 }
 ```
 
-Other error messages you may see:
-
-| Message | Fix |
-| --- | --- |
-| `Must call init on SecureStore first!` | Call `init` before any other method |
-| `Access control level must be OPEN to use this retrieve method` | Use `retrieveWithAuthentication` for this store |
-| `Use retrieve method, access control is set to OPEN, no need for auth` | Use `retrieve` for this store |
 
 ## How the encryption works
 
