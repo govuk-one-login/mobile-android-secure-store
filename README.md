@@ -1,4 +1,4 @@
-# GOV.UK One Login secure store for Android
+# One Login secure store for Android
 
 [![On Branch Push (main)](https://github.com/govuk-one-login/mobile-android-secure-store/actions/workflows/on_push-main.yml/badge.svg)](https://github.com/govuk-one-login/mobile-android-secure-store/actions/workflows/on_push-main.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mobile-android-secure-store&metric=alert_status&token=83ba0683800aaef95a5e945919d235f1abd8ac6d)](https://sonarcloud.io/summary/new_code?id=mobile-android-secure-store)
@@ -17,10 +17,10 @@ The public API is the `SecureStoreAsyncV2` interface. The implementation is `Sha
 
 ### Limitations
 
-- Requires Android 10 (API level 29) or later.
+- Needs Android 10 (API level 29) or later.
 - Stores `String` values only. Serialise other types yourself, for example as JSON.
 - Designed for small values. It is not a replacement for an encrypted database.
-- Stored data cannot be restored from a backup or moved to another device. See [Exclude the store from backups](#exclude-the-store-from-backups).
+- Stored data can't be restored from a backup or moved to another device. See [Exclude the store from backups](#exclude-the-store-from-backups).
 - Data in a protected store becomes permanently unreadable if the user removes their screen lock or enrols new biometrics. See [Errors and how to fix them](#errors-and-how-to-fix-them).
 
 ### Contents
@@ -57,7 +57,7 @@ val tokens = store.retrieveWithAuthentication(
 
 ## Apps that use this library
 
-- [GOV.UK One Login app](https://github.com/govuk-one-login/mobile-android-one-login-app)
+- [One Login app](https://github.com/govuk-one-login/mobile-android-one-login-app)
 
 
 
@@ -73,9 +73,9 @@ To read from a protected store, your screen must be a `FragmentActivity` (`AppCo
 
 The library depends on:
 
-- [androidx.biometric](https://developer.android.com/jetpack/androidx/releases/biometric) – shows the passcode and biometric prompt
+- [androidx.biometric](https://developer.android.com/jetpack/androidx/releases/biometric) shows the passcode and biometric prompt
 - [androidx.core](https://developer.android.com/jetpack/androidx/releases/core) and [androidx.appcompat](https://developer.android.com/jetpack/androidx/releases/appcompat)
-- [govuk-one-login/mobile-android-pipelines](https://github.com/govuk-one-login/mobile-android-pipelines) – shared build and release configuration, used only when building this repository
+- [govuk-one-login/mobile-android-pipelines](https://github.com/govuk-one-login/mobile-android-pipelines) shared build and release configuration, used only when building this repository
 
 ## Get started
 
@@ -239,11 +239,11 @@ store.deleteAll()                      // deletes every value and the store's Ke
 
 ### Choose your keys
 
-The library stores each value under your key, and its encrypted AES key under the same name with `Key` added to the end. Do not use 2 keys that differ only by a `Key` suffix, such as `token` and `tokenKey`, in the same store.
+The library stores each value under your key, and its encrypted Advanced Encryption Standard (AES) key under the same name with `Key` added to the end. Do not use 2 keys that differ only by a `Key` suffix, such as `token` and `tokenKey`, in the same store.
 
 ### Exclude the store from backups
 
-Android's Auto Backup copies SharedPreferences files to the user's Google account and to new devices. It cannot copy Keystore keys. If the store's file is restored without its key, the app sees the data but cannot decrypt it.
+Android's Auto Backup copies SharedPreferences files to the user's Google account and to new devices. It can't copy Keystore keys. If the store's file is restored without its key, the app sees the data but can't decrypt it.
 
 Exclude the store's file, named after its `id`, from both cloud backup and device transfer:
 
@@ -308,7 +308,7 @@ class FakeSecureStore(
 
 ### Errors and how to fix them
 
-Every method throws `SecureStorageErrorV2` when something goes wrong. Its `type` tells you what to do next. Coroutine cancellation is never wrapped, so structured concurrency still works.
+Every method throws `SecureStorageErrorV2` when something goes wrong. Its `type` tells you what to do next. coroutine cancellation is never wrapped, so structured concurrency still works.
 
 | Error type | What it means |
 | --- | --- |
