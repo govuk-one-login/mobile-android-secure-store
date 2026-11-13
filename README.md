@@ -4,7 +4,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=mobile-android-secure-store&metric=alert_status&token=83ba0683800aaef95a5e945919d235f1abd8ac6d)](https://sonarcloud.io/summary/new_code?id=mobile-android-secure-store)
 [![Latest release](https://img.shields.io/github/v/release/govuk-one-login/mobile-android-secure-store)](https://github.com/govuk-one-login/mobile-android-secure-store/releases)
 
-An Android library for storing small pieces of sensitive data, such as tokens, encrypted on the device. You can choose whether reading the data needs the user's device passcode, strong biometrics, or neither.
+An Android library for storing small pieces of sensitive data, such as tokens, encrypted on the device. You can choose whether reading the data needs the user's device credential, strong biometrics, or neither.
 
 The library:
 
@@ -45,7 +45,7 @@ store.upsert("sessionId", "abc-123")
 val sessionId: String? = store.retrieve("sessionId")["sessionId"]
 ```
 
-Read values from a store that needs the user's passcode or biometrics. The system prompt appears and the call completes after the user authenticates:
+Read values from a store that needs the user's device credential or biometrics. The system prompt appears and the call completes after the user authenticates:
 
 ```kotlin
 val tokens = store.retrieveWithAuthentication(
@@ -73,7 +73,7 @@ To read from a protected store, your screen must be a `FragmentActivity` (`AppCo
 
 The library depends on:
 
-- [androidx.biometric](https://developer.android.com/jetpack/androidx/releases/biometric) shows the passcode and biometric prompt
+- [androidx.biometric](https://developer.android.com/jetpack/androidx/releases/biometric) shows the device credential and biometric prompt
 - [androidx.core](https://developer.android.com/jetpack/androidx/releases/core) and [androidx.appcompat](https://developer.android.com/jetpack/androidx/releases/appcompat)
 - [govuk-one-login/mobile-android-pipelines](https://github.com/govuk-one-login/mobile-android-pipelines) shared build and release configuration, used only when building this repository
 
@@ -165,7 +165,7 @@ Use a separate store, with its own `id`, for each access control level you need.
 | --- | --- | --- | --- |
 | `OPEN` | `upsert` | `retrieve` | Nothing |
 | `PASSCODE` | `upsert` | `retrieveWithAuthentication` | Device PIN, pattern or password prompt |
-| `PASSCODE_AND_BIOMETRICS` | `upsert` | `retrieveWithAuthentication` | Strong biometric prompt, with passcode as a fallback |
+| `PASSCODE_AND_BIOMETRICS` | `upsert` | `retrieveWithAuthentication` | Strong biometric prompt, with device credential as a fallback |
 
 Saving data never shows a prompt. Only reading protected data does.
 
